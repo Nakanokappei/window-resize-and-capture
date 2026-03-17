@@ -18,7 +18,7 @@ Windows port of [Window Resize (macOS)](https://github.com/Nakanokappei/window-r
 
 ## Download
 
-Download the latest release from [Releases](https://github.com/Nakanokappei/window-resize-and-capture-windows/releases).
+Download the latest release from [Releases](https://github.com/Nakanokappei/window-resize-and-capture/releases).
 
 No .NET runtime installation required — the exe is self-contained.
 

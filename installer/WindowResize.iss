@@ -4,7 +4,7 @@
 #define MyAppName "Window Resize & Capture"
 #define MyAppVersion "1.6"
 #define MyAppPublisher "Kappei Nakano"
-#define MyAppURL "https://github.com/Nakanokappei/window-resize-and-capture-windows"
+#define MyAppURL "https://github.com/Nakanokappei/window-resize-and-capture"
 #define MyAppExeName "WindowResize.exe"
 
 [Setup]
