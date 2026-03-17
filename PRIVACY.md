@@ -41,4 +41,4 @@ If this privacy policy is updated, the changes will be posted on this page with 
 
 ## Contact
 
-If you have any questions about this privacy policy, please open an issue on the [GitHub repository](https://github.com/Nakanokappei/window-resize-windows/issues).
+If you have any questions about this privacy policy, please open an issue on the [GitHub repository](https://github.com/Nakanokappei/window-resize-and-capture-windows/issues).
