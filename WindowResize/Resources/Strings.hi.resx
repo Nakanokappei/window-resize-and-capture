@@ -57,4 +57,13 @@
   <data name="SettingsScreenshotChooseFolder" xml:space="preserve"><value>फ़ोल्डर चुनें...</value></data>
   <data name="SettingsScreenshotCopyToClipboard" xml:space="preserve"><value>क्लिपबोर्ड पर कॉपी करें</value></data>
   <data name="SettingsScreenshotNoFolderSelected" xml:space="preserve"><value>कोई फ़ोल्डर चयनित नहीं</value></data>
+  <data name="SettingsBehaviour" xml:space="preserve"><value>व्यवहार</value></data>
+  <data name="SettingsBringToFront" xml:space="preserve"><value>आकार बदलने के बाद विंडो को सामने लाएं</value></data>
+  <data name="SettingsWindowPosition" xml:space="preserve"><value>आकार बदलने के बाद स्थिति</value></data>
+  <data name="SettingsMoveToMainScreen" xml:space="preserve"><value>मुख्य स्क्रीन पर ले जाएं</value></data>
+  <data name="MenuCurrentSize" xml:space="preserve"><value>वर्तमान आकार</value></data>
+  <data name="SettingsLanguage" xml:space="preserve"><value>भाषा</value></data>
+  <data name="SettingsLanguageSystem" xml:space="preserve"><value>सिस्टम डिफ़ॉल्ट</value></data>
+  <data name="SettingsLanguageRestartTitle" xml:space="preserve"><value>भाषा बदली गई</value></data>
+  <data name="SettingsLanguageRestartBody" xml:space="preserve"><value>नई भाषा लागू करने के लिए ऐप को पुनः आरंभ करना आवश्यक है। अभी पुनः आरंभ करें?</value></data>
 </root>

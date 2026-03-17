@@ -126,4 +126,33 @@
   <data name="SettingsScreenshotNoFolderSelected" xml:space="preserve">
     <value>No folder selected</value>
   </data>
+  <!-- Behaviour settings -->
+  <data name="SettingsBehaviour" xml:space="preserve">
+    <value>Behaviour</value>
+  </data>
+  <data name="SettingsBringToFront" xml:space="preserve">
+    <value>Bring window to front after resize</value>
+  </data>
+  <data name="SettingsWindowPosition" xml:space="preserve">
+    <value>Position after resize</value>
+  </data>
+  <data name="SettingsMoveToMainScreen" xml:space="preserve">
+    <value>Move to main screen</value>
+  </data>
+  <data name="MenuCurrentSize" xml:space="preserve">
+    <value>Current</value>
+  </data>
+  <!-- Language settings -->
+  <data name="SettingsLanguage" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="SettingsLanguageSystem" xml:space="preserve">
+    <value>System Default</value>
+  </data>
+  <data name="SettingsLanguageRestartTitle" xml:space="preserve">
+    <value>Language Changed</value>
+  </data>
+  <data name="SettingsLanguageRestartBody" xml:space="preserve">
+    <value>The app needs to restart to apply the new language. Restart now?</value>
+  </data>
 </root>

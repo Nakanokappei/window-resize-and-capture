@@ -2,7 +2,7 @@
 ; Build: iscc.exe WindowResize.iss
 
 #define MyAppName "Window Resize"
-#define MyAppVersion "1.5"
+#define MyAppVersion "1.6"
 #define MyAppPublisher "Kappei Nakano"
 #define MyAppURL "https://github.com/Nakanokappei/window-resize-windows"
 #define MyAppExeName "WindowResize.exe"

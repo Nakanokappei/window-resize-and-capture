@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace WindowResize;
@@ -13,6 +15,9 @@ public class TrayApplicationContext : ApplicationContext
 
     public TrayApplicationContext()
     {
+        // Apply saved language before building any UI
+        _store.InitializeLanguage();
+
         _contextMenu = new ContextMenuStrip { ShowImageMargin = true };
         BuildMenu();
 
@@ -81,6 +86,7 @@ public class TrayApplicationContext : ApplicationContext
     }
 
     // Enumerate visible windows and add each as a submenu item with its app icon.
+    // When 3+ windows belong to the same app, group them under an app-level submenu.
     private void PopulateWindowList(ToolStripMenuItem parent)
     {
         var windows = WindowManager.ListWindows();
@@ -95,39 +101,113 @@ public class TrayApplicationContext : ApplicationContext
         var menuFont = SystemFonts.MenuFont ?? new Font("Segoe UI", 9);
         float maxMenuWidth = Screen.PrimaryScreen!.Bounds.Width / 4.0f;
 
-        foreach (var win in windows)
+        // Group windows by process ID
+        var groups = windows.GroupBy(w => w.ProcessId).ToList();
+
+        // Determine whether any app has 3+ windows (triggers grouping mode)
+        bool useGrouping = groups.Any(g => g.Count() >= 3);
+
+        if (useGrouping)
         {
-            string displayName = string.IsNullOrEmpty(win.Title) ? Strings.MenuUntitled : win.Title;
-
-            // Truncate title so its rendered width stays within the budget
-            string title = TruncateToFit(displayName, menuFont, maxMenuWidth);
-
-            var windowItem = new ToolStripMenuItem(title);
-            windowItem.ShortcutKeyDisplayString = win.ProcessName;
-
-            // Display the application's icon beside the menu item
-            if (win.AppIcon != null)
+            foreach (var group in groups)
             {
-                try
+                var appWindows = group.ToList();
+                string appName = appWindows[0].ProcessName;
+
+                if (appWindows.Count >= 3)
                 {
-                    windowItem.Image = win.AppIcon.ToBitmap();
-                    windowItem.ImageScaling = ToolStripItemImageScaling.SizeToFit;
+                    // Create an app-level parent item with window count
+                    string groupLabel = $"{appName} ({appWindows.Count})";
+                    var groupItem = new ToolStripMenuItem(groupLabel);
+
+                    // Use the first window's icon for the group
+                    if (appWindows[0].AppIcon is { } groupIcon)
+                    {
+                        try
+                        {
+                            groupItem.Image = groupIcon.ToBitmap();
+                            groupItem.ImageScaling = ToolStripItemImageScaling.SizeToFit;
+                        }
+                        catch { }
+                    }
+
+                    // Add each window as a child
+                    foreach (var win in appWindows)
+                    {
+                        string displayName = string.IsNullOrEmpty(win.Title) ? Strings.MenuUntitled : win.Title;
+                        string title = TruncateToFit(displayName, menuFont, maxMenuWidth);
+                        var windowItem = new ToolStripMenuItem(title);
+
+                        PopulateSizeList(windowItem, win);
+                        groupItem.DropDownItems.Add(windowItem);
+                    }
+
+                    parent.DropDownItems.Add(groupItem);
                 }
-                catch { }
+                else
+                {
+                    // Fewer than 3 windows from this app: show flat
+                    foreach (var win in appWindows)
+                    {
+                        AddFlatWindowItem(parent, win, menuFont, maxMenuWidth);
+                    }
+                }
             }
-
-            // Attach the available preset sizes as a submenu
-            PopulateSizeList(windowItem, win);
-
-            parent.DropDownItems.Add(windowItem);
+        }
+        else
+        {
+            // No grouping needed: show all windows flat
+            foreach (var win in windows)
+            {
+                AddFlatWindowItem(parent, win, menuFont, maxMenuWidth);
+            }
         }
     }
 
+    // Add a single window as a flat menu item with icon and process name tag.
+    private void AddFlatWindowItem(ToolStripMenuItem parent, WindowInfo win, Font menuFont, float maxMenuWidth)
+    {
+        string displayName = string.IsNullOrEmpty(win.Title) ? Strings.MenuUntitled : win.Title;
+        string title = TruncateToFit(displayName, menuFont, maxMenuWidth);
+
+        var windowItem = new ToolStripMenuItem(title);
+        windowItem.ShortcutKeyDisplayString = win.ProcessName;
+
+        // Display the application's icon beside the menu item
+        if (win.AppIcon != null)
+        {
+            try
+            {
+                windowItem.Image = win.AppIcon.ToBitmap();
+                windowItem.ImageScaling = ToolStripItemImageScaling.SizeToFit;
+            }
+            catch { }
+        }
+
+        // Attach the available preset sizes as a submenu
+        PopulateSizeList(windowItem, win);
+
+        parent.DropDownItems.Add(windowItem);
+    }
+
     // Add a size menu item for each preset; disable sizes that exceed the window's screen.
+    // When positioning features are active, add a "Current Size" item at the top.
     private void PopulateSizeList(ToolStripMenuItem parent, WindowInfo win)
     {
         // Determine which display contains this window and get its resolution
         var screenSize = GetScreenSizeForWindow(win);
+
+        // If any positioning feature is active, add a "current size" item
+        // that repositions/brings-to-front without resizing
+        if (_store.HasActivePositioningFeatures)
+        {
+            var currentSize = new PresetSize(win.Width, win.Height, Strings.MenuCurrentSize);
+            var currentItem = new ToolStripMenuItem($"{win.Width} x {win.Height}");
+            currentItem.ShortcutKeyDisplayString = Strings.MenuCurrentSize;
+            currentItem.Click += (_, _) => PerformResize(win, currentSize);
+            parent.DropDownItems.Add(currentItem);
+            parent.DropDownItems.Add(new ToolStripSeparator());
+        }
 
         foreach (var size in _store.AllSizes)
         {
@@ -142,26 +222,35 @@ public class TrayApplicationContext : ApplicationContext
 
             if (!exceedsScreen)
             {
-                sizeItem.Click += (_, _) =>
-                {
-                    bool success = WindowManager.ResizeWindow(win, size);
-                    if (success)
-                    {
-                        // Capture a screenshot now that the resize succeeded
-                        ScreenshotHelper.CaptureAfterResize(win, size);
-                    }
-                    else
-                    {
-                        MessageBox.Show(
-                            Strings.AlertResizeFailedBody,
-                            Strings.AlertResizeFailedTitle,
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Warning);
-                    }
-                };
+                sizeItem.Click += (_, _) => PerformResize(win, size);
             }
 
             parent.DropDownItems.Add(sizeItem);
+        }
+    }
+
+    // Execute the resize operation with all behaviour settings applied.
+    private void PerformResize(WindowInfo win, PresetSize size)
+    {
+        bool success = WindowManager.ResizeWindow(
+            win, size,
+            bringToFront: _store.BringToFront,
+            position: _store.Position,
+            moveToMainScreen: _store.MoveToMainScreen
+        );
+
+        if (success)
+        {
+            // Capture a screenshot now that the resize succeeded
+            ScreenshotHelper.CaptureAfterResize(win, size);
+        }
+        else
+        {
+            MessageBox.Show(
+                Strings.AlertResizeFailedBody,
+                Strings.AlertResizeFailedTitle,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
         }
     }
 

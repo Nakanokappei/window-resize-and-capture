@@ -57,4 +57,13 @@
   <data name="SettingsScreenshotChooseFolder" xml:space="preserve"><value>اختيار مجلد...</value></data>
   <data name="SettingsScreenshotCopyToClipboard" xml:space="preserve"><value>نسخ إلى الحافظة</value></data>
   <data name="SettingsScreenshotNoFolderSelected" xml:space="preserve"><value>لم يتم اختيار مجلد</value></data>
+  <data name="SettingsBehaviour" xml:space="preserve"><value>السلوك</value></data>
+  <data name="SettingsBringToFront" xml:space="preserve"><value>إحضار النافذة للأمام بعد تغيير الحجم</value></data>
+  <data name="SettingsWindowPosition" xml:space="preserve"><value>الموضع بعد تغيير الحجم</value></data>
+  <data name="SettingsMoveToMainScreen" xml:space="preserve"><value>نقل إلى الشاشة الرئيسية</value></data>
+  <data name="MenuCurrentSize" xml:space="preserve"><value>الحجم الحالي</value></data>
+  <data name="SettingsLanguage" xml:space="preserve"><value>اللغة</value></data>
+  <data name="SettingsLanguageSystem" xml:space="preserve"><value>إعداد النظام</value></data>
+  <data name="SettingsLanguageRestartTitle" xml:space="preserve"><value>تم تغيير اللغة</value></data>
+  <data name="SettingsLanguageRestartBody" xml:space="preserve"><value>يجب إعادة تشغيل التطبيق لتطبيق اللغة الجديدة. إعادة التشغيل الآن؟</value></data>
 </root>

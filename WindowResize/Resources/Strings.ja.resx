@@ -57,4 +57,13 @@
   <data name="SettingsScreenshotChooseFolder" xml:space="preserve"><value>フォルダを選択...</value></data>
   <data name="SettingsScreenshotCopyToClipboard" xml:space="preserve"><value>クリップボードにコピー</value></data>
   <data name="SettingsScreenshotNoFolderSelected" xml:space="preserve"><value>フォルダが選択されていません</value></data>
+  <data name="SettingsBehaviour" xml:space="preserve"><value>動作</value></data>
+  <data name="SettingsBringToFront" xml:space="preserve"><value>リサイズ後にウインドウを最前面に移動</value></data>
+  <data name="SettingsWindowPosition" xml:space="preserve"><value>リサイズ後の配置</value></data>
+  <data name="SettingsMoveToMainScreen" xml:space="preserve"><value>メインスクリーンに移動</value></data>
+  <data name="MenuCurrentSize" xml:space="preserve"><value>現在のサイズ</value></data>
+  <data name="SettingsLanguage" xml:space="preserve"><value>言語</value></data>
+  <data name="SettingsLanguageSystem" xml:space="preserve"><value>システム設定に従う</value></data>
+  <data name="SettingsLanguageRestartTitle" xml:space="preserve"><value>言語を変更しました</value></data>
+  <data name="SettingsLanguageRestartBody" xml:space="preserve"><value>新しい言語を適用するにはアプリの再起動が必要です。今すぐ再起動しますか?</value></data>
 </root>

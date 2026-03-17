@@ -57,4 +57,13 @@
   <data name="SettingsScreenshotChooseFolder" xml:space="preserve"><value>Ordner wählen...</value></data>
   <data name="SettingsScreenshotCopyToClipboard" xml:space="preserve"><value>In die Zwischenablage kopieren</value></data>
   <data name="SettingsScreenshotNoFolderSelected" xml:space="preserve"><value>Kein Ordner ausgewählt</value></data>
+  <data name="SettingsBehaviour" xml:space="preserve"><value>Verhalten</value></data>
+  <data name="SettingsBringToFront" xml:space="preserve"><value>Fenster nach dem Ändern in den Vordergrund bringen</value></data>
+  <data name="SettingsWindowPosition" xml:space="preserve"><value>Position nach dem Ändern</value></data>
+  <data name="SettingsMoveToMainScreen" xml:space="preserve"><value>Zum Hauptbildschirm verschieben</value></data>
+  <data name="MenuCurrentSize" xml:space="preserve"><value>Aktuelle Größe</value></data>
+  <data name="SettingsLanguage" xml:space="preserve"><value>Sprache</value></data>
+  <data name="SettingsLanguageSystem" xml:space="preserve"><value>Systemstandard</value></data>
+  <data name="SettingsLanguageRestartTitle" xml:space="preserve"><value>Sprache geändert</value></data>
+  <data name="SettingsLanguageRestartBody" xml:space="preserve"><value>Die App muss neu gestartet werden, um die neue Sprache anzuwenden. Jetzt neu starten?</value></data>
 </root>

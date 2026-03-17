@@ -1,13 +1,24 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Win32;
 #if WINDOWS10_0_17763_0_OR_GREATER
 using Windows.ApplicationModel;
 #endif
 
 namespace WindowResize;
+
+// 9-position snap anchor for post-resize window placement
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum WindowPosition
+{
+    TopLeft, Top, TopRight,
+    Left, Center, Right,
+    BottomLeft, Bottom, BottomRight
+}
 
 public class SettingsStore
 {
@@ -20,11 +31,80 @@ public class SettingsStore
 
     public List<PresetSize> CustomSizes { get; private set; } = new();
 
-    // Screenshot settings
-    public bool ScreenshotEnabled { get; set; }
-    public bool ScreenshotSaveToFile { get; set; } = true;
+    // Window behaviour settings
+    public bool BringToFront { get; set; } = true;
+    public WindowPosition? Position { get; set; }
+    public bool MoveToMainScreen { get; set; }
+
+    // Whether any positioning feature is active (used to show "Current Size" menu item)
+    public bool HasActivePositioningFeatures =>
+        BringToFront || Position != null || MoveToMainScreen;
+
+    // Screenshot settings with smart auto-enable/disable logic
+    private bool _screenshotEnabled;
+    public bool ScreenshotEnabled
+    {
+        get => _screenshotEnabled;
+        set
+        {
+            _screenshotEnabled = value;
+            // Auto-enable clipboard if no destination is selected
+            if (value && !ScreenshotSaveToFile && !ScreenshotCopyToClipboard)
+                ScreenshotCopyToClipboard = true;
+        }
+    }
+
+    private bool _screenshotSaveToFile = true;
+    public bool ScreenshotSaveToFile
+    {
+        get => _screenshotSaveToFile;
+        set
+        {
+            _screenshotSaveToFile = value;
+            // Auto-disable master toggle if no destination remains
+            if (!value && !ScreenshotCopyToClipboard)
+                _screenshotEnabled = false;
+        }
+    }
+
     public string ScreenshotSaveFolderPath { get; set; } = "";
-    public bool ScreenshotCopyToClipboard { get; set; }
+
+    private bool _screenshotCopyToClipboard;
+    public bool ScreenshotCopyToClipboard
+    {
+        get => _screenshotCopyToClipboard;
+        set
+        {
+            _screenshotCopyToClipboard = value;
+            // Auto-disable master toggle if no destination remains
+            if (!value && !ScreenshotSaveToFile)
+                _screenshotEnabled = false;
+        }
+    }
+
+    // Language override (empty or "system" = system default)
+    public string AppLanguage { get; set; } = "system";
+
+    // Supported languages for the language picker
+    public static readonly (string Code, string NativeName)[] SupportedLanguages =
+    {
+        ("en", "English"),
+        ("ja", "日本語"),
+        ("zh-Hans", "简体中文"),
+        ("zh-Hant", "繁體中文"),
+        ("ko", "한국어"),
+        ("es", "Español"),
+        ("fr", "Français"),
+        ("de", "Deutsch"),
+        ("it", "Italiano"),
+        ("pt", "Português"),
+        ("ru", "Русский"),
+        ("ar", "العربية"),
+        ("hi", "हिन्दी"),
+        ("id", "Bahasa Indonesia"),
+        ("vi", "Tiếng Việt"),
+        ("th", "ไทย"),
+    };
 
     public bool LaunchAtLogin
     {
@@ -89,6 +169,38 @@ public class SettingsStore
         SettingsChanged?.Invoke();
     }
 
+    // Save behaviour settings (bring-to-front, position, move-to-main-screen)
+    public void SaveBehaviourSettings()
+    {
+        Save();
+        SettingsChanged?.Invoke();
+    }
+
+    // Apply language override and restart the app
+    public void ApplyLanguage(string languageCode)
+    {
+        AppLanguage = languageCode;
+        Save();
+
+        if (languageCode == "system" || string.IsNullOrEmpty(languageCode))
+        {
+            Strings.Culture = null;
+        }
+        else
+        {
+            Strings.Culture = new CultureInfo(languageCode);
+        }
+    }
+
+    // Set the resource culture on startup based on saved language
+    public void InitializeLanguage()
+    {
+        if (!string.IsNullOrEmpty(AppLanguage) && AppLanguage != "system")
+        {
+            Strings.Culture = new CultureInfo(AppLanguage);
+        }
+    }
+
     private void Load()
     {
         try
@@ -99,10 +211,20 @@ public class SettingsStore
                 var data = JsonSerializer.Deserialize<SettingsData>(json);
                 if (data?.CustomSizes != null)
                     CustomSizes = data.CustomSizes;
-                ScreenshotEnabled = data?.ScreenshotEnabled ?? false;
-                ScreenshotSaveToFile = data?.ScreenshotSaveToFile ?? true;
+
+                // Load behaviour settings
+                BringToFront = data?.BringToFront ?? true;
+                Position = data?.Position;
+                MoveToMainScreen = data?.MoveToMainScreen ?? false;
+
+                // Load screenshot settings (use backing fields to avoid auto-logic during load)
+                _screenshotEnabled = data?.ScreenshotEnabled ?? false;
+                _screenshotSaveToFile = data?.ScreenshotSaveToFile ?? true;
                 ScreenshotSaveFolderPath = data?.ScreenshotSaveFolderPath ?? "";
-                ScreenshotCopyToClipboard = data?.ScreenshotCopyToClipboard ?? false;
+                _screenshotCopyToClipboard = data?.ScreenshotCopyToClipboard ?? false;
+
+                // Load language
+                AppLanguage = data?.AppLanguage ?? "system";
             }
         }
         catch { }
@@ -115,10 +237,14 @@ public class SettingsStore
             var data = new SettingsData
             {
                 CustomSizes = CustomSizes,
+                BringToFront = BringToFront,
+                Position = Position,
+                MoveToMainScreen = MoveToMainScreen,
                 ScreenshotEnabled = ScreenshotEnabled,
                 ScreenshotSaveToFile = ScreenshotSaveToFile,
                 ScreenshotSaveFolderPath = ScreenshotSaveFolderPath,
-                ScreenshotCopyToClipboard = ScreenshotCopyToClipboard
+                ScreenshotCopyToClipboard = ScreenshotCopyToClipboard,
+                AppLanguage = AppLanguage
             };
             string json = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(_settingsPath, json);
@@ -228,9 +354,13 @@ public class SettingsStore
     private class SettingsData
     {
         public List<PresetSize>? CustomSizes { get; set; }
+        public bool BringToFront { get; set; } = true;
+        public WindowPosition? Position { get; set; }
+        public bool MoveToMainScreen { get; set; }
         public bool ScreenshotEnabled { get; set; }
         public bool ScreenshotSaveToFile { get; set; } = true;
         public string ScreenshotSaveFolderPath { get; set; } = "";
         public bool ScreenshotCopyToClipboard { get; set; }
+        public string AppLanguage { get; set; } = "system";
     }
 }

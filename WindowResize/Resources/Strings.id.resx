@@ -57,4 +57,13 @@
   <data name="SettingsScreenshotChooseFolder" xml:space="preserve"><value>Pilih Folder...</value></data>
   <data name="SettingsScreenshotCopyToClipboard" xml:space="preserve"><value>Salin ke papan klip</value></data>
   <data name="SettingsScreenshotNoFolderSelected" xml:space="preserve"><value>Belum ada folder dipilih</value></data>
+  <data name="SettingsBehaviour" xml:space="preserve"><value>Perilaku</value></data>
+  <data name="SettingsBringToFront" xml:space="preserve"><value>Bawa jendela ke depan setelah mengubah ukuran</value></data>
+  <data name="SettingsWindowPosition" xml:space="preserve"><value>Posisi setelah mengubah ukuran</value></data>
+  <data name="SettingsMoveToMainScreen" xml:space="preserve"><value>Pindahkan ke layar utama</value></data>
+  <data name="MenuCurrentSize" xml:space="preserve"><value>Ukuran saat ini</value></data>
+  <data name="SettingsLanguage" xml:space="preserve"><value>Bahasa</value></data>
+  <data name="SettingsLanguageSystem" xml:space="preserve"><value>Bawaan Sistem</value></data>
+  <data name="SettingsLanguageRestartTitle" xml:space="preserve"><value>Bahasa Diubah</value></data>
+  <data name="SettingsLanguageRestartBody" xml:space="preserve"><value>Aplikasi perlu dimulai ulang untuk menerapkan bahasa baru. Mulai ulang sekarang?</value></data>
 </root>

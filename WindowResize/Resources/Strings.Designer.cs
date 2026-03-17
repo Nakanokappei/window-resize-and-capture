@@ -203,5 +203,59 @@ namespace WindowResize {
                 return ResourceManager.GetString("SettingsScreenshotNoFolderSelected", resourceCulture) ?? "No folder selected";
             }
         }
+
+        internal static string SettingsBehaviour {
+            get {
+                return ResourceManager.GetString("SettingsBehaviour", resourceCulture) ?? "Behaviour";
+            }
+        }
+
+        internal static string SettingsBringToFront {
+            get {
+                return ResourceManager.GetString("SettingsBringToFront", resourceCulture) ?? "Bring window to front after resize";
+            }
+        }
+
+        internal static string SettingsWindowPosition {
+            get {
+                return ResourceManager.GetString("SettingsWindowPosition", resourceCulture) ?? "Position after resize";
+            }
+        }
+
+        internal static string SettingsMoveToMainScreen {
+            get {
+                return ResourceManager.GetString("SettingsMoveToMainScreen", resourceCulture) ?? "Move to main screen";
+            }
+        }
+
+        internal static string MenuCurrentSize {
+            get {
+                return ResourceManager.GetString("MenuCurrentSize", resourceCulture) ?? "Current";
+            }
+        }
+
+        internal static string SettingsLanguage {
+            get {
+                return ResourceManager.GetString("SettingsLanguage", resourceCulture) ?? "Language";
+            }
+        }
+
+        internal static string SettingsLanguageSystem {
+            get {
+                return ResourceManager.GetString("SettingsLanguageSystem", resourceCulture) ?? "System Default";
+            }
+        }
+
+        internal static string SettingsLanguageRestartTitle {
+            get {
+                return ResourceManager.GetString("SettingsLanguageRestartTitle", resourceCulture) ?? "Language Changed";
+            }
+        }
+
+        internal static string SettingsLanguageRestartBody {
+            get {
+                return ResourceManager.GetString("SettingsLanguageRestartBody", resourceCulture) ?? "The app needs to restart to apply the new language. Restart now?";
+            }
+        }
     }
 }

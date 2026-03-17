@@ -79,7 +79,7 @@ public class SplashForm : Form
         using var versionFont = new Font("Segoe UI", 10);
         using var versionBrush = new SolidBrush(Color.FromArgb(160, 160, 160));
         var versionRect = new RectangleF(0, 120, Width, 20);
-        g.DrawString("v1.5", versionFont, versionBrush, versionRect, sf);
+        g.DrawString("v1.6", versionFont, versionBrush, versionRect, sf);
 
         // Copyright
         using var copyrightFont = new Font("Segoe UI", 8);

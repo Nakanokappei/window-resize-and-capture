@@ -57,4 +57,13 @@
   <data name="SettingsScreenshotChooseFolder" xml:space="preserve"><value>Выбрать папку...</value></data>
   <data name="SettingsScreenshotCopyToClipboard" xml:space="preserve"><value>Копировать в буфер обмена</value></data>
   <data name="SettingsScreenshotNoFolderSelected" xml:space="preserve"><value>Папка не выбрана</value></data>
+  <data name="SettingsBehaviour" xml:space="preserve"><value>Поведение</value></data>
+  <data name="SettingsBringToFront" xml:space="preserve"><value>Вывести окно на передний план после изменения размера</value></data>
+  <data name="SettingsWindowPosition" xml:space="preserve"><value>Положение после изменения размера</value></data>
+  <data name="SettingsMoveToMainScreen" xml:space="preserve"><value>Переместить на основной экран</value></data>
+  <data name="MenuCurrentSize" xml:space="preserve"><value>Текущий размер</value></data>
+  <data name="SettingsLanguage" xml:space="preserve"><value>Язык</value></data>
+  <data name="SettingsLanguageSystem" xml:space="preserve"><value>Системный</value></data>
+  <data name="SettingsLanguageRestartTitle" xml:space="preserve"><value>Язык изменён</value></data>
+  <data name="SettingsLanguageRestartBody" xml:space="preserve"><value>Для применения нового языка необходимо перезапустить приложение. Перезапустить сейчас?</value></data>
 </root>

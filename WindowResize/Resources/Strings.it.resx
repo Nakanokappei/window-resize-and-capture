@@ -57,4 +57,13 @@
   <data name="SettingsScreenshotChooseFolder" xml:space="preserve"><value>Scegli cartella...</value></data>
   <data name="SettingsScreenshotCopyToClipboard" xml:space="preserve"><value>Copia negli appunti</value></data>
   <data name="SettingsScreenshotNoFolderSelected" xml:space="preserve"><value>Nessuna cartella selezionata</value></data>
+  <data name="SettingsBehaviour" xml:space="preserve"><value>Comportamento</value></data>
+  <data name="SettingsBringToFront" xml:space="preserve"><value>Porta la finestra in primo piano dopo il ridimensionamento</value></data>
+  <data name="SettingsWindowPosition" xml:space="preserve"><value>Posizione dopo il ridimensionamento</value></data>
+  <data name="SettingsMoveToMainScreen" xml:space="preserve"><value>Sposta sullo schermo principale</value></data>
+  <data name="MenuCurrentSize" xml:space="preserve"><value>Dimensione attuale</value></data>
+  <data name="SettingsLanguage" xml:space="preserve"><value>Lingua</value></data>
+  <data name="SettingsLanguageSystem" xml:space="preserve"><value>Predefinita di sistema</value></data>
+  <data name="SettingsLanguageRestartTitle" xml:space="preserve"><value>Lingua modificata</value></data>
+  <data name="SettingsLanguageRestartBody" xml:space="preserve"><value>L'app deve essere riavviata per applicare la nuova lingua. Riavviare ora?</value></data>
 </root>

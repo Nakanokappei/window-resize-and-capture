@@ -57,4 +57,13 @@
   <data name="SettingsScreenshotChooseFolder" xml:space="preserve"><value>選擇資料夾⋯</value></data>
   <data name="SettingsScreenshotCopyToClipboard" xml:space="preserve"><value>拷貝至剪貼簿</value></data>
   <data name="SettingsScreenshotNoFolderSelected" xml:space="preserve"><value>尚未選擇資料夾</value></data>
+  <data name="SettingsBehaviour" xml:space="preserve"><value>行為</value></data>
+  <data name="SettingsBringToFront" xml:space="preserve"><value>調整後將視窗移至最前</value></data>
+  <data name="SettingsWindowPosition" xml:space="preserve"><value>調整後的位置</value></data>
+  <data name="SettingsMoveToMainScreen" xml:space="preserve"><value>移至主螢幕</value></data>
+  <data name="MenuCurrentSize" xml:space="preserve"><value>目前大小</value></data>
+  <data name="SettingsLanguage" xml:space="preserve"><value>語言</value></data>
+  <data name="SettingsLanguageSystem" xml:space="preserve"><value>跟隨系統</value></data>
+  <data name="SettingsLanguageRestartTitle" xml:space="preserve"><value>語言已變更</value></data>
+  <data name="SettingsLanguageRestartBody" xml:space="preserve"><value>需要重新啟動應用程式以套用新語言。立即重新啟動嗎?</value></data>
 </root>

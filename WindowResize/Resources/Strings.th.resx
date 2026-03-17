@@ -57,4 +57,13 @@
   <data name="SettingsScreenshotChooseFolder" xml:space="preserve"><value>เลือกโฟลเดอร์...</value></data>
   <data name="SettingsScreenshotCopyToClipboard" xml:space="preserve"><value>คัดลอกไปยังคลิปบอร์ด</value></data>
   <data name="SettingsScreenshotNoFolderSelected" xml:space="preserve"><value>ยังไม่ได้เลือกโฟลเดอร์</value></data>
+  <data name="SettingsBehaviour" xml:space="preserve"><value>พฤติกรรม</value></data>
+  <data name="SettingsBringToFront" xml:space="preserve"><value>นำหน้าต่างมาด้านหน้าหลังปรับขนาด</value></data>
+  <data name="SettingsWindowPosition" xml:space="preserve"><value>ตำแหน่งหลังปรับขนาด</value></data>
+  <data name="SettingsMoveToMainScreen" xml:space="preserve"><value>ย้ายไปหน้าจอหลัก</value></data>
+  <data name="MenuCurrentSize" xml:space="preserve"><value>ขนาดปัจจุบัน</value></data>
+  <data name="SettingsLanguage" xml:space="preserve"><value>ภาษา</value></data>
+  <data name="SettingsLanguageSystem" xml:space="preserve"><value>ค่าเริ่มต้นของระบบ</value></data>
+  <data name="SettingsLanguageRestartTitle" xml:space="preserve"><value>เปลี่ยนภาษาแล้ว</value></data>
+  <data name="SettingsLanguageRestartBody" xml:space="preserve"><value>แอปจำเป็นต้องเริ่มต้นใหม่เพื่อใช้ภาษาใหม่ เริ่มใหม่ตอนนี้หรือไม่?</value></data>
 </root>
