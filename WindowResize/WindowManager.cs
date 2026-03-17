@@ -6,8 +6,9 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace WindowResize;
+namespace WindowsResizeCapture;
 
+// Metadata for a single visible application window discovered by enumeration.
 public class WindowInfo
 {
     public IntPtr Handle { get; set; }
@@ -21,8 +22,13 @@ public class WindowInfo
     public Icon? AppIcon { get; set; }
 }
 
+// Provides Win32 P/Invoke operations for enumerating visible desktop windows,
+// resizing them to preset dimensions, repositioning them on a target screen,
+// and forcibly bringing them to the foreground from a tray-app context.
 public static class WindowManager
 {
+    // ── Win32 API declarations ───────────────────────────────────────────
+
     private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
 
     [DllImport("user32.dll")]
@@ -61,33 +67,6 @@ public static class WindowManager
     [DllImport("user32.dll")]
     private static extern IntPtr GetClassLongPtr(IntPtr hWnd, int nIndex);
 
-    private const uint WM_GETICON = 0x007F;
-    private const IntPtr ICON_SMALL = 0;
-    private const IntPtr ICON_BIG = 1;
-    private const IntPtr ICON_SMALL2 = 2;
-    private const int GCLP_HICONSM = -34;
-    private const int GCLP_HICON = -14;
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct RECT
-    {
-        public int Left;
-        public int Top;
-        public int Right;
-        public int Bottom;
-    }
-
-    private const int GWL_STYLE = -16;
-    private const int GWL_EXSTYLE = -20;
-    private const long WS_VISIBLE = 0x10000000;
-    private const long WS_CAPTION = 0x00C00000;
-    private const long WS_EX_TOOLWINDOW = 0x00000080;
-    private const long WS_EX_APPWINDOW = 0x00040000;
-    private const int DWMWA_CLOAKED = 14;
-    private const uint SWP_NOMOVE = 0x0002;
-    private const uint SWP_NOSIZE = 0x0001;
-    private const uint SWP_NOZORDER = 0x0004;
-
     [DllImport("user32.dll")]
     private static extern bool SetForegroundWindow(IntPtr hWnd);
 
@@ -112,9 +91,36 @@ public static class WindowManager
     [DllImport("user32.dll")]
     private static extern bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFO lpmi);
 
+    // ── Constants ────────────────────────────────────────────────────────
+
+    private const uint WM_GETICON = 0x007F;
+    private const IntPtr ICON_SMALL = 0;
+    private const IntPtr ICON_BIG = 1;
+    private const IntPtr ICON_SMALL2 = 2;
+    private const int GCLP_HICONSM = -34;
+    private const int GCLP_HICON = -14;
+
+    private const int GWL_STYLE = -16;
+    private const int GWL_EXSTYLE = -20;
+    private const long WS_CAPTION = 0x00C00000;
+    private const long WS_EX_TOOLWINDOW = 0x00000080;
+    private const long WS_EX_APPWINDOW = 0x00040000;
+    private const int DWMWA_CLOAKED = 14;
+
+    private const uint SWP_NOMOVE = 0x0002;
+    private const uint SWP_NOSIZE = 0x0001;
+    private const uint SWP_NOZORDER = 0x0004;
     private const uint MONITOR_DEFAULTTONEAREST = 2;
     private const uint MONITOR_DEFAULTTOPRIMARY = 1;
     private const int SW_RESTORE = 9;
+
+    // ── Structs ──────────────────────────────────────────────────────────
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct RECT
+    {
+        public int Left, Top, Right, Bottom;
+    }
 
     [StructLayout(LayoutKind.Sequential)]
     private struct MONITORINFO
@@ -125,18 +131,23 @@ public static class WindowManager
         public uint dwFlags;
     }
 
-    // Enumerate all visible, resizable application windows, excluding this process.
-    public static List<WindowInfo> ListWindows()
+    // ── Public API ───────────────────────────────────────────────────────
+
+    // Walk all top-level windows via EnumWindows and return those that
+    // represent visible, titled application windows (excluding this
+    // process, cloaked UWP shells, and tool windows).
+    public static List<WindowInfo> DiscoverWindows()
     {
         var windows = new List<WindowInfo>();
-        int myPid = Environment.ProcessId;
+        int ownPid = Environment.ProcessId;
 
-        EnumWindows((hWnd, lParam) =>
+        EnumWindows((hWnd, _) =>
         {
+            // Skip invisible windows early
             if (!IsWindowVisible(hWnd))
                 return true;
 
-            // Skip cloaked windows (UWP hidden windows, etc.)
+            // Exclude cloaked windows (hidden UWP containers, virtual-desktop ghosts)
             DwmGetWindowAttribute(hWnd, DWMWA_CLOAKED, out int cloaked, sizeof(int));
             if (cloaked != 0)
                 return true;
@@ -144,41 +155,36 @@ public static class WindowManager
             int style = GetWindowLong(hWnd, GWL_STYLE);
             int exStyle = GetWindowLong(hWnd, GWL_EXSTYLE);
 
-            // Must have a caption (title bar) - filters out background/system windows
+            // Require a title bar — filters out background/system surfaces
             if ((style & (int)WS_CAPTION) != (int)WS_CAPTION)
                 return true;
 
-            // Skip tool windows unless they are explicitly app windows
+            // Exclude tool windows unless explicitly marked as app windows
             if ((exStyle & (int)WS_EX_TOOLWINDOW) != 0 && (exStyle & (int)WS_EX_APPWINDOW) == 0)
                 return true;
 
-            // Get title
+            // Must have a non-empty title
             int titleLength = GetWindowTextLength(hWnd);
             if (titleLength == 0)
                 return true;
 
-            var titleBuilder = new StringBuilder(titleLength + 1);
-            GetWindowText(hWnd, titleBuilder, titleBuilder.Capacity);
-            string title = titleBuilder.ToString();
+            var titleBuffer = new StringBuilder(titleLength + 1);
+            GetWindowText(hWnd, titleBuffer, titleBuffer.Capacity);
 
-            // Get process info
+            // Skip our own process
             GetWindowThreadProcessId(hWnd, out uint processId);
-            if ((int)processId == myPid)
+            if ((int)processId == ownPid)
                 return true;
 
+            // Resolve the owning process name (best-effort)
             string processName = "";
-            try
-            {
-                var process = Process.GetProcessById((int)processId);
-                processName = process.ProcessName;
-            }
+            try { processName = Process.GetProcessById((int)processId).ProcessName; }
             catch { }
 
-            // Get size
+            // Compute pixel dimensions; skip zero-area windows
             GetWindowRect(hWnd, out RECT rect);
             int width = rect.Right - rect.Left;
             int height = rect.Bottom - rect.Top;
-
             if (width <= 0 || height <= 0)
                 return true;
 
@@ -187,12 +193,12 @@ public static class WindowManager
                 Handle = hWnd,
                 ProcessId = processId,
                 ProcessName = processName,
-                Title = title,
+                Title = titleBuffer.ToString(),
                 Left = rect.Left,
                 Top = rect.Top,
                 Width = width,
                 Height = height,
-                AppIcon = GetWindowIcon(hWnd)
+                AppIcon = ExtractWindowIcon(hWnd)
             });
 
             return true;
@@ -201,23 +207,59 @@ public static class WindowManager
         return windows;
     }
 
-    /// <summary>
-    /// Retrieve the application icon for a window, trying multiple Win32 strategies.
-    /// </summary>
-    private static Icon? GetWindowIcon(IntPtr hWnd)
+    // Resize the given window to the preset dimensions, then optionally
+    // reposition it on a target screen and bring it to the foreground.
+    // Returns false if the initial SetWindowPos resize call fails.
+    public static bool ResizeWindow(WindowInfo window, PresetSize size,
+        bool bringToFront = false, WindowPosition? position = null, bool moveToMainScreen = false)
+    {
+        // Step 1 — resize without moving or changing Z-order
+        bool resized = SetWindowPos(
+            window.Handle, IntPtr.Zero,
+            0, 0, size.Width, size.Height,
+            SWP_NOMOVE | SWP_NOZORDER);
+
+        if (!resized) return false;
+
+        // Step 2 — snap to a screen position if any positioning is requested
+        if (position != null || moveToMainScreen)
+        {
+            var workArea = ResolveTargetWorkArea(window.Handle, moveToMainScreen);
+            var anchor = position ?? WindowPosition.Center;
+            var origin = CalculateSnapOrigin(anchor, size.Width, size.Height, workArea);
+
+            SetWindowPos(
+                window.Handle, IntPtr.Zero,
+                origin.X, origin.Y, 0, 0,
+                SWP_NOSIZE | SWP_NOZORDER);
+        }
+
+        // Step 3 — force the window to the foreground if requested
+        if (bringToFront)
+            BringToForeground(window.Handle);
+
+        return true;
+    }
+
+    // ── Private helpers ──────────────────────────────────────────────────
+
+    // Try multiple Win32 strategies to obtain the application icon for a
+    // window: first WM_GETICON with decreasing size preference, then the
+    // window-class registered icons.
+    private static Icon? ExtractWindowIcon(IntPtr hWnd)
     {
         try
         {
             IntPtr iconHandle = IntPtr.Zero;
 
-            // Try WM_GETICON with decreasing size preference (small2 -> small -> big).
+            // Try WM_GETICON: small2 → small → big
             foreach (var sizeHint in new[] { ICON_SMALL2, ICON_SMALL, ICON_BIG })
             {
                 iconHandle = SendMessage(hWnd, WM_GETICON, sizeHint, IntPtr.Zero);
                 if (iconHandle != IntPtr.Zero) break;
             }
 
-            // Fall back to the window class icon (small -> large).
+            // Fall back to the window-class icon: small → large
             if (iconHandle == IntPtr.Zero)
             {
                 foreach (var classIndex in new[] { GCLP_HICONSM, GCLP_HICON })
@@ -235,123 +277,73 @@ public static class WindowManager
         return null;
     }
 
-    // Resize the window to the given preset size, then optionally reposition and bring to front.
-    public static bool ResizeWindow(WindowInfo window, PresetSize size,
-        bool bringToFront = false, WindowPosition? position = null, bool moveToMainScreen = false)
+    // Return the taskbar-excluded work area of the target display.
+    // When usePrimaryScreen is true, always pick the primary monitor;
+    // otherwise pick whichever monitor currently contains the window.
+    private static RECT ResolveTargetWorkArea(IntPtr hWnd, bool usePrimaryScreen)
     {
-        // Step 1: Resize the window
-        bool resized = SetWindowPos(
-            window.Handle,
-            IntPtr.Zero,
-            0, 0,
-            size.Width, size.Height,
-            SWP_NOMOVE | SWP_NOZORDER
-        );
+        IntPtr hMonitor = usePrimaryScreen
+            ? MonitorFromWindow(IntPtr.Zero, MONITOR_DEFAULTTOPRIMARY)
+            : MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
 
-        if (!resized) return false;
-
-        // Step 2: Reposition on a target screen if requested
-        if (position != null || moveToMainScreen)
-        {
-            var workArea = GetTargetWorkArea(window.Handle, moveToMainScreen);
-            var anchor = position ?? WindowPosition.Center;
-            var origin = CalculateOrigin(anchor, size.Width, size.Height, workArea);
-
-            SetWindowPos(
-                window.Handle,
-                IntPtr.Zero,
-                origin.X, origin.Y,
-                0, 0,
-                SWP_NOSIZE | SWP_NOZORDER
-            );
-        }
-
-        // Step 3: Bring to front if requested.
-        // SetForegroundWindow alone fails from tray apps because Windows restricts
-        // focus stealing.  Attach our thread to the foreground thread first so the
-        // OS allows the switch.
-        if (bringToFront)
-        {
-            ForceForegroundWindow(window.Handle);
-        }
-
-        return true;
-    }
-
-    // Get the working area of the target screen (excludes taskbar).
-    private static RECT GetTargetWorkArea(IntPtr hWnd, bool usePrimaryScreen)
-    {
-        IntPtr hMonitor;
-        if (usePrimaryScreen)
-        {
-            // Use the primary monitor by passing a null-equivalent window handle
-            hMonitor = MonitorFromWindow(IntPtr.Zero, MONITOR_DEFAULTTOPRIMARY);
-        }
-        else
-        {
-            // Use the monitor containing the current window
-            hMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
-        }
-
-        var info = new MONITORINFO { cbSize = System.Runtime.InteropServices.Marshal.SizeOf<MONITORINFO>() };
+        var info = new MONITORINFO { cbSize = Marshal.SizeOf<MONITORINFO>() };
         GetMonitorInfo(hMonitor, ref info);
         return info.rcWork;
     }
 
-    // Calculate the top-left origin for a window based on its snap position within the work area.
-    private static Point CalculateOrigin(WindowPosition position, int windowWidth, int windowHeight, RECT workArea)
+    // Compute the top-left pixel coordinate for a window of the given size
+    // snapped to one of nine anchor positions within the work area.
+    private static Point CalculateSnapOrigin(
+        WindowPosition anchor, int windowWidth, int windowHeight, RECT workArea)
     {
         int areaWidth = workArea.Right - workArea.Left;
         int areaHeight = workArea.Bottom - workArea.Top;
 
-        // Horizontal coordinate
-        int x = position switch
+        // Horizontal coordinate based on the anchor column
+        int x = anchor switch
         {
             WindowPosition.TopLeft or WindowPosition.Left or WindowPosition.BottomLeft
                 => workArea.Left,
             WindowPosition.Top or WindowPosition.Center or WindowPosition.Bottom
                 => workArea.Left + (areaWidth - windowWidth) / 2,
-            _ // TopRight, Right, BottomRight
-                => workArea.Right - windowWidth,
+            _ => workArea.Right - windowWidth,
         };
 
-        // Vertical coordinate
-        int y = position switch
+        // Vertical coordinate based on the anchor row
+        int y = anchor switch
         {
             WindowPosition.TopLeft or WindowPosition.Top or WindowPosition.TopRight
                 => workArea.Top,
             WindowPosition.Left or WindowPosition.Center or WindowPosition.Right
                 => workArea.Top + (areaHeight - windowHeight) / 2,
-            _ // BottomLeft, Bottom, BottomRight
-                => workArea.Bottom - windowHeight,
+            _ => workArea.Bottom - windowHeight,
         };
 
         return new Point(x, y);
     }
 
     // Force a window to the foreground even from a background/tray process.
-    // Windows restricts SetForegroundWindow to the process that owns the
-    // current foreground window.  By temporarily attaching our input thread
-    // to the foreground thread we satisfy that requirement.
-    private static void ForceForegroundWindow(IntPtr hWnd)
+    // Windows restricts SetForegroundWindow to the thread that owns the
+    // current foreground window. Temporarily attaching our input thread to
+    // that thread satisfies the requirement.
+    private static void BringToForeground(IntPtr hWnd)
     {
         IntPtr foregroundHwnd = GetForegroundWindow();
         uint foregroundThread = GetWindowThreadProcessId(foregroundHwnd, out _);
         uint currentThread = GetCurrentThreadId();
 
+        // Attach our input queue to the foreground thread so Windows allows
+        // the focus switch
         bool attached = false;
         if (foregroundThread != currentThread)
-        {
             attached = AttachThreadInput(currentThread, foregroundThread, true);
-        }
 
         ShowWindow(hWnd, SW_RESTORE);
         BringWindowToTop(hWnd);
         SetForegroundWindow(hWnd);
 
+        // Detach immediately to restore normal input processing
         if (attached)
-        {
             AttachThreadInput(currentThread, foregroundThread, false);
-        }
     }
 }

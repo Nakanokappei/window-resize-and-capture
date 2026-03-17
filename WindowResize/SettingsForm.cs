@@ -3,8 +3,12 @@ using System.Drawing;
 using System.Globalization;
 using System.Windows.Forms;
 
-namespace WindowResize;
+namespace WindowsResizeCapture;
 
+// The Settings window. Built entirely in code (no designer). Provides
+// controls for preset sizes, launch-at-login, window behaviour options,
+// screenshot destinations, and language selection. Hides instead of
+// closing so it can be reused without reconstruction.
 public class SettingsForm : Form
 {
     private readonly SettingsStore _store = SettingsStore.Shared;
@@ -32,15 +36,14 @@ public class SettingsForm : Form
     // Language controls
     private ComboBox _languageCombo = null!;
 
-    // Top Y coordinate of the collapsible screenshot options panel
+    // Y-coordinate where the collapsible screenshot options panel begins
     private int _screenshotOptionsPanelTop;
 
-    // Position button labels: Wingdings 3 directional arrows
-    // Wingdings 3 mapping: á=← â=→ ã=↑ ä=↓ å=↖ æ=↗ ç=↙ è=↘
-    // Reordered to match PositionOrder: TL, T, TR, L, C, R, BL, B, BR
-    private static readonly string[] PositionLabels = { "å", "ã", "æ", "á", "é", "â", "ç", "ä", "è" };
+    // Wingdings 3 arrow glyphs mapped to the 3x3 position grid
+    // (TL, T, TR, L, C, R, BL, B, BR)
+    private static readonly string[] PositionGlyphs = { "å", "ã", "æ", "á", "é", "â", "ç", "ä", "è" };
 
-    // Map WindowPosition enum values to grid indices
+    // WindowPosition enum values in the same grid order as the glyphs
     private static readonly WindowPosition[] PositionOrder =
     {
         WindowPosition.TopLeft, WindowPosition.Top, WindowPosition.TopRight,
@@ -50,11 +53,15 @@ public class SettingsForm : Form
 
     public SettingsForm()
     {
-        InitializeComponents();
-        LoadData();
+        BuildLayout();
+        PopulateLists();
     }
 
-    private void InitializeComponents()
+    // ── Layout construction ──────────────────────────────────────────────
+
+    // Construct all controls top-to-bottom: preset sizes, launch-at-login,
+    // behaviour options, screenshot options, and language picker.
+    private void BuildLayout()
     {
         Text = Strings.SettingsTitle;
         FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -64,18 +71,17 @@ public class SettingsForm : Form
 
         int y = 12;
 
-        // Preset Sizes header
-        var headerLabel = new Label
+        // ── Preset sizes header ──
+        Controls.Add(new Label
         {
             Text = Strings.SettingsPresetSizes,
             Font = new Font(Font, FontStyle.Bold),
             Location = new Point(12, y),
             AutoSize = true
-        };
-        Controls.Add(headerLabel);
+        });
         y += 28;
 
-        // Built-in group (5 visible rows)
+        // ── Built-in sizes group ──
         var builtInGroup = new GroupBox
         {
             Text = Strings.SettingsBuiltIn,
@@ -94,7 +100,7 @@ public class SettingsForm : Form
         Controls.Add(builtInGroup);
         y += 108;
 
-        // Custom group (3 visible rows)
+        // ── Custom sizes group ──
         var customGroup = new GroupBox
         {
             Text = Strings.SettingsCustom,
@@ -110,7 +116,7 @@ public class SettingsForm : Form
         };
         customGroup.Controls.Add(_customList);
 
-        // Remove button, placed to the right of the custom sizes list
+        // Remove button beside the custom list
         _removeButton = new Button
         {
             Text = Strings.SettingsRemove,
@@ -118,57 +124,45 @@ public class SettingsForm : Form
             Size = new Size(76, 28),
             Enabled = false
         };
-        _removeButton.Click += RemoveButton_Click;
+        _removeButton.Click += OnRemovePreset;
         customGroup.Controls.Add(_removeButton);
 
+        // Enable the remove button only when a custom size is selected
         _customList.SelectedIndexChanged += (_, _) =>
-        {
             _removeButton.Enabled = _customList.SelectedIndex >= 0;
-        };
 
-        // Add row
+        // ── Add-size row (width × height + Add button) ──
         var addPanel = new Panel
         {
             Location = new Point(8, 80),
             Size = new Size(364, 30)
         };
 
-        var widthLabel = new Label
+        addPanel.Controls.Add(new Label
         {
             Text = Strings.SettingsWidth,
             Location = new Point(0, 5),
             AutoSize = true
-        };
-        addPanel.Controls.Add(widthLabel);
+        });
 
-        _widthBox = new TextBox
-        {
-            Location = new Point(50, 2),
-            Size = new Size(70, 23)
-        };
+        _widthBox = new TextBox { Location = new Point(50, 2), Size = new Size(70, 23) };
         addPanel.Controls.Add(_widthBox);
 
-        var sepLabel = new Label
+        addPanel.Controls.Add(new Label
         {
             Text = Strings.SettingsDimensionSeparator,
             Location = new Point(125, 5),
             AutoSize = true
-        };
-        addPanel.Controls.Add(sepLabel);
+        });
 
-        var heightLabel = new Label
+        addPanel.Controls.Add(new Label
         {
             Text = Strings.SettingsHeight,
             Location = new Point(140, 5),
             AutoSize = true
-        };
-        addPanel.Controls.Add(heightLabel);
+        });
 
-        _heightBox = new TextBox
-        {
-            Location = new Point(190, 2),
-            Size = new Size(70, 23)
-        };
+        _heightBox = new TextBox { Location = new Point(190, 2), Size = new Size(70, 23) };
         addPanel.Controls.Add(_heightBox);
 
         _addButton = new Button
@@ -177,15 +171,14 @@ public class SettingsForm : Form
             Location = new Point(270, 1),
             Size = new Size(60, 25)
         };
-        _addButton.Click += AddButton_Click;
+        _addButton.Click += OnAddPreset;
         addPanel.Controls.Add(_addButton);
 
         customGroup.Controls.Add(addPanel);
-
         Controls.Add(customGroup);
         y += 128;
 
-        // Launch at Login
+        // ── Launch at login ──
         _launchAtLoginCheck = new CheckBox
         {
             Text = Strings.SettingsLaunchAtLogin,
@@ -194,21 +187,18 @@ public class SettingsForm : Form
             Checked = _store.LaunchAtLogin
         };
         _launchAtLoginCheck.CheckedChanged += (_, _) =>
-        {
             _store.LaunchAtLogin = _launchAtLoginCheck.Checked;
-        };
         Controls.Add(_launchAtLoginCheck);
         y += 32;
 
-        // --- Behaviour section ---
-        var behaviourHeader = new Label
+        // ── Behaviour section ──
+        Controls.Add(new Label
         {
             Text = Strings.SettingsBehaviour,
             Font = new Font(Font, FontStyle.Bold),
             Location = new Point(12, y),
             AutoSize = true
-        };
-        Controls.Add(behaviourHeader);
+        });
         y += 24;
 
         // Bring to front
@@ -222,7 +212,7 @@ public class SettingsForm : Form
         _bringToFrontCheck.CheckedChanged += (_, _) =>
         {
             _store.BringToFront = _bringToFrontCheck.Checked;
-            _store.SaveBehaviourSettings();
+            _store.SaveAndNotify();
         };
         Controls.Add(_bringToFrontCheck);
         y += 26;
@@ -238,24 +228,22 @@ public class SettingsForm : Form
         _moveToMainScreenCheck.CheckedChanged += (_, _) =>
         {
             _store.MoveToMainScreen = _moveToMainScreenCheck.Checked;
-            _store.SaveBehaviourSettings();
+            _store.SaveAndNotify();
         };
         Controls.Add(_moveToMainScreenCheck);
         y += 28;
 
-        // Position after resize label
-        var posLabel = new Label
+        // Position-after-resize label and 9-button grid
+        Controls.Add(new Label
         {
             Text = Strings.SettingsWindowPosition,
             Location = new Point(12, y + 2),
             AutoSize = true
-        };
-        Controls.Add(posLabel);
+        });
 
-        // Single row of 9 position buttons (compact)
         int gridLeft = 140;
-        int btnSize = 26;
-        int btnGap = 1;
+        int buttonSize = 26;
+        int buttonGap = 1;
         _positionButtons = new Button[9];
 
         var wingdings3 = new Font("Wingdings 3", 10f);
@@ -263,37 +251,35 @@ public class SettingsForm : Form
         {
             var btn = new Button
             {
-                Size = new Size(btnSize, btnSize),
-                Location = new Point(gridLeft + i * (btnSize + btnGap), y - 2),
+                Size = new Size(buttonSize, buttonSize),
+                Location = new Point(gridLeft + i * (buttonSize + buttonGap), y - 2),
                 FlatStyle = FlatStyle.Flat,
                 Tag = PositionOrder[i],
                 Font = wingdings3,
-                Text = PositionLabels[i],
+                Text = PositionGlyphs[i],
                 TextAlign = ContentAlignment.MiddleCenter,
                 Padding = Padding.Empty
             };
             btn.FlatAppearance.BorderSize = 1;
-            btn.Click += PositionButton_Click;
-
+            btn.Click += OnPositionButtonClick;
             _positionButtons[i] = btn;
             Controls.Add(btn);
         }
 
-        UpdatePositionButtonStates();
-        y += btnSize + 8;
+        RefreshPositionButtonHighlights();
+        y += buttonSize + 8;
 
-        // --- Screenshot section ---
-        var screenshotHeader = new Label
+        // ── Screenshot section ──
+        Controls.Add(new Label
         {
             Text = Strings.SettingsScreenshot,
             Font = new Font(Font, FontStyle.Bold),
             Location = new Point(12, y),
             AutoSize = true
-        };
-        Controls.Add(screenshotHeader);
+        });
         y += 24;
 
-        // Screenshot enabled
+        // Master screenshot toggle
         _screenshotEnabledCheck = new CheckBox
         {
             Text = Strings.SettingsScreenshotEnabled,
@@ -304,9 +290,9 @@ public class SettingsForm : Form
         _screenshotEnabledCheck.CheckedChanged += (_, _) =>
         {
             _store.ScreenshotEnabled = _screenshotEnabledCheck.Checked;
-            _store.SaveScreenshotSettings();
-            SyncScreenshotCheckboxes();
-            UpdateScreenshotOptionsVisibility();
+            _store.SaveAndNotify();
+            SynchronizeScreenshotControls();
+            AdjustScreenshotPanelVisibility();
         };
         Controls.Add(_screenshotEnabledCheck);
         y += 26;
@@ -319,210 +305,116 @@ public class SettingsForm : Form
             Size = new Size(420, 86)
         };
 
-        int py = 0;
+        int panelY = 0;
 
-        // Save to file
+        // Save-to-file checkbox
         _screenshotSaveToFileCheck = new CheckBox
         {
             Text = Strings.SettingsScreenshotSaveToFile,
-            Location = new Point(28, py),
+            Location = new Point(28, panelY),
             AutoSize = true,
             Checked = _store.ScreenshotSaveToFile
         };
         _screenshotSaveToFileCheck.CheckedChanged += (_, _) =>
         {
             _store.ScreenshotSaveToFile = _screenshotSaveToFileCheck.Checked;
-            _store.SaveScreenshotSettings();
+            _store.SaveAndNotify();
             _chooseFolderButton.Enabled = _store.ScreenshotSaveToFile;
-            SyncScreenshotCheckboxes();
+            SynchronizeScreenshotControls();
         };
         _screenshotOptionsPanel.Controls.Add(_screenshotSaveToFileCheck);
-        py += 26;
+        panelY += 26;
 
-        // Choose folder button + path label
+        // Folder chooser button and path label
         _chooseFolderButton = new Button
         {
             Text = Strings.SettingsScreenshotChooseFolder,
-            Location = new Point(44, py),
+            Location = new Point(44, panelY),
             AutoSize = true,
             Enabled = _store.ScreenshotSaveToFile
         };
-        _chooseFolderButton.Click += ChooseFolderButton_Click;
+        _chooseFolderButton.Click += OnChooseScreenshotFolder;
         _screenshotOptionsPanel.Controls.Add(_chooseFolderButton);
 
         _folderPathLabel = new Label
         {
-            Text = GetFolderDisplayText(),
-            Location = new Point(_chooseFolderButton.Right + 8, py + 4),
+            Text = FormatFolderPath(),
+            Location = new Point(_chooseFolderButton.Right + 8, panelY + 4),
             Size = new Size(240, 20),
             ForeColor = Color.Gray,
             AutoEllipsis = true
         };
         _screenshotOptionsPanel.Controls.Add(_folderPathLabel);
-        py += 30;
+        panelY += 30;
 
-        // Copy to clipboard
+        // Copy-to-clipboard checkbox
         _screenshotCopyToClipboardCheck = new CheckBox
         {
             Text = Strings.SettingsScreenshotCopyToClipboard,
-            Location = new Point(28, py),
+            Location = new Point(28, panelY),
             AutoSize = true,
             Checked = _store.ScreenshotCopyToClipboard
         };
         _screenshotCopyToClipboardCheck.CheckedChanged += (_, _) =>
         {
             _store.ScreenshotCopyToClipboard = _screenshotCopyToClipboardCheck.Checked;
-            _store.SaveScreenshotSettings();
-            SyncScreenshotCheckboxes();
+            _store.SaveAndNotify();
+            SynchronizeScreenshotControls();
         };
         _screenshotOptionsPanel.Controls.Add(_screenshotCopyToClipboardCheck);
-
         Controls.Add(_screenshotOptionsPanel);
 
-        // --- Language section ---
-        // Positioned after the screenshot panel (dynamically adjusted)
-        int langY = _screenshotOptionsPanelTop + _screenshotOptionsPanel.Height + 8;
+        // ── Language section ──
+        int languageY = _screenshotOptionsPanelTop + _screenshotOptionsPanel.Height + 8;
 
-        var langHeader = new Label
+        Controls.Add(new Label
         {
             Text = Strings.SettingsLanguage,
             Font = new Font(Font, FontStyle.Bold),
-            Location = new Point(12, langY),
+            Location = new Point(12, languageY),
             AutoSize = true,
             Name = "_langHeader"
-        };
-        Controls.Add(langHeader);
-        langY += 24;
+        });
+        languageY += 24;
 
         _languageCombo = new ComboBox
         {
-            Location = new Point(12, langY),
+            Location = new Point(12, languageY),
             Size = new Size(250, 24),
             DropDownStyle = ComboBoxStyle.DropDownList,
             Name = "_languageCombo"
         };
 
-        // Populate with system default + all supported languages
+        // Populate: "System default" first, then every shipped language
         _languageCombo.Items.Add(Strings.SettingsLanguageSystem);
         foreach (var (_, nativeName) in SettingsStore.SupportedLanguages)
-        {
             _languageCombo.Items.Add(nativeName);
-        }
 
-        // Select current language
+        // Select the currently active language
         if (_store.AppLanguage == "system" || string.IsNullOrEmpty(_store.AppLanguage))
         {
             _languageCombo.SelectedIndex = 0;
         }
         else
         {
-            int langIndex = Array.FindIndex(SettingsStore.SupportedLanguages, l => l.Code == _store.AppLanguage);
+            int langIndex = Array.FindIndex(SettingsStore.SupportedLanguages,
+                l => l.Code == _store.AppLanguage);
             _languageCombo.SelectedIndex = langIndex >= 0 ? langIndex + 1 : 0;
         }
 
-        _languageCombo.SelectedIndexChanged += LanguageCombo_SelectedIndexChanged;
+        _languageCombo.SelectedIndexChanged += OnLanguageChanged;
         Controls.Add(_languageCombo);
 
-        // Set initial panel visibility based on current setting
-        UpdateScreenshotOptionsVisibility();
+        // Set initial screenshot panel visibility
+        AdjustScreenshotPanelVisibility();
     }
 
-    // Sync screenshot checkboxes after the smart auto-enable/disable logic in SettingsStore
-    private void SyncScreenshotCheckboxes()
+    // ── Data population ──────────────────────────────────────────────────
+
+    // Fill the built-in and custom size list boxes from the store.
+    private void PopulateLists()
     {
-        if (_screenshotEnabledCheck.Checked != _store.ScreenshotEnabled)
-            _screenshotEnabledCheck.Checked = _store.ScreenshotEnabled;
-        if (_screenshotSaveToFileCheck.Checked != _store.ScreenshotSaveToFile)
-            _screenshotSaveToFileCheck.Checked = _store.ScreenshotSaveToFile;
-        if (_screenshotCopyToClipboardCheck.Checked != _store.ScreenshotCopyToClipboard)
-            _screenshotCopyToClipboardCheck.Checked = _store.ScreenshotCopyToClipboard;
-    }
-
-    // Handle position button click: toggle selection
-    private void PositionButton_Click(object? sender, EventArgs e)
-    {
-        if (sender is not Button btn || btn.Tag is not WindowPosition pos)
-            return;
-
-        // Toggle: clicking the already-selected position clears it
-        _store.Position = (_store.Position == pos) ? null : pos;
-        _store.SaveBehaviourSettings();
-        UpdatePositionButtonStates();
-    }
-
-    // Refresh all position button appearances using background/foreground colors
-    private void UpdatePositionButtonStates()
-    {
-        foreach (var btn in _positionButtons)
-        {
-            if (btn.Tag is not WindowPosition pos) continue;
-            bool selected = _store.Position == pos;
-            btn.BackColor = selected ? Color.DodgerBlue : SystemColors.Control;
-            btn.ForeColor = selected ? Color.White : SystemColors.ControlText;
-        }
-    }
-
-    // Handle language selection change
-    private void LanguageCombo_SelectedIndexChanged(object? sender, EventArgs e)
-    {
-        int idx = _languageCombo.SelectedIndex;
-        string newLang = idx == 0 ? "system" : SettingsStore.SupportedLanguages[idx - 1].Code;
-
-        if (newLang == _store.AppLanguage)
-            return;
-
-        _store.ApplyLanguage(newLang);
-
-        // Notify user that restart is needed for full effect
-        var result = MessageBox.Show(
-            Strings.SettingsLanguageRestartBody,
-            Strings.SettingsLanguageRestartTitle,
-            MessageBoxButtons.YesNo,
-            MessageBoxIcon.Information);
-
-        if (result == DialogResult.Yes)
-        {
-            // Restart application
-            var exePath = Environment.ProcessPath;
-            if (!string.IsNullOrEmpty(exePath))
-            {
-                System.Diagnostics.Process.Start(exePath);
-                Application.Exit();
-            }
-        }
-    }
-
-    /// <summary>
-    /// Toggle screenshot options visibility and auto-adjust form height.
-    /// Also repositions the language section below.
-    /// </summary>
-    private void UpdateScreenshotOptionsVisibility()
-    {
-        bool show = _store.ScreenshotEnabled;
-        _screenshotOptionsPanel.Visible = show;
-
-        // Calculate where language section goes
-        int langY = show
-            ? _screenshotOptionsPanelTop + _screenshotOptionsPanel.Height + 8
-            : _screenshotOptionsPanelTop + 8;
-
-        // Move language controls
-        var langHeader = Controls.Find("_langHeader", false);
-        if (langHeader.Length > 0)
-            langHeader[0].Location = new Point(12, langY);
-
-        _languageCombo.Location = new Point(12, langY + 24);
-
-        // Recalculate form height
-        int contentBottom = langY + 24 + _languageCombo.Height + 12;
-
-        // Set client area; WinForms accounts for the title bar automatically
-        ClientSize = new Size(404, contentBottom);
-    }
-
-    private void LoadData()
-    {
-        // Built-in sizes
+        // Built-in sizes (read-only display)
         _builtInList.Items.Clear();
         foreach (var size in SettingsStore.BuiltInSizes)
         {
@@ -532,17 +424,13 @@ public class SettingsForm : Form
             _builtInList.Items.Add(display);
         }
 
-        // Custom sizes
         RefreshCustomList();
     }
 
+    // Rebuild the custom sizes list and show a placeholder when empty.
     private void RefreshCustomList()
     {
         _customList.Items.Clear();
-        foreach (var size in _store.CustomSizes)
-        {
-            _customList.Items.Add(size.DisplayName);
-        }
 
         if (_store.CustomSizes.Count == 0)
         {
@@ -551,13 +439,18 @@ public class SettingsForm : Form
         }
         else
         {
+            foreach (var size in _store.CustomSizes)
+                _customList.Items.Add(size.DisplayName);
             _customList.Enabled = true;
         }
 
         _removeButton.Enabled = false;
     }
 
-    private void AddButton_Click(object? sender, EventArgs e)
+    // ── Event handlers ───────────────────────────────────────────────────
+
+    // Parse the width/height inputs and add a new custom preset.
+    private void OnAddPreset(object? sender, EventArgs e)
     {
         if (int.TryParse(_widthBox.Text, out int w) &&
             int.TryParse(_heightBox.Text, out int h) &&
@@ -570,17 +463,61 @@ public class SettingsForm : Form
         }
     }
 
-    private void RemoveButton_Click(object? sender, EventArgs e)
+    // Remove the currently selected custom preset.
+    private void OnRemovePreset(object? sender, EventArgs e)
     {
-        int idx = _customList.SelectedIndex;
-        if (idx >= 0 && idx < _store.CustomSizes.Count)
+        int index = _customList.SelectedIndex;
+        if (index >= 0 && index < _store.CustomSizes.Count)
         {
-            _store.RemoveSize(_store.CustomSizes[idx]);
+            _store.RemoveSize(_store.CustomSizes[index]);
             RefreshCustomList();
         }
     }
 
-    private void ChooseFolderButton_Click(object? sender, EventArgs e)
+    // Toggle the selected snap position. Clicking the already-active
+    // position clears it (no snap).
+    private void OnPositionButtonClick(object? sender, EventArgs e)
+    {
+        if (sender is not Button btn || btn.Tag is not WindowPosition pos)
+            return;
+
+        _store.Position = (_store.Position == pos) ? null : pos;
+        _store.SaveAndNotify();
+        RefreshPositionButtonHighlights();
+    }
+
+    // Apply the newly selected language and offer to restart the app
+    // so that all UI strings update.
+    private void OnLanguageChanged(object? sender, EventArgs e)
+    {
+        int index = _languageCombo.SelectedIndex;
+        string newLanguage = index == 0 ? "system" : SettingsStore.SupportedLanguages[index - 1].Code;
+
+        if (newLanguage == _store.AppLanguage)
+            return;
+
+        _store.ApplyLanguage(newLanguage);
+
+        // Prompt the user to restart for the change to take full effect
+        var result = MessageBox.Show(
+            Strings.SettingsLanguageRestartBody,
+            Strings.SettingsLanguageRestartTitle,
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Information);
+
+        if (result == DialogResult.Yes)
+        {
+            var exePath = Environment.ProcessPath;
+            if (!string.IsNullOrEmpty(exePath))
+            {
+                System.Diagnostics.Process.Start(exePath);
+                Application.Exit();
+            }
+        }
+    }
+
+    // Open a folder browser to choose the screenshot save location.
+    private void OnChooseScreenshotFolder(object? sender, EventArgs e)
     {
         using var dialog = new FolderBrowserDialog();
         if (!string.IsNullOrEmpty(_store.ScreenshotSaveFolderPath))
@@ -589,18 +526,69 @@ public class SettingsForm : Form
         if (dialog.ShowDialog() == DialogResult.OK)
         {
             _store.ScreenshotSaveFolderPath = dialog.SelectedPath;
-            _store.SaveScreenshotSettings();
-            _folderPathLabel.Text = GetFolderDisplayText();
+            _store.SaveAndNotify();
+            _folderPathLabel.Text = FormatFolderPath();
         }
     }
 
-    private string GetFolderDisplayText()
+    // ── UI synchronisation helpers ───────────────────────────────────────
+
+    // After the store's auto-enable/disable logic fires, push the
+    // canonical state back into the checkboxes without re-triggering events.
+    private void SynchronizeScreenshotControls()
+    {
+        if (_screenshotEnabledCheck.Checked != _store.ScreenshotEnabled)
+            _screenshotEnabledCheck.Checked = _store.ScreenshotEnabled;
+        if (_screenshotSaveToFileCheck.Checked != _store.ScreenshotSaveToFile)
+            _screenshotSaveToFileCheck.Checked = _store.ScreenshotSaveToFile;
+        if (_screenshotCopyToClipboardCheck.Checked != _store.ScreenshotCopyToClipboard)
+            _screenshotCopyToClipboardCheck.Checked = _store.ScreenshotCopyToClipboard;
+    }
+
+    // Highlight the currently selected position button and reset the rest.
+    private void RefreshPositionButtonHighlights()
+    {
+        foreach (var btn in _positionButtons)
+        {
+            if (btn.Tag is not WindowPosition pos) continue;
+            bool selected = _store.Position == pos;
+            btn.BackColor = selected ? Color.DodgerBlue : SystemColors.Control;
+            btn.ForeColor = selected ? Color.White : SystemColors.ControlText;
+        }
+    }
+
+    // Show or hide the screenshot options panel and reflow the language
+    // section and form height accordingly.
+    private void AdjustScreenshotPanelVisibility()
+    {
+        bool visible = _store.ScreenshotEnabled;
+        _screenshotOptionsPanel.Visible = visible;
+
+        // Calculate where the language section starts
+        int languageY = visible
+            ? _screenshotOptionsPanelTop + _screenshotOptionsPanel.Height + 8
+            : _screenshotOptionsPanelTop + 8;
+
+        // Reposition the language header and combo box
+        var langHeader = Controls.Find("_langHeader", false);
+        if (langHeader.Length > 0)
+            langHeader[0].Location = new Point(12, languageY);
+        _languageCombo.Location = new Point(12, languageY + 24);
+
+        // Resize the form to fit the visible content
+        int contentBottom = languageY + 24 + _languageCombo.Height + 12;
+        ClientSize = new Size(404, contentBottom);
+    }
+
+    // Return the folder path for display, or a placeholder if none is set.
+    private string FormatFolderPath()
     {
         return string.IsNullOrEmpty(_store.ScreenshotSaveFolderPath)
             ? Strings.SettingsScreenshotNoFolderSelected
             : _store.ScreenshotSaveFolderPath;
     }
 
+    // Hide instead of closing so the form can be reused without rebuilding.
     protected override void OnFormClosing(FormClosingEventArgs e)
     {
         if (e.CloseReason == CloseReason.UserClosing)

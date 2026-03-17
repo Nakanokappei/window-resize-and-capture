@@ -11,7 +11,7 @@
 
 ## Getting Started
 
-1. Run **WindowResize.exe**. A splash screen appears briefly.
+1. Run **WindowsResizeCapture.exe**. A splash screen appears briefly.
 2. The app icon appears in the **system tray** (notification area at the bottom-right of the taskbar).
 3. Click the tray icon to open the menu.
 

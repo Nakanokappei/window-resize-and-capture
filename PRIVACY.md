@@ -21,7 +21,7 @@ Window Resize for Windows is a system tray utility that resizes application wind
 
 The app stores the following data **only on your local device**:
 
-- **User preferences** — custom window sizes, launch-at-login setting, and screenshot options are saved in a JSON file located at `%APPDATA%\WindowResize\settings.json`
+- **User preferences** — custom window sizes, launch-at-login setting, and screenshot options are saved in a JSON file located at `%APPDATA%\WindowsResizeCapture\settings.json`
 - **Launch at login** — if enabled, a registry entry is created under `HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
 - **Screenshots** — if the screenshot feature is enabled by the user, captured images are saved to a folder chosen by the user and/or copied to the system clipboard. Screenshots are never uploaded or transmitted.
 

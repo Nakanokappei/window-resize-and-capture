@@ -7,7 +7,7 @@
   IgnorableNamespaces="uap rescap desktop">
 
   <Identity
-    Name="WindowResize"
+    Name="WindowsResizeCapture"
     Publisher="CN=CBBEB0B6-F2F8-4A20-93BF-7BB185208944"
     Version="1.6.0.0"
     ProcessorArchitecture="x64" />
@@ -44,8 +44,8 @@
 
   <Applications>
     <Application
-      Id="WindowResize"
-      Executable="WindowResize.exe"
+      Id="WindowsResizeCapture"
+      Executable="WindowsResizeCapture.exe"
       EntryPoint="Windows.FullTrustApplication">
 
       <uap:VisualElements
@@ -64,7 +64,7 @@
         <!-- Auto-start at login (replaces Registry Run key for packaged apps) -->
         <desktop:Extension Category="windows.startupTask">
           <desktop:StartupTask
-            TaskId="WindowResizeStartup"
+            TaskId="WindowsResizeCaptureStartup"
             Enabled="false"
             DisplayName="Window Resize &amp; Capture" />
         </desktop:Extension>

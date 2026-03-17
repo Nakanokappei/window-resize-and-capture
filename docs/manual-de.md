@@ -11,7 +11,7 @@
 
 ## Erste Schritte
 
-1. Starten Sie **WindowResize.exe**. Ein Startbildschirm wird kurz angezeigt.
+1. Starten Sie **WindowsResizeCapture.exe**. Ein Startbildschirm wird kurz angezeigt.
 2. Das App-Symbol erscheint im **Infobereich** (Benachrichtigungsbereich unten rechts in der Taskleiste).
 3. Klicken Sie auf das Infobereich-Symbol, um das Menü zu öffnen.
 

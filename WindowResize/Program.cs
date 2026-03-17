@@ -2,8 +2,10 @@ using System;
 using System.Threading;
 using System.Windows.Forms;
 
-namespace WindowResize;
+namespace WindowsResizeCapture;
 
+// Application entry point. Enforces single-instance via a global mutex,
+// then starts the tray application context that hosts the NotifyIcon.
 static class Program
 {
     private static Mutex? _mutex;
@@ -11,13 +13,14 @@ static class Program
     [STAThread]
     static void Main()
     {
-        const string mutexName = "Global\\WindowResize_SingleInstance_F7A3B2";
+        // Acquire a named mutex to prevent multiple instances from running.
+        // If the mutex already exists, another instance is active — show a
+        // message and exit immediately.
+        const string mutexName = "Global\\WindowsResizeCapture_SingleInstance_F7A3B2";
+        _mutex = new Mutex(true, mutexName, out bool isFirstInstance);
 
-        _mutex = new Mutex(true, mutexName, out bool createdNew);
-
-        if (!createdNew)
+        if (!isFirstInstance)
         {
-            // Already running
             MessageBox.Show(
                 Strings.AlreadyRunningBody,
                 "Window Resize & Capture",
@@ -26,6 +29,8 @@ static class Program
             return;
         }
 
+        // Run the tray application, releasing the mutex on exit regardless
+        // of whether the app exits normally or via an unhandled exception.
         try
         {
             Application.EnableVisualStyles();

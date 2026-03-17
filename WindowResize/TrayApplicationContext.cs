@@ -4,8 +4,11 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace WindowResize;
+namespace WindowsResizeCapture;
 
+// The core application context: hosts the system-tray NotifyIcon and builds
+// the context menu that lets users pick a window and resize it to a preset.
+// Also manages the settings form lifecycle and splash screen.
 public class TrayApplicationContext : ApplicationContext
 {
     private readonly NotifyIcon _notifyIcon;
@@ -13,9 +16,11 @@ public class TrayApplicationContext : ApplicationContext
     private readonly SettingsStore _store = SettingsStore.Shared;
     private SettingsForm? _settingsForm;
 
+    // Initialise the tray icon, build the menu, show the splash screen,
+    // and subscribe to settings changes for live menu rebuilds.
     public TrayApplicationContext()
     {
-        // Apply saved language before building any UI
+        // Apply the saved language before any UI strings are resolved
         _store.InitializeLanguage();
 
         _contextMenu = new ContextMenuStrip { ShowImageMargin = true };
@@ -29,53 +34,53 @@ public class TrayApplicationContext : ApplicationContext
             Text = "Window Resize & Capture"
         };
 
+        // Show the context menu on left-click as well (default is right-click only)
         _notifyIcon.MouseClick += (_, e) =>
         {
             if (e.Button == MouseButtons.Left)
             {
-                // Show context menu on left click too
-                var mi = typeof(NotifyIcon).GetMethod("ShowContextMenu",
+                var showMethod = typeof(NotifyIcon).GetMethod("ShowContextMenu",
                     System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-                mi?.Invoke(_notifyIcon, null);
+                showMethod?.Invoke(_notifyIcon, null);
             }
         };
 
+        // Rebuild the menu whenever settings change (e.g. new preset added)
         _store.SettingsChanged += () =>
         {
             _contextMenu.Items.Clear();
             BuildMenu();
         };
 
-        // Show splash screen briefly
-        var splash = new SplashForm();
-        splash.ShowSplash(1500);
+        // Brief splash screen on startup
+        new SplashForm().ShowSplash(1500);
     }
 
-    // Construct the tray context menu: Resize submenu, Settings, Quit.
+    // ── Menu construction ────────────────────────────────────────────────
+
+    // Build the top-level context menu: Resize submenu, Settings, Quit.
     private void BuildMenu()
     {
+        // The Resize submenu lazily discovers windows when opened
         var resizeItem = new ToolStripMenuItem(Strings.MenuResize);
-
-        // Lazy-load the window list each time the submenu opens
         resizeItem.DropDownOpening += (_, _) =>
         {
             resizeItem.DropDownItems.Clear();
             PopulateWindowList(resizeItem);
         };
 
-        // Placeholder item so WinForms renders the submenu arrow
+        // Placeholder so WinForms renders the submenu arrow before first open
         resizeItem.DropDownItems.Add(new ToolStripMenuItem(Strings.MenuLoading) { Enabled = false });
         _contextMenu.Items.Add(resizeItem);
         _contextMenu.Items.Add(new ToolStripSeparator());
 
-        // Settings
+        // Settings item
         var settingsItem = new ToolStripMenuItem(Strings.MenuSettings);
-        settingsItem.Click += (_, _) => OpenSettings();
+        settingsItem.Click += (_, _) => ShowSettingsForm();
         _contextMenu.Items.Add(settingsItem);
-
         _contextMenu.Items.Add(new ToolStripSeparator());
 
-        // Quit
+        // Quit item
         var quitItem = new ToolStripMenuItem(Strings.MenuQuit);
         quitItem.Click += (_, _) =>
         {
@@ -85,11 +90,12 @@ public class TrayApplicationContext : ApplicationContext
         _contextMenu.Items.Add(quitItem);
     }
 
-    // Enumerate visible windows and add each as a submenu item with its app icon.
-    // When 3+ windows belong to the same app, group them under an app-level submenu.
+    // Enumerate visible windows and add each as a submenu item with its
+    // app icon. When three or more windows belong to the same process,
+    // group them under an app-level parent item.
     private void PopulateWindowList(ToolStripMenuItem parent)
     {
-        var windows = WindowManager.ListWindows();
+        var windows = WindowManager.DiscoverWindows();
 
         if (windows.Count == 0)
         {
@@ -97,152 +103,146 @@ public class TrayApplicationContext : ApplicationContext
             return;
         }
 
-        // Limit menu item width to 1/4 of the primary screen width (matches macOS behaviour)
+        // Layout constants for truncation
         var menuFont = SystemFonts.MenuFont ?? new Font("Segoe UI", 9);
         float maxMenuWidth = Screen.PrimaryScreen!.Bounds.Width / 4.0f;
 
-        // Group windows by process ID
+        // Group windows by owning process
         var groups = windows.GroupBy(w => w.ProcessId).ToList();
-
-        // Determine whether any app has 3+ windows (triggers grouping mode)
         bool useGrouping = groups.Any(g => g.Count() >= 3);
 
-        if (useGrouping)
+        if (!useGrouping)
         {
-            foreach (var group in groups)
-            {
-                var appWindows = group.ToList();
-                string appName = appWindows[0].ProcessName;
-
-                if (appWindows.Count >= 3)
-                {
-                    // Create an app-level parent item with window count
-                    string groupLabel = $"{appName} ({appWindows.Count})";
-                    var groupItem = new ToolStripMenuItem(groupLabel);
-
-                    // Use the first window's icon for the group
-                    if (appWindows[0].AppIcon is { } groupIcon)
-                    {
-                        try
-                        {
-                            groupItem.Image = groupIcon.ToBitmap();
-                            groupItem.ImageScaling = ToolStripItemImageScaling.SizeToFit;
-                        }
-                        catch { }
-                    }
-
-                    // Add each window as a child
-                    foreach (var win in appWindows)
-                    {
-                        string displayName = string.IsNullOrEmpty(win.Title) ? Strings.MenuUntitled : win.Title;
-                        string title = TruncateToFit(displayName, menuFont, maxMenuWidth);
-                        var windowItem = new ToolStripMenuItem(title);
-
-                        PopulateSizeList(windowItem, win);
-                        groupItem.DropDownItems.Add(windowItem);
-                    }
-
-                    parent.DropDownItems.Add(groupItem);
-                }
-                else
-                {
-                    // Fewer than 3 windows from this app: show flat
-                    foreach (var win in appWindows)
-                    {
-                        AddFlatWindowItem(parent, win, menuFont, maxMenuWidth);
-                    }
-                }
-            }
+            // Flat list — every window gets its own top-level item
+            foreach (var window in windows)
+                AddFlatWindowItem(parent, window, menuFont, maxMenuWidth);
+            return;
         }
-        else
+
+        // Grouped mode — cluster windows by process
+        foreach (var group in groups)
         {
-            // No grouping needed: show all windows flat
-            foreach (var win in windows)
+            var appWindows = group.ToList();
+
+            if (appWindows.Count < 3)
             {
-                AddFlatWindowItem(parent, win, menuFont, maxMenuWidth);
+                // Too few windows to justify a group — show flat
+                foreach (var window in appWindows)
+                    AddFlatWindowItem(parent, window, menuFont, maxMenuWidth);
+                continue;
             }
+
+            // Create an app-level parent with window count badge
+            string groupLabel = $"{appWindows[0].ProcessName} ({appWindows.Count})";
+            var groupItem = new ToolStripMenuItem(groupLabel);
+
+            // Use the first window's icon for the group header
+            if (appWindows[0].AppIcon is { } groupIcon)
+            {
+                try
+                {
+                    groupItem.Image = groupIcon.ToBitmap();
+                    groupItem.ImageScaling = ToolStripItemImageScaling.SizeToFit;
+                }
+                catch { }
+            }
+
+            // Each window becomes a child of the group
+            foreach (var window in appWindows)
+            {
+                string displayTitle = string.IsNullOrEmpty(window.Title) ? Strings.MenuUntitled : window.Title;
+                string truncatedTitle = TruncateToFit(displayTitle, menuFont, maxMenuWidth);
+                var windowItem = new ToolStripMenuItem(truncatedTitle);
+                BuildSizeSubmenu(windowItem, window);
+                groupItem.DropDownItems.Add(windowItem);
+            }
+
+            parent.DropDownItems.Add(groupItem);
         }
     }
 
-    // Add a single window as a flat menu item with icon and process name tag.
-    private void AddFlatWindowItem(ToolStripMenuItem parent, WindowInfo win, Font menuFont, float maxMenuWidth)
+    // Create a flat menu item for a single window, showing its icon and
+    // the owning process name as a right-aligned tag.
+    private void AddFlatWindowItem(
+        ToolStripMenuItem parent, WindowInfo window, Font menuFont, float maxMenuWidth)
     {
-        string displayName = string.IsNullOrEmpty(win.Title) ? Strings.MenuUntitled : win.Title;
-        string title = TruncateToFit(displayName, menuFont, maxMenuWidth);
+        string displayTitle = string.IsNullOrEmpty(window.Title) ? Strings.MenuUntitled : window.Title;
+        string truncatedTitle = TruncateToFit(displayTitle, menuFont, maxMenuWidth);
 
-        var windowItem = new ToolStripMenuItem(title);
-        windowItem.ShortcutKeyDisplayString = win.ProcessName;
+        var item = new ToolStripMenuItem(truncatedTitle)
+        {
+            ShortcutKeyDisplayString = window.ProcessName
+        };
 
         // Display the application's icon beside the menu item
-        if (win.AppIcon != null)
+        if (window.AppIcon != null)
         {
             try
             {
-                windowItem.Image = win.AppIcon.ToBitmap();
-                windowItem.ImageScaling = ToolStripItemImageScaling.SizeToFit;
+                item.Image = window.AppIcon.ToBitmap();
+                item.ImageScaling = ToolStripItemImageScaling.SizeToFit;
             }
             catch { }
         }
 
-        // Attach the available preset sizes as a submenu
-        PopulateSizeList(windowItem, win);
-
-        parent.DropDownItems.Add(windowItem);
+        BuildSizeSubmenu(item, window);
+        parent.DropDownItems.Add(item);
     }
 
-    // Add a size menu item for each preset; disable sizes that exceed the window's screen.
-    // When positioning features are active, add a "Current Size" item at the top.
-    private void PopulateSizeList(ToolStripMenuItem parent, WindowInfo win)
+    // Attach preset-size children to a window menu item. Sizes that
+    // exceed the window's current screen are shown but disabled.
+    // When positioning features are active, a "Current Size" item is
+    // prepended to allow repositioning without changing dimensions.
+    private void BuildSizeSubmenu(ToolStripMenuItem parent, WindowInfo window)
     {
-        // Determine which display contains this window and get its resolution
-        var screenSize = GetScreenSizeForWindow(win);
+        // Determine the resolution of the display containing this window
+        var screenBounds = ScreenBoundsForWindow(window);
 
-        // If any positioning feature is active, add a "current size" item
-        // that repositions/brings-to-front without resizing
-        if (_store.HasActivePositioningFeatures)
+        // If any positioning feature is active, offer a "reposition only" item
+        if (_store.IsPositioningActive)
         {
-            var currentSize = new PresetSize(win.Width, win.Height, Strings.MenuCurrentSize);
-            var currentItem = new ToolStripMenuItem($"{win.Width} x {win.Height}");
-            currentItem.ShortcutKeyDisplayString = Strings.MenuCurrentSize;
-            currentItem.Click += (_, _) => PerformResize(win, currentSize);
+            var currentSize = new PresetSize(window.Width, window.Height, Strings.MenuCurrentSize);
+            var currentItem = new ToolStripMenuItem($"{window.Width} x {window.Height}")
+            {
+                ShortcutKeyDisplayString = Strings.MenuCurrentSize
+            };
+            currentItem.Click += (_, _) => PerformResize(window, currentSize);
             parent.DropDownItems.Add(currentItem);
             parent.DropDownItems.Add(new ToolStripSeparator());
         }
 
+        // Add every preset size, disabling those larger than the screen
         foreach (var size in _store.AllSizes)
         {
-            string text = size.DisplayName;
+            bool exceedsScreen = size.Width > screenBounds.Width || size.Height > screenBounds.Height;
 
-            bool exceedsScreen = size.Width > screenSize.Width || size.Height > screenSize.Height;
+            var sizeItem = new ToolStripMenuItem(size.DisplayName) { Enabled = !exceedsScreen };
 
-            var sizeItem = new ToolStripMenuItem(text);
             if (!string.IsNullOrEmpty(size.Label))
                 sizeItem.ShortcutKeyDisplayString = size.Label;
-            sizeItem.Enabled = !exceedsScreen;
 
             if (!exceedsScreen)
-            {
-                sizeItem.Click += (_, _) => PerformResize(win, size);
-            }
+                sizeItem.Click += (_, _) => PerformResize(window, size);
 
             parent.DropDownItems.Add(sizeItem);
         }
     }
 
-    // Execute the resize operation with all behaviour settings applied.
-    private void PerformResize(WindowInfo win, PresetSize size)
+    // ── Actions ──────────────────────────────────────────────────────────
+
+    // Execute the resize with all configured behaviour options, then
+    // capture a screenshot if successful, or show an error dialog.
+    private void PerformResize(WindowInfo window, PresetSize size)
     {
         bool success = WindowManager.ResizeWindow(
-            win, size,
+            window, size,
             bringToFront: _store.BringToFront,
             position: _store.Position,
-            moveToMainScreen: _store.MoveToMainScreen
-        );
+            moveToMainScreen: _store.MoveToMainScreen);
 
         if (success)
         {
-            // Capture a screenshot now that the resize succeeded
-            ScreenshotHelper.CaptureAfterResize(win, size);
+            ScreenshotHelper.CaptureAfterResize(window, size);
         }
         else
         {
@@ -254,15 +254,27 @@ public class TrayApplicationContext : ApplicationContext
         }
     }
 
-    /// <summary>
-    /// Truncates text with "..." so its rendered width does not exceed maxWidth.
-    /// </summary>
+    // Show the settings form, creating it on first use. Reuses the
+    // existing instance (which hides instead of closing) when possible.
+    private void ShowSettingsForm()
+    {
+        if (_settingsForm == null || _settingsForm.IsDisposed)
+            _settingsForm = new SettingsForm();
+
+        _settingsForm.Show();
+        _settingsForm.BringToFront();
+        _settingsForm.Activate();
+    }
+
+    // ── Utility ──────────────────────────────────────────────────────────
+
+    // Shorten text with an ellipsis so its rendered width stays within
+    // maxWidth pixels. Preserves at least 10 characters before giving up.
     private static string TruncateToFit(string text, Font font, float maxWidth)
     {
         if (TextRenderer.MeasureText(text, font).Width <= maxWidth)
             return text;
 
-        // Shorten one character at a time until the text plus ellipsis fits.
         for (int length = text.Length - 1; length >= 10; length--)
         {
             string candidate = text[..length] + "\u2026";
@@ -273,44 +285,27 @@ public class TrayApplicationContext : ApplicationContext
         return text[..10] + "\u2026";
     }
 
-    /// <summary>
-    /// Returns the screen size of the display containing the window's center point.
-    /// </summary>
-    private static Size GetScreenSizeForWindow(WindowInfo win)
+    // Return the pixel dimensions of the display that contains the
+    // centre point of the given window.
+    private static Size ScreenBoundsForWindow(WindowInfo window)
     {
-        var centerPoint = new Point(
-            win.Left + win.Width / 2,
-            win.Top + win.Height / 2
-        );
-
-        var screen = Screen.FromPoint(centerPoint);
-        return screen.Bounds.Size;
+        var centre = new Point(
+            window.Left + window.Width / 2,
+            window.Top + window.Height / 2);
+        return Screen.FromPoint(centre).Bounds.Size;
     }
 
-    private void OpenSettings()
-    {
-        if (_settingsForm == null || _settingsForm.IsDisposed)
-        {
-            _settingsForm = new SettingsForm();
-        }
-
-        _settingsForm.Show();
-        _settingsForm.BringToFront();
-        _settingsForm.Activate();
-    }
-
-    // Load the tray icon from embedded resources, with a drawn fallback.
+    // Load the tray icon from the embedded resource. If the resource is
+    // missing, draw a minimal fallback resize icon.
     private static Icon LoadTrayIcon()
     {
-        // Load icon from embedded resource
         var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-        var stream = assembly.GetManifestResourceStream("WindowResize.Resources.app.ico");
-        if (stream != null)
-        {
-            return new Icon(stream);
-        }
+        var stream = assembly.GetManifestResourceStream("WindowsResizeCapture.Resources.app.ico");
 
-        // Fallback: draw a simple resize icon
+        if (stream != null)
+            return new Icon(stream);
+
+        // Fallback: a simple hand-drawn resize icon
         var bitmap = new Bitmap(16, 16);
         using (var g = Graphics.FromImage(bitmap))
         {
@@ -323,8 +318,7 @@ public class TrayApplicationContext : ApplicationContext
             g.DrawLine(pen, 3, 9, 3, 13);
         }
 
-        var handle = bitmap.GetHicon();
-        return Icon.FromHandle(handle);
+        return Icon.FromHandle(bitmap.GetHicon());
     }
 
     protected override void Dispose(bool disposing)

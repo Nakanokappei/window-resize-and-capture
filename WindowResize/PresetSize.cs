@@ -1,8 +1,11 @@
 using System;
 using System.Text.Json.Serialization;
 
-namespace WindowResize;
+namespace WindowsResizeCapture;
 
+// A window size preset with width, height, and an optional human-readable label
+// (e.g. "Full HD"). Each instance carries a stable GUID for identity in the
+// custom-sizes list.
 public class PresetSize
 {
     [JsonPropertyName("id")]

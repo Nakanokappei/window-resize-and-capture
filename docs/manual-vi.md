@@ -11,7 +11,7 @@
 
 ## Bắt đầu
 
-1. Chạy **WindowResize.exe**. Màn hình khởi động sẽ hiển thị trong giây lát.
+1. Chạy **WindowsResizeCapture.exe**. Màn hình khởi động sẽ hiển thị trong giây lát.
 2. Biểu tượng ứng dụng xuất hiện trong **khay hệ thống** (vùng thông báo ở góc dưới bên phải thanh tác vụ).
 3. Nhấp vào biểu tượng khay để mở menu.
 

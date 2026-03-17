@@ -11,7 +11,7 @@
 
 ## Começando
 
-1. Execute **WindowResize.exe**. Uma tela inicial será exibida brevemente.
+1. Execute **WindowsResizeCapture.exe**. Uma tela inicial será exibida brevemente.
 2. O ícone do aplicativo aparece na **bandeja do sistema** (área de notificação no canto inferior direito da barra de tarefas).
 3. Clique no ícone da bandeja para abrir o menu.
 

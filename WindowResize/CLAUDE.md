@@ -21,12 +21,12 @@ DOTNET=/opt/homebrew/Cellar/dotnet@8/8.0.123/libexec/dotnet
 $DOTNET publish WindowResize.csproj -c Release -r win-x64 --self-contained -p:PublishSingleFile=true
 
 # 出力先
-# WindowResize/bin/Release/net8.0-windows10.0.17763.0/win-x64/publish/WindowResize.exe
+# WindowResize/bin/Release/net8.0-windows10.0.17763.0/win-x64/publish/WindowsResizeCapture.exe
 ```
 
 ## Project Structure
 ```
-Window Resize Windows/           # リポジトリルート (W:\01_Active\Window Resize Windows)
+Window Resize and Capture/       # リポジトリルート (W:\01_Active\Window Resize and Capture)
 ├── README.md                    # GitHub用README
 ├── LICENSE                      # MIT License
 ├── .gitignore
@@ -76,7 +76,7 @@ Window Resize Windows/           # リポジトリルート (W:\01_Active\Window
 - `SetWindowPos` でリサイズ実行（`SWP_NOMOVE | SWP_NOZORDER`）
 
 ### 設定永続化
-- JSON ファイル: `%APPDATA%/WindowResize/settings.json`
+- JSON ファイル: `%APPDATA%/WindowsResizeCapture/settings.json`
 - 自動起動: `HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
 
 ### 多言語対応 (i18n)
@@ -151,7 +151,7 @@ dotnet publish WindowResize/WindowResize.csproj -c Release -r win-x64 --self-con
 
 # 2. Prepare layout (copy publish → msix_layout, move Package/* to root)
 # 3. MakeAppx
-makeappx.exe pack /d msix_layout /p WindowResize.msix /o
+makeappx.exe pack /d msix_layout /p WindowsResizeCapture.msix /o
 
 # Store 提出時は Microsoft が署名するため自己署名不要
 # ローカルテスト時は自己署名 + 開発者モード有効化が必要
@@ -172,14 +172,14 @@ makeappx.exe pack /d msix_layout /p WindowResize.msix /o
 ## 配布方法
 
 ### 1. ZIP (ポータブル)
-`dist/WindowResize-Windows-v{VERSION}.zip` — EXE + README.md + LICENSE を同梱
+`dist/WindowsResizeCapture-Windows-v{VERSION}.zip` — EXE + README.md + LICENSE を同梱
 ```bash
 dotnet publish WindowResize/WindowResize.csproj -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
-# ZIP に WindowResize.exe, README.md, LICENSE を含める
+# ZIP に WindowsResizeCapture.exe, README.md, LICENSE を含める
 ```
 
 ### 2. インストーラ (Inno Setup)
-`dist/WindowResize-Setup-v{VERSION}.exe` — 9言語選択ダイアログ付き
+`dist/WindowsResizeCapture-Setup-v{VERSION}.exe` — 9言語選択ダイアログ付き
 ```bash
 # Inno Setup パス: C:\Users\nakanokappei\AppData\Local\Programs\Inno Setup 6\ISCC.exe
 ISCC.exe installer/WindowResize.iss

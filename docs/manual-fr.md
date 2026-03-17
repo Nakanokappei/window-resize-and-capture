@@ -11,7 +11,7 @@
 
 ## Pour commencer
 
-1. Lancez **WindowResize.exe**. Un écran de démarrage s'affiche brièvement.
+1. Lancez **WindowsResizeCapture.exe**. Un écran de démarrage s'affiche brièvement.
 2. L'icône de l'application apparaît dans la **zone de notification** (en bas à droite de la barre des tâches).
 3. Cliquez sur l'icône pour ouvrir le menu.
 

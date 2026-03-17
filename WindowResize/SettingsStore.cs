@@ -9,9 +9,9 @@ using Microsoft.Win32;
 using Windows.ApplicationModel;
 #endif
 
-namespace WindowResize;
+namespace WindowsResizeCapture;
 
-// 9-position snap anchor for post-resize window placement
+// Nine-position snap anchor for placing a window after resize.
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum WindowPosition
 {
@@ -20,6 +20,10 @@ public enum WindowPosition
     BottomLeft, Bottom, BottomRight
 }
 
+// Thread-safe singleton that persists all user preferences to a JSON file
+// in %APPDATA%/WindowsResizeCapture/settings.json. Also manages the
+// "launch at login" registration via either the Windows registry (standalone
+// EXE) or the UWP StartupTask API (MSIX Store distribution).
 public class SettingsStore
 {
     private static readonly Lazy<SettingsStore> _instance = new(() => new SettingsStore());
@@ -27,7 +31,8 @@ public class SettingsStore
 
     private readonly string _settingsPath;
     private const string RegistryRunKey = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run";
-    private const string AppName = "WindowResize";
+    private const string AppName = "WindowsResizeCapture";
+    private const string StartupTaskId = "WindowsResizeCaptureStartup";
 
     public List<PresetSize> CustomSizes { get; private set; } = new();
 
@@ -36,11 +41,15 @@ public class SettingsStore
     public WindowPosition? Position { get; set; }
     public bool MoveToMainScreen { get; set; }
 
-    // Whether any positioning feature is active (used to show "Current Size" menu item)
-    public bool HasActivePositioningFeatures =>
+    // True when any post-resize positioning feature is enabled, which
+    // determines whether the "Current Size" menu item should appear.
+    public bool IsPositioningActive =>
         BringToFront || Position != null || MoveToMainScreen;
 
-    // Screenshot settings with smart auto-enable/disable logic
+    // Screenshot destination settings with smart auto-toggle logic:
+    //  - Enabling screenshots with no destination auto-enables clipboard.
+    //  - Disabling all destinations auto-disables the master toggle.
+
     private bool _screenshotEnabled;
     public bool ScreenshotEnabled
     {
@@ -48,7 +57,8 @@ public class SettingsStore
         set
         {
             _screenshotEnabled = value;
-            // Auto-enable clipboard if no destination is selected
+
+            // If enabling with no output selected, default to clipboard
             if (value && !ScreenshotSaveToFile && !ScreenshotCopyToClipboard)
                 ScreenshotCopyToClipboard = true;
         }
@@ -61,7 +71,8 @@ public class SettingsStore
         set
         {
             _screenshotSaveToFile = value;
-            // Auto-disable master toggle if no destination remains
+
+            // Turn off the master toggle when no destination remains
             if (!value && !ScreenshotCopyToClipboard)
                 _screenshotEnabled = false;
         }
@@ -76,16 +87,17 @@ public class SettingsStore
         set
         {
             _screenshotCopyToClipboard = value;
-            // Auto-disable master toggle if no destination remains
+
+            // Turn off the master toggle when no destination remains
             if (!value && !ScreenshotSaveToFile)
                 _screenshotEnabled = false;
         }
     }
 
-    // Language override (empty or "system" = system default)
+    // Language override: "system" or an IETF tag (e.g. "ja", "zh-Hans").
     public string AppLanguage { get; set; } = "system";
 
-    // Supported languages for the language picker
+    // All languages shipped with the app, shown in the settings language picker.
     public static readonly (string Code, string NativeName)[] SupportedLanguages =
     {
         ("en", "English"),
@@ -106,10 +118,76 @@ public class SettingsStore
         ("th", "ไทย"),
     };
 
+    // Launch-at-login property that dispatches to the registry or
+    // StartupTask API depending on the deployment model.
     public bool LaunchAtLogin
     {
-        get => GetLaunchAtLogin();
-        set => SetLaunchAtLogin(value);
+        get
+        {
+            // For MSIX packages, query the StartupTask state;
+            // for standalone EXE, check the registry Run key.
+            if (IsPackaged())
+            {
+#if WINDOWS10_0_17763_0_OR_GREATER
+                try
+                {
+                    var task = StartupTask.GetAsync(StartupTaskId).GetAwaiter().GetResult();
+                    return task.State == StartupTaskState.Enabled;
+                }
+                catch { }
+#endif
+                return false;
+            }
+
+            try
+            {
+                using var key = Registry.CurrentUser.OpenSubKey(RegistryRunKey, false);
+                return key?.GetValue(AppName) != null;
+            }
+            catch { return false; }
+        }
+        set
+        {
+            // For MSIX packages, enable/disable via the StartupTask API;
+            // for standalone EXE, write or remove a registry Run key.
+            if (IsPackaged())
+            {
+#if WINDOWS10_0_17763_0_OR_GREATER
+                try
+                {
+                    var task = StartupTask.GetAsync(StartupTaskId).GetAwaiter().GetResult();
+                    if (value)
+                    {
+                        if (task.State == StartupTaskState.Disabled)
+                            task.RequestEnableAsync().GetAwaiter().GetResult();
+                    }
+                    else
+                    {
+                        task.Disable();
+                    }
+                }
+                catch { }
+#endif
+                return;
+            }
+
+            try
+            {
+                using var key = Registry.CurrentUser.OpenSubKey(RegistryRunKey, true);
+                if (key == null) return;
+
+                if (value)
+                {
+                    string exePath = Environment.ProcessPath ?? "";
+                    key.SetValue(AppName, $"\"{exePath}\"");
+                }
+                else
+                {
+                    key.DeleteValue(AppName, false);
+                }
+            }
+            catch { }
+        }
     }
 
     public static readonly List<PresetSize> BuiltInSizes = new()
@@ -128,108 +206,109 @@ public class SettingsStore
         new(800,  600,  "SVGA"),
     };
 
+    // Merged view of built-in presets followed by user-defined custom sizes.
     public List<PresetSize> AllSizes
     {
         get
         {
-            var all = new List<PresetSize>(BuiltInSizes);
-            all.AddRange(CustomSizes);
-            return all;
+            var combined = new List<PresetSize>(BuiltInSizes);
+            combined.AddRange(CustomSizes);
+            return combined;
         }
     }
 
+    // Fired after any setting mutation so the UI can rebuild menus/controls.
     public event Action? SettingsChanged;
 
+    // Private constructor: resolve the settings directory, ensure it exists,
+    // and load persisted data.
     private SettingsStore()
     {
         string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        string appDir = Path.Combine(appData, "WindowResize");
+        string appDir = Path.Combine(appData, "WindowsResizeCapture");
         Directory.CreateDirectory(appDir);
         _settingsPath = Path.Combine(appDir, "settings.json");
         Load();
     }
 
+    // Add a user-defined preset size, persist, and notify listeners.
     public void AddSize(PresetSize size)
     {
         CustomSizes.Add(size);
-        Save();
-        SettingsChanged?.Invoke();
+        SaveAndNotify();
     }
 
+    // Remove a user-defined preset size by ID, persist, and notify listeners.
     public void RemoveSize(PresetSize size)
     {
         CustomSizes.RemoveAll(s => s.Id == size.Id);
-        Save();
-        SettingsChanged?.Invoke();
+        SaveAndNotify();
     }
 
-    public void SaveScreenshotSettings()
+    // Persist the current state and fire the SettingsChanged event.
+    // Called by public mutators after any setting change.
+    public void SaveAndNotify()
     {
         Save();
         SettingsChanged?.Invoke();
     }
 
-    // Save behaviour settings (bring-to-front, position, move-to-main-screen)
-    public void SaveBehaviourSettings()
-    {
-        Save();
-        SettingsChanged?.Invoke();
-    }
-
-    // Apply language override and restart the app
+    // Apply a language override, persist, and update the resource culture
+    // so that subsequent Strings.* lookups use the new language.
     public void ApplyLanguage(string languageCode)
     {
         AppLanguage = languageCode;
         Save();
 
+        // "system" or empty means follow the OS locale
         if (languageCode == "system" || string.IsNullOrEmpty(languageCode))
-        {
             Strings.Culture = null;
-        }
         else
-        {
             Strings.Culture = new CultureInfo(languageCode);
-        }
     }
 
-    // Set the resource culture on startup based on saved language
+    // On startup, set the resource culture to the saved language so the
+    // first UI strings already appear in the correct language.
     public void InitializeLanguage()
     {
         if (!string.IsNullOrEmpty(AppLanguage) && AppLanguage != "system")
-        {
             Strings.Culture = new CultureInfo(AppLanguage);
-        }
     }
 
+    // Read settings from the JSON file into this instance's properties.
+    // Uses backing fields for screenshot booleans to avoid triggering the
+    // auto-enable/disable logic during deserialization.
     private void Load()
     {
         try
         {
-            if (File.Exists(_settingsPath))
-            {
-                string json = File.ReadAllText(_settingsPath);
-                var data = JsonSerializer.Deserialize<SettingsData>(json);
-                if (data?.CustomSizes != null)
-                    CustomSizes = data.CustomSizes;
+            if (!File.Exists(_settingsPath))
+                return;
 
-                // Load behaviour settings
-                BringToFront = data?.BringToFront ?? true;
-                Position = data?.Position;
-                MoveToMainScreen = data?.MoveToMainScreen ?? false;
+            string json = File.ReadAllText(_settingsPath);
+            var data = JsonSerializer.Deserialize<SettingsData>(json);
 
-                // Load screenshot settings (use backing fields to avoid auto-logic during load)
-                _screenshotEnabled = data?.ScreenshotEnabled ?? false;
-                _screenshotSaveToFile = data?.ScreenshotSaveToFile ?? true;
-                ScreenshotSaveFolderPath = data?.ScreenshotSaveFolderPath ?? "";
-                _screenshotCopyToClipboard = data?.ScreenshotCopyToClipboard ?? false;
+            if (data?.CustomSizes != null)
+                CustomSizes = data.CustomSizes;
 
-                // Load language
-                AppLanguage = data?.AppLanguage ?? "system";
-            }
+            // Behaviour settings
+            BringToFront = data?.BringToFront ?? true;
+            Position = data?.Position;
+            MoveToMainScreen = data?.MoveToMainScreen ?? false;
+
+            // Screenshot settings (bypass property setters to avoid auto-logic)
+            _screenshotEnabled = data?.ScreenshotEnabled ?? false;
+            _screenshotSaveToFile = data?.ScreenshotSaveToFile ?? true;
+            ScreenshotSaveFolderPath = data?.ScreenshotSaveFolderPath ?? "";
+            _screenshotCopyToClipboard = data?.ScreenshotCopyToClipboard ?? false;
+
+            // Language
+            AppLanguage = data?.AppLanguage ?? "system";
         }
         catch { }
     }
 
+    // Serialize all current settings to JSON and write to disk.
     private void Save()
     {
         try
@@ -252,15 +331,13 @@ public class SettingsStore
         catch { }
     }
 
-    /// <summary>
-    /// Detects whether the app is running as a packaged MSIX app.
-    /// </summary>
+    // Detect whether the app is running inside an MSIX package.
+    // Package.Current throws when the process is not packaged.
     public static bool IsPackaged()
     {
 #if WINDOWS10_0_17763_0_OR_GREATER
         try
         {
-            // Package.Current throws if not packaged
             _ = Package.Current.Id;
             return true;
         }
@@ -269,88 +346,7 @@ public class SettingsStore
         return false;
     }
 
-    private bool GetLaunchAtLogin()
-    {
-        if (IsPackaged())
-            return GetLaunchAtLoginPackaged();
-        return GetLaunchAtLoginRegistry();
-    }
-
-    private void SetLaunchAtLogin(bool enabled)
-    {
-        if (IsPackaged())
-            SetLaunchAtLoginPackaged(enabled);
-        else
-            SetLaunchAtLoginRegistry(enabled);
-    }
-
-    // --- Registry-based (non-packaged / EXE distribution) ---
-
-    private bool GetLaunchAtLoginRegistry()
-    {
-        try
-        {
-            using var key = Registry.CurrentUser.OpenSubKey(RegistryRunKey, false);
-            return key?.GetValue(AppName) != null;
-        }
-        catch { return false; }
-    }
-
-    private void SetLaunchAtLoginRegistry(bool enabled)
-    {
-        try
-        {
-            using var key = Registry.CurrentUser.OpenSubKey(RegistryRunKey, true);
-            if (key == null) return;
-
-            if (enabled)
-            {
-                string exePath = Environment.ProcessPath ?? "";
-                key.SetValue(AppName, $"\"{exePath}\"");
-            }
-            else
-            {
-                key.DeleteValue(AppName, false);
-            }
-        }
-        catch { }
-    }
-
-    // --- StartupTask-based (packaged / MSIX Store distribution) ---
-
-    private bool GetLaunchAtLoginPackaged()
-    {
-#if WINDOWS10_0_17763_0_OR_GREATER
-        try
-        {
-            var task = StartupTask.GetAsync("WindowResizeStartup").GetAwaiter().GetResult();
-            return task.State == StartupTaskState.Enabled;
-        }
-        catch { }
-#endif
-        return false;
-    }
-
-    private void SetLaunchAtLoginPackaged(bool enabled)
-    {
-#if WINDOWS10_0_17763_0_OR_GREATER
-        try
-        {
-            var task = StartupTask.GetAsync("WindowResizeStartup").GetAwaiter().GetResult();
-            if (enabled)
-            {
-                if (task.State == StartupTaskState.Disabled)
-                    task.RequestEnableAsync().GetAwaiter().GetResult();
-            }
-            else
-            {
-                task.Disable();
-            }
-        }
-        catch { }
-#endif
-    }
-
+    // JSON-serializable DTO mirroring all persisted fields.
     private class SettingsData
     {
         public List<PresetSize>? CustomSizes { get; set; }

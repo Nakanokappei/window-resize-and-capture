@@ -5,7 +5,7 @@
 #define MyAppVersion "1.6"
 #define MyAppPublisher "Kappei Nakano"
 #define MyAppURL "https://github.com/Nakanokappei/window-resize-and-capture"
-#define MyAppExeName "WindowResize.exe"
+#define MyAppExeName "WindowsResizeCapture.exe"
 
 [Setup]
 AppId={{B7A3F2E1-9C4D-4E5F-8A6B-1D2E3F4A5B6C}
@@ -19,7 +19,7 @@ DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 LicenseFile=..\LICENSE
 OutputDir=..\dist
-OutputBaseFilename=WindowResize-Setup-v{#MyAppVersion}
+OutputBaseFilename=WindowsResizeCapture-Setup-v{#MyAppVersion}
 SetupIconFile=..\WindowResize\Resources\app.ico
 Compression=lzma2/ultra64
 SolidCompression=yes
@@ -72,7 +72,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Name: "launchatlogin"; Description: "Start with Windows"; GroupDescription: "Other:"
 
 [Files]
-Source: "..\WindowResize\bin\Release\net8.0-windows10.0.17763.0\win-x64\publish\WindowResize.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\WindowResize\bin\Release\net8.0-windows10.0.17763.0\win-x64\publish\WindowsResizeCapture.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\README.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 ; User manuals
@@ -99,7 +99,7 @@ Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Registry]
-Root: HKCU; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "WindowResize"; ValueData: """{app}\{#MyAppExeName}"""; Flags: uninsdeletevalue; Tasks: launchatlogin
+Root: HKCU; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "WindowsResizeCapture"; ValueData: """{app}\{#MyAppExeName}"""; Flags: uninsdeletevalue; Tasks: launchatlogin
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent

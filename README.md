@@ -24,7 +24,7 @@ No .NET runtime installation required — the exe is self-contained.
 
 ## Usage
 
-1. Run `WindowResize.exe`
+1. Run `WindowsResizeCapture.exe`
 2. A splash screen appears briefly, then the app sits in the system tray
 3. Click the tray icon to open the menu
 4. Select **Resize** → choose a window → select a preset size
@@ -60,7 +60,7 @@ cd WindowResize
 dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true
 ```
 
-Output: `bin/Release/net8.0-windows/win-x64/publish/WindowResize.exe`
+Output: `bin/Release/net8.0-windows/win-x64/publish/WindowsResizeCapture.exe`
 
 ### Cross-compile from macOS
 

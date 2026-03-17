@@ -66,19 +66,19 @@ jobs:
                     Select-Object -Last 1
           Write-Host "Using: $($sdkBin.FullName)"
 
-          & $sdkBin.FullName pack /d msix_layout /p WindowResize.msix /o
+          & $sdkBin.FullName pack /d msix_layout /p WindowsResizeCapture.msix /o
           if ($LASTEXITCODE -ne 0) { throw "MakeAppx failed" }
 
-          Write-Host "MSIX size: $((Get-Item WindowResize.msix).Length / 1MB) MB"
+          Write-Host "MSIX size: $((Get-Item WindowsResizeCapture.msix).Length / 1MB) MB"
 
       - name: Upload MSIX artifact
         uses: actions/upload-artifact@v4
         with:
-          name: WindowResize-msix
-          path: WindowResize.msix
+          name: WindowsResizeCapture-msix
+          path: WindowsResizeCapture.msix
 
       - name: Publish to GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: WindowResize.msix
+          files: WindowsResizeCapture.msix

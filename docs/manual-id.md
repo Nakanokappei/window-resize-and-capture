@@ -11,7 +11,7 @@
 
 ## Memulai
 
-1. Jalankan **WindowResize.exe**. Layar pembuka akan muncul sebentar.
+1. Jalankan **WindowsResizeCapture.exe**. Layar pembuka akan muncul sebentar.
 2. Ikon aplikasi muncul di **system tray** (area notifikasi di kanan bawah taskbar).
 3. Klik ikon tray untuk membuka menu.
 
