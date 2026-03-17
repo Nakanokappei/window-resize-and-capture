@@ -11,6 +11,11 @@
     <ApplicationIcon>Resources\app.ico</ApplicationIcon>
     <!-- Suppress platform compatibility warnings for WinRT APIs guarded by IsPackaged() -->
     <NoWarn>$(NoWarn);CA1416</NoWarn>
+    <!-- Compress the single-file bundle to reduce download size.
+         PublishTrimmed is NOT used: WinForms relies heavily on COM interop
+         and UI Automation types that the IL trimmer cannot safely analyze,
+         causing TypeLoadException at runtime (UiaCore, ComponentManager). -->
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>
 
   <!-- UseWindowsForms requires Windows Desktop SDK which isn't on macOS.

@@ -12,7 +12,7 @@ using Windows.ApplicationModel;
 namespace WindowsResizeCapture;
 
 // Nine-position snap anchor for placing a window after resize.
-[JsonConverter(typeof(JsonStringEnumConverter))]
+[JsonConverter(typeof(JsonStringEnumConverter<WindowPosition>))]
 public enum WindowPosition
 {
     TopLeft, Top, TopRight,
@@ -24,7 +24,7 @@ public enum WindowPosition
 // in %APPDATA%/WindowsResizeCapture/settings.json. Also manages the
 // "launch at login" registration via either the Windows registry (standalone
 // EXE) or the UWP StartupTask API (MSIX Store distribution).
-public class SettingsStore
+public partial class SettingsStore
 {
     private static readonly Lazy<SettingsStore> _instance = new(() => new SettingsStore());
     public static SettingsStore Shared => _instance.Value;
@@ -286,7 +286,7 @@ public class SettingsStore
                 return;
 
             string json = File.ReadAllText(_settingsPath);
-            var data = JsonSerializer.Deserialize<SettingsData>(json);
+            var data = JsonSerializer.Deserialize(json, SettingsJsonContext.Default.SettingsData);
 
             if (data?.CustomSizes != null)
                 CustomSizes = data.CustomSizes;
@@ -325,7 +325,7 @@ public class SettingsStore
                 ScreenshotCopyToClipboard = ScreenshotCopyToClipboard,
                 AppLanguage = AppLanguage
             };
-            string json = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
+            string json = JsonSerializer.Serialize(data, SettingsJsonContext.Default.SettingsData);
             File.WriteAllText(_settingsPath, json);
         }
         catch { }
@@ -359,4 +359,10 @@ public class SettingsStore
         public bool ScreenshotCopyToClipboard { get; set; }
         public string AppLanguage { get; set; } = "system";
     }
+
+    // Source-generated JSON serializer context for trim-safe serialization.
+    // Eliminates reflection-based type discovery that the trimmer cannot analyze.
+    [JsonSerializable(typeof(SettingsData))]
+    [JsonSourceGenerationOptions(WriteIndented = true)]
+    private partial class SettingsJsonContext : JsonSerializerContext { }
 }
