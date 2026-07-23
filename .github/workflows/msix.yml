@@ -48,11 +48,14 @@ jobs:
           # Remove the nested Package directory
           Remove-Item -Path "$layoutDir/Package" -Recurse -Force
 
-          # Patch version from tag (if tag push)
+          # Patch version from tag (if tag push). Note: -creplace keeps the
+          # match case-sensitive so the XML declaration's version="1.0"
+          # attribute is left untouched (a -replace here corrupted it and
+          # broke every previous tag build).
           if ($env:GITHUB_REF -match '^refs/tags/v(\d+\.\d+)') {
             $version = $Matches[1] + ".0.0"
             $manifest = "$layoutDir/AppxManifest.xml"
-            (Get-Content $manifest) -replace 'Version="[\d.]+"', "Version=`"$version`"" |
+            (Get-Content $manifest) -creplace 'Version="[\d.]+"', "Version=`"$version`"" |
               Set-Content $manifest
             Write-Host "Patched manifest version to $version"
           }
