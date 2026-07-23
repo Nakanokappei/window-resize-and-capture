@@ -63,4 +63,13 @@
   <data name="MenuCurrentSize" xml:space="preserve"><value>वर्तमान आकार</value></data>
   <data name="SettingsGeneral" xml:space="preserve"><value>सामान्य</value></data>
   <data name="SettingsName" xml:space="preserve"><value>नाम</value></data>
+  <data name="SettingsPositionTopLeft" xml:space="preserve"><value>ऊपर बाएँ</value></data>
+  <data name="SettingsPositionTop" xml:space="preserve"><value>ऊपर</value></data>
+  <data name="SettingsPositionTopRight" xml:space="preserve"><value>ऊपर दाएँ</value></data>
+  <data name="SettingsPositionLeft" xml:space="preserve"><value>बाएँ</value></data>
+  <data name="SettingsPositionCenter" xml:space="preserve"><value>मध्य</value></data>
+  <data name="SettingsPositionRight" xml:space="preserve"><value>दाएँ</value></data>
+  <data name="SettingsPositionBottomLeft" xml:space="preserve"><value>नीचे बाएँ</value></data>
+  <data name="SettingsPositionBottom" xml:space="preserve"><value>नीचे</value></data>
+  <data name="SettingsPositionBottomRight" xml:space="preserve"><value>नीचे दाएँ</value></data>
 </root>

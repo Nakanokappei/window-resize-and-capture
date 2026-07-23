@@ -63,4 +63,13 @@
   <data name="MenuCurrentSize" xml:space="preserve"><value>현재 크기</value></data>
   <data name="SettingsGeneral" xml:space="preserve"><value>일반</value></data>
   <data name="SettingsName" xml:space="preserve"><value>이름</value></data>
+  <data name="SettingsPositionTopLeft" xml:space="preserve"><value>왼쪽 위</value></data>
+  <data name="SettingsPositionTop" xml:space="preserve"><value>위</value></data>
+  <data name="SettingsPositionTopRight" xml:space="preserve"><value>오른쪽 위</value></data>
+  <data name="SettingsPositionLeft" xml:space="preserve"><value>왼쪽</value></data>
+  <data name="SettingsPositionCenter" xml:space="preserve"><value>가운데</value></data>
+  <data name="SettingsPositionRight" xml:space="preserve"><value>오른쪽</value></data>
+  <data name="SettingsPositionBottomLeft" xml:space="preserve"><value>왼쪽 아래</value></data>
+  <data name="SettingsPositionBottom" xml:space="preserve"><value>아래</value></data>
+  <data name="SettingsPositionBottomRight" xml:space="preserve"><value>오른쪽 아래</value></data>
 </root>

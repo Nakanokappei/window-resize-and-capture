@@ -63,4 +63,13 @@
   <data name="MenuCurrentSize" xml:space="preserve"><value>Kích thước hiện tại</value></data>
   <data name="SettingsGeneral" xml:space="preserve"><value>Chung</value></data>
   <data name="SettingsName" xml:space="preserve"><value>Tên</value></data>
+  <data name="SettingsPositionTopLeft" xml:space="preserve"><value>Trên bên trái</value></data>
+  <data name="SettingsPositionTop" xml:space="preserve"><value>Trên</value></data>
+  <data name="SettingsPositionTopRight" xml:space="preserve"><value>Trên bên phải</value></data>
+  <data name="SettingsPositionLeft" xml:space="preserve"><value>Trái</value></data>
+  <data name="SettingsPositionCenter" xml:space="preserve"><value>Giữa</value></data>
+  <data name="SettingsPositionRight" xml:space="preserve"><value>Phải</value></data>
+  <data name="SettingsPositionBottomLeft" xml:space="preserve"><value>Dưới bên trái</value></data>
+  <data name="SettingsPositionBottom" xml:space="preserve"><value>Dưới</value></data>
+  <data name="SettingsPositionBottomRight" xml:space="preserve"><value>Dưới bên phải</value></data>
 </root>

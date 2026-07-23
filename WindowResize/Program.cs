@@ -33,6 +33,10 @@ static class Program
         // of whether the app exits normally or via an unhandled exception.
         try
         {
+            // Declare DPI awareness so forms with AutoScaleMode.Dpi scale
+            // their layout instead of being bitmap-stretched (blurry) at
+            // high display scaling
+            Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new TrayApplicationContext());

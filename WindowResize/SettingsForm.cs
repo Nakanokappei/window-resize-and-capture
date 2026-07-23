@@ -30,14 +30,20 @@ public class SettingsForm : Form
     private Button _chooseFolderButton = null!;
     private Label _folderPathLabel = null!;
 
-    // Behaviour tab controls
+    // Behaviour tab controls. The position tiles are checkbox-styled
+    // buttons so UI Automation exposes their checked state to screen
+    // readers (a plain Button has no toggle state).
     private CheckBox _bringToFrontCheck = null!;
     private CheckBox _moveToMainScreenCheck = null!;
-    private Button[] _positionButtons = null!;
+    private CheckBox[] _positionButtons = null!;
 
     // Wingdings 3 arrow glyphs mapped to the 3x3 position grid
     // (TL, T, TR, L, C, R, BL, B, BR)
     private static readonly string[] PositionGlyphs = { "å", "ã", "æ", "á", "é", "â", "ç", "ä", "è" };
+
+    // Selected-tile background: the Windows accent blue, which keeps the
+    // white glyph above the 4.5:1 contrast threshold (DodgerBlue did not).
+    private static readonly Color SelectedTileColor = Color.FromArgb(0, 99, 177);
 
     // WindowPosition enum values in the same grid order as the glyphs
     private static readonly WindowPosition[] PositionOrder =
@@ -64,6 +70,11 @@ public class SettingsForm : Form
         MaximizeBox = false;
         StartPosition = FormStartPosition.CenterScreen;
         ShowInTaskbar = true;
+        // Scale the fixed pixel layout with the monitor DPI so the window
+        // stays usable at 200%+ display scaling. The layout below is
+        // designed at 96 DPI.
+        AutoScaleDimensions = new SizeF(96F, 96F);
+        AutoScaleMode = AutoScaleMode.Dpi;
         ClientSize = new Size(420, 356);
 
         var tabs = new TabControl
@@ -96,7 +107,8 @@ public class SettingsForm : Form
             Location = new Point(8, 20),
             Size = new Size(364, 70),
             SelectionMode = SelectionMode.None,
-            BorderStyle = BorderStyle.None
+            BorderStyle = BorderStyle.None,
+            AccessibleName = Strings.SettingsBuiltIn
         };
         builtInGroup.Controls.Add(_builtInList);
         tab.Controls.Add(builtInGroup);
@@ -113,7 +125,8 @@ public class SettingsForm : Form
         {
             Location = new Point(8, 20),
             Size = new Size(280, 55),
-            BorderStyle = BorderStyle.FixedSingle
+            BorderStyle = BorderStyle.FixedSingle,
+            AccessibleName = Strings.SettingsCustom
         };
         customGroup.Controls.Add(_customList);
 
@@ -140,7 +153,12 @@ public class SettingsForm : Form
             AutoSize = true
         });
 
-        _widthBox = new TextBox { Location = new Point(64, 84), Size = new Size(60, 23) };
+        _widthBox = new TextBox
+        {
+            Location = new Point(64, 84),
+            Size = new Size(60, 23),
+            AccessibleName = Strings.SettingsWidth
+        };
         customGroup.Controls.Add(_widthBox);
 
         customGroup.Controls.Add(new Label
@@ -157,7 +175,12 @@ public class SettingsForm : Form
             AutoSize = true
         });
 
-        _heightBox = new TextBox { Location = new Point(204, 84), Size = new Size(60, 23) };
+        _heightBox = new TextBox
+        {
+            Location = new Point(204, 84),
+            Size = new Size(60, 23),
+            AccessibleName = Strings.SettingsHeight
+        };
         customGroup.Controls.Add(_heightBox);
 
         customGroup.Controls.Add(new Label
@@ -167,7 +190,12 @@ public class SettingsForm : Form
             AutoSize = true
         });
 
-        _nameBox = new TextBox { Location = new Point(64, 116), Size = new Size(200, 23) };
+        _nameBox = new TextBox
+        {
+            Location = new Point(64, 116),
+            Size = new Size(200, 23),
+            AccessibleName = Strings.SettingsName
+        };
         customGroup.Controls.Add(_nameBox);
 
         _addButton = new Button
@@ -258,12 +286,14 @@ public class SettingsForm : Form
         _chooseFolderButton.Click += OnChooseScreenshotFolder;
         _screenshotOptionsPanel.Controls.Add(_chooseFolderButton);
 
+        // GrayText keeps at least AA contrast in the default theme and
+        // adapts to high-contrast themes, unlike a hard-coded gray
         _folderPathLabel = new Label
         {
             Text = FormatFolderPath(),
             Location = new Point(_chooseFolderButton.Right + 8, panelY + 4),
             Size = new Size(220, 20),
-            ForeColor = Color.Gray,
+            ForeColor = SystemColors.GrayText,
             AutoEllipsis = true
         };
         _screenshotOptionsPanel.Controls.Add(_folderPathLabel);
@@ -332,19 +362,33 @@ public class SettingsForm : Form
             AutoSize = true
         });
 
+        // Screen readers cannot pronounce the Wingdings glyphs, so each
+        // tile carries a localized position name as its UIA name
+        string[] positionNames =
+        {
+            Strings.SettingsPositionTopLeft, Strings.SettingsPositionTop, Strings.SettingsPositionTopRight,
+            Strings.SettingsPositionLeft, Strings.SettingsPositionCenter, Strings.SettingsPositionRight,
+            Strings.SettingsPositionBottomLeft, Strings.SettingsPositionBottom, Strings.SettingsPositionBottomRight
+        };
+
         int gridTop = 96;
         int buttonSize = 32;
         int buttonGap = 2;
-        _positionButtons = new Button[9];
+        _positionButtons = new CheckBox[9];
 
         var wingdings3 = new Font("Wingdings 3", 10f);
         for (int i = 0; i < 9; i++)
         {
-            // Arrange the nine buttons as three rows of three tiles
+            // Arrange the nine tiles as three rows of three. AutoCheck is
+            // off because the checked state mirrors the store: clicking
+            // raises Click, the store updates, and the refresh below sets
+            // Checked on every tile (only one may be active).
             int col = i % 3;
             int row = i / 3;
-            var btn = new Button
+            var btn = new CheckBox
             {
+                Appearance = Appearance.Button,
+                AutoCheck = false,
                 Size = new Size(buttonSize, buttonSize),
                 Location = new Point(
                     12 + col * (buttonSize + buttonGap),
@@ -354,7 +398,8 @@ public class SettingsForm : Form
                 Font = wingdings3,
                 Text = PositionGlyphs[i],
                 TextAlign = ContentAlignment.MiddleCenter,
-                Padding = Padding.Empty
+                Padding = Padding.Empty,
+                AccessibleName = positionNames[i]
             };
             btn.FlatAppearance.BorderSize = 1;
             btn.Click += OnPositionButtonClick;
@@ -442,7 +487,7 @@ public class SettingsForm : Form
     // position clears it (no snap).
     private void OnPositionButtonClick(object? sender, EventArgs e)
     {
-        if (sender is not Button btn || btn.Tag is not WindowPosition pos)
+        if (sender is not CheckBox btn || btn.Tag is not WindowPosition pos)
             return;
 
         _store.Position = (_store.Position == pos) ? null : pos;
@@ -479,14 +524,16 @@ public class SettingsForm : Form
             _screenshotCopyToClipboardCheck.Checked = _store.ScreenshotCopyToClipboard;
     }
 
-    // Highlight the currently selected position button and reset the rest.
+    // Highlight the currently selected position tile and reset the rest.
+    // Checked feeds the UIA toggle state; the colours are the visual cue.
     private void RefreshPositionButtonHighlights()
     {
         foreach (var btn in _positionButtons)
         {
             if (btn.Tag is not WindowPosition pos) continue;
             bool selected = _store.Position == pos;
-            btn.BackColor = selected ? Color.DodgerBlue : SystemColors.Control;
+            btn.Checked = selected;
+            btn.BackColor = selected ? SelectedTileColor : SystemColors.Control;
             btn.ForeColor = selected ? Color.White : SystemColors.ControlText;
         }
     }

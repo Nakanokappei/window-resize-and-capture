@@ -146,4 +146,31 @@
   <data name="SettingsName" xml:space="preserve">
     <value>Name</value>
   </data>
+  <data name="SettingsPositionTopLeft" xml:space="preserve">
+    <value>Top left</value>
+  </data>
+  <data name="SettingsPositionTop" xml:space="preserve">
+    <value>Top</value>
+  </data>
+  <data name="SettingsPositionTopRight" xml:space="preserve">
+    <value>Top right</value>
+  </data>
+  <data name="SettingsPositionLeft" xml:space="preserve">
+    <value>Left</value>
+  </data>
+  <data name="SettingsPositionCenter" xml:space="preserve">
+    <value>Center</value>
+  </data>
+  <data name="SettingsPositionRight" xml:space="preserve">
+    <value>Right</value>
+  </data>
+  <data name="SettingsPositionBottomLeft" xml:space="preserve">
+    <value>Bottom left</value>
+  </data>
+  <data name="SettingsPositionBottom" xml:space="preserve">
+    <value>Bottom</value>
+  </data>
+  <data name="SettingsPositionBottomRight" xml:space="preserve">
+    <value>Bottom right</value>
+  </data>
 </root>

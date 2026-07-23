@@ -63,4 +63,13 @@
   <data name="MenuCurrentSize" xml:space="preserve"><value>Ukuran saat ini</value></data>
   <data name="SettingsGeneral" xml:space="preserve"><value>Umum</value></data>
   <data name="SettingsName" xml:space="preserve"><value>Nama</value></data>
+  <data name="SettingsPositionTopLeft" xml:space="preserve"><value>Kiri atas</value></data>
+  <data name="SettingsPositionTop" xml:space="preserve"><value>Atas</value></data>
+  <data name="SettingsPositionTopRight" xml:space="preserve"><value>Kanan atas</value></data>
+  <data name="SettingsPositionLeft" xml:space="preserve"><value>Kiri</value></data>
+  <data name="SettingsPositionCenter" xml:space="preserve"><value>Tengah</value></data>
+  <data name="SettingsPositionRight" xml:space="preserve"><value>Kanan</value></data>
+  <data name="SettingsPositionBottomLeft" xml:space="preserve"><value>Kiri bawah</value></data>
+  <data name="SettingsPositionBottom" xml:space="preserve"><value>Bawah</value></data>
+  <data name="SettingsPositionBottomRight" xml:space="preserve"><value>Kanan bawah</value></data>
 </root>

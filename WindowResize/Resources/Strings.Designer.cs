@@ -108,6 +108,60 @@ namespace WindowsResizeCapture {
             }
         }
 
+        internal static string SettingsPositionTopLeft {
+            get {
+                return ResourceManager.GetString("SettingsPositionTopLeft", resourceCulture) ?? "Top left";
+            }
+        }
+
+        internal static string SettingsPositionTop {
+            get {
+                return ResourceManager.GetString("SettingsPositionTop", resourceCulture) ?? "Top";
+            }
+        }
+
+        internal static string SettingsPositionTopRight {
+            get {
+                return ResourceManager.GetString("SettingsPositionTopRight", resourceCulture) ?? "Top right";
+            }
+        }
+
+        internal static string SettingsPositionLeft {
+            get {
+                return ResourceManager.GetString("SettingsPositionLeft", resourceCulture) ?? "Left";
+            }
+        }
+
+        internal static string SettingsPositionCenter {
+            get {
+                return ResourceManager.GetString("SettingsPositionCenter", resourceCulture) ?? "Center";
+            }
+        }
+
+        internal static string SettingsPositionRight {
+            get {
+                return ResourceManager.GetString("SettingsPositionRight", resourceCulture) ?? "Right";
+            }
+        }
+
+        internal static string SettingsPositionBottomLeft {
+            get {
+                return ResourceManager.GetString("SettingsPositionBottomLeft", resourceCulture) ?? "Bottom left";
+            }
+        }
+
+        internal static string SettingsPositionBottom {
+            get {
+                return ResourceManager.GetString("SettingsPositionBottom", resourceCulture) ?? "Bottom";
+            }
+        }
+
+        internal static string SettingsPositionBottomRight {
+            get {
+                return ResourceManager.GetString("SettingsPositionBottomRight", resourceCulture) ?? "Bottom right";
+            }
+        }
+
         internal static string SettingsName {
             get {
                 return ResourceManager.GetString("SettingsName", resourceCulture) ?? "Name";

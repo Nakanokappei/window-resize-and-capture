@@ -63,4 +63,13 @@
   <data name="MenuCurrentSize" xml:space="preserve"><value>Dimensione attuale</value></data>
   <data name="SettingsGeneral" xml:space="preserve"><value>Generale</value></data>
   <data name="SettingsName" xml:space="preserve"><value>Nome</value></data>
+  <data name="SettingsPositionTopLeft" xml:space="preserve"><value>In alto a sinistra</value></data>
+  <data name="SettingsPositionTop" xml:space="preserve"><value>In alto</value></data>
+  <data name="SettingsPositionTopRight" xml:space="preserve"><value>In alto a destra</value></data>
+  <data name="SettingsPositionLeft" xml:space="preserve"><value>Sinistra</value></data>
+  <data name="SettingsPositionCenter" xml:space="preserve"><value>Centro</value></data>
+  <data name="SettingsPositionRight" xml:space="preserve"><value>Destra</value></data>
+  <data name="SettingsPositionBottomLeft" xml:space="preserve"><value>In basso a sinistra</value></data>
+  <data name="SettingsPositionBottom" xml:space="preserve"><value>In basso</value></data>
+  <data name="SettingsPositionBottomRight" xml:space="preserve"><value>In basso a destra</value></data>
 </root>

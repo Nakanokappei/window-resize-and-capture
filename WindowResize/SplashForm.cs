@@ -16,6 +16,11 @@ public class SplashForm : Form
     // Configure the form as a fixed-size, borderless overlay centred on screen.
     public SplashForm()
     {
+        // The content is owner-drawn, so give the form itself a name that
+        // screen readers can announce
+        Text = "Window Resize & Capture";
+        AccessibleName = "Window Resize & Capture";
+
         FormBorderStyle = FormBorderStyle.None;
         StartPosition = FormStartPosition.CenterScreen;
         Size = new Size(380, 200);

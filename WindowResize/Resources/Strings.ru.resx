@@ -63,4 +63,13 @@
   <data name="MenuCurrentSize" xml:space="preserve"><value>Текущий размер</value></data>
   <data name="SettingsGeneral" xml:space="preserve"><value>Общие</value></data>
   <data name="SettingsName" xml:space="preserve"><value>Название</value></data>
+  <data name="SettingsPositionTopLeft" xml:space="preserve"><value>Слева вверху</value></data>
+  <data name="SettingsPositionTop" xml:space="preserve"><value>Сверху</value></data>
+  <data name="SettingsPositionTopRight" xml:space="preserve"><value>Справа вверху</value></data>
+  <data name="SettingsPositionLeft" xml:space="preserve"><value>Слева</value></data>
+  <data name="SettingsPositionCenter" xml:space="preserve"><value>По центру</value></data>
+  <data name="SettingsPositionRight" xml:space="preserve"><value>Справа</value></data>
+  <data name="SettingsPositionBottomLeft" xml:space="preserve"><value>Слева внизу</value></data>
+  <data name="SettingsPositionBottom" xml:space="preserve"><value>Снизу</value></data>
+  <data name="SettingsPositionBottomRight" xml:space="preserve"><value>Справа внизу</value></data>
 </root>

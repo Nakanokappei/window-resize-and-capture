@@ -63,4 +63,13 @@
   <data name="MenuCurrentSize" xml:space="preserve"><value>الحجم الحالي</value></data>
   <data name="SettingsGeneral" xml:space="preserve"><value>عام</value></data>
   <data name="SettingsName" xml:space="preserve"><value>الاسم</value></data>
+  <data name="SettingsPositionTopLeft" xml:space="preserve"><value>أعلى اليسار</value></data>
+  <data name="SettingsPositionTop" xml:space="preserve"><value>أعلى</value></data>
+  <data name="SettingsPositionTopRight" xml:space="preserve"><value>أعلى اليمين</value></data>
+  <data name="SettingsPositionLeft" xml:space="preserve"><value>يسار</value></data>
+  <data name="SettingsPositionCenter" xml:space="preserve"><value>وسط</value></data>
+  <data name="SettingsPositionRight" xml:space="preserve"><value>يمين</value></data>
+  <data name="SettingsPositionBottomLeft" xml:space="preserve"><value>أسفل اليسار</value></data>
+  <data name="SettingsPositionBottom" xml:space="preserve"><value>أسفل</value></data>
+  <data name="SettingsPositionBottomRight" xml:space="preserve"><value>أسفل اليمين</value></data>
 </root>
