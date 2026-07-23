@@ -13,7 +13,7 @@
     ProcessorArchitecture="x64" />
 
   <Properties>
-    <DisplayName>Window Resize & Capture</DisplayName>
+    <DisplayName>Window Resize &amp; Capture</DisplayName>
     <PublisherDisplayName>Kappei Nakano</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
     <Description>Resize application windows to preset sizes from the system tray.</Description>
@@ -23,23 +23,13 @@
     <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.22621.0" />
   </Dependencies>
 
+  <!-- Store-declared languages only. The app itself ships .NET satellite
+       resources for 16 languages and follows the OS display language;
+       declaring just en-US and ja keeps the Partner Center listing burden
+       to two languages. -->
   <Resources>
     <Resource Language="en-US" />
     <Resource Language="ja" />
-    <Resource Language="zh-Hans" />
-    <Resource Language="zh-Hant" />
-    <Resource Language="ko" />
-    <Resource Language="es" />
-    <Resource Language="fr" />
-    <Resource Language="de" />
-    <Resource Language="it" />
-    <Resource Language="pt" />
-    <Resource Language="ru" />
-    <Resource Language="ar" />
-    <Resource Language="hi" />
-    <Resource Language="th" />
-    <Resource Language="vi" />
-    <Resource Language="id" />
   </Resources>
 
   <Applications>
