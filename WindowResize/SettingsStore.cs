@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -93,30 +92,6 @@ public partial class SettingsStore
                 _screenshotEnabled = false;
         }
     }
-
-    // Language override: "system" or an IETF tag (e.g. "ja", "zh-Hans").
-    public string AppLanguage { get; set; } = "system";
-
-    // All languages shipped with the app, shown in the settings language picker.
-    public static readonly (string Code, string NativeName)[] SupportedLanguages =
-    {
-        ("en", "English"),
-        ("ja", "日本語"),
-        ("zh-Hans", "简体中文"),
-        ("zh-Hant", "繁體中文"),
-        ("ko", "한국어"),
-        ("es", "Español"),
-        ("fr", "Français"),
-        ("de", "Deutsch"),
-        ("it", "Italiano"),
-        ("pt", "Português"),
-        ("ru", "Русский"),
-        ("ar", "العربية"),
-        ("hi", "हिन्दी"),
-        ("id", "Bahasa Indonesia"),
-        ("vi", "Tiếng Việt"),
-        ("th", "ไทย"),
-    };
 
     // Launch-at-login property that dispatches to the registry or
     // StartupTask API depending on the deployment model.
@@ -253,28 +228,6 @@ public partial class SettingsStore
         SettingsChanged?.Invoke();
     }
 
-    // Apply a language override, persist, and update the resource culture
-    // so that subsequent Strings.* lookups use the new language.
-    public void ApplyLanguage(string languageCode)
-    {
-        AppLanguage = languageCode;
-        Save();
-
-        // "system" or empty means follow the OS locale
-        if (languageCode == "system" || string.IsNullOrEmpty(languageCode))
-            Strings.Culture = null;
-        else
-            Strings.Culture = new CultureInfo(languageCode);
-    }
-
-    // On startup, set the resource culture to the saved language so the
-    // first UI strings already appear in the correct language.
-    public void InitializeLanguage()
-    {
-        if (!string.IsNullOrEmpty(AppLanguage) && AppLanguage != "system")
-            Strings.Culture = new CultureInfo(AppLanguage);
-    }
-
     // Read settings from the JSON file into this instance's properties.
     // Uses backing fields for screenshot booleans to avoid triggering the
     // auto-enable/disable logic during deserialization.
@@ -301,9 +254,6 @@ public partial class SettingsStore
             _screenshotSaveToFile = data?.ScreenshotSaveToFile ?? true;
             ScreenshotSaveFolderPath = data?.ScreenshotSaveFolderPath ?? "";
             _screenshotCopyToClipboard = data?.ScreenshotCopyToClipboard ?? false;
-
-            // Language
-            AppLanguage = data?.AppLanguage ?? "system";
         }
         catch { }
     }
@@ -322,8 +272,7 @@ public partial class SettingsStore
                 ScreenshotEnabled = ScreenshotEnabled,
                 ScreenshotSaveToFile = ScreenshotSaveToFile,
                 ScreenshotSaveFolderPath = ScreenshotSaveFolderPath,
-                ScreenshotCopyToClipboard = ScreenshotCopyToClipboard,
-                AppLanguage = AppLanguage
+                ScreenshotCopyToClipboard = ScreenshotCopyToClipboard
             };
             string json = JsonSerializer.Serialize(data, SettingsJsonContext.Default.SettingsData);
             File.WriteAllText(_settingsPath, json);
@@ -357,7 +306,6 @@ public partial class SettingsStore
         public bool ScreenshotSaveToFile { get; set; } = true;
         public string ScreenshotSaveFolderPath { get; set; } = "";
         public bool ScreenshotCopyToClipboard { get; set; }
-        public string AppLanguage { get; set; } = "system";
     }
 
     // Source-generated JSON serializer context for trim-safe serialization.

@@ -39,8 +39,7 @@
   <data name="AlertResizeFailedTitle" xml:space="preserve"><value>Échec du redimensionnement</value></data>
   <data name="AlertResizeFailedBody" xml:space="preserve"><value>Impossible de redimensionner la fenêtre. La fenêtre ne prend peut-être pas en charge le redimensionnement ou est en mode plein écran.</value></data>
   <data name="AlertButtonOK" xml:space="preserve"><value>OK</value></data>
-  <data name="SettingsTitle" xml:space="preserve"><value>Paramètres de Window Resize</value></data>
-  <data name="SettingsPresetSizes" xml:space="preserve"><value>Tailles prédéfinies</value></data>
+  <data name="SettingsTitle" xml:space="preserve"><value>Paramètres de Window Resize &amp; Capture</value></data>
   <data name="SettingsBuiltIn" xml:space="preserve"><value>Intégrées</value></data>
   <data name="SettingsCustom" xml:space="preserve"><value>Personnalisées</value></data>
   <data name="SettingsNoCustomSizes" xml:space="preserve"><value>Aucune taille personnalisée ajoutée</value></data>
@@ -62,8 +61,6 @@
   <data name="SettingsWindowPosition" xml:space="preserve"><value>Position après redimensionnement</value></data>
   <data name="SettingsMoveToMainScreen" xml:space="preserve"><value>Déplacer vers l'écran principal</value></data>
   <data name="MenuCurrentSize" xml:space="preserve"><value>Taille actuelle</value></data>
-  <data name="SettingsLanguage" xml:space="preserve"><value>Langue</value></data>
-  <data name="SettingsLanguageSystem" xml:space="preserve"><value>Par défaut du système</value></data>
-  <data name="SettingsLanguageRestartTitle" xml:space="preserve"><value>Langue modifiée</value></data>
-  <data name="SettingsLanguageRestartBody" xml:space="preserve"><value>L'application doit redémarrer pour appliquer la nouvelle langue. Redémarrer maintenant ?</value></data>
+  <data name="SettingsGeneral" xml:space="preserve"><value>Général</value></data>
+  <data name="SettingsName" xml:space="preserve"><value>Nom</value></data>
 </root>

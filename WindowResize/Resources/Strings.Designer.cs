@@ -98,13 +98,19 @@ namespace WindowsResizeCapture {
 
         internal static string SettingsTitle {
             get {
-                return ResourceManager.GetString("SettingsTitle", resourceCulture) ?? "Window Resize Settings";
+                return ResourceManager.GetString("SettingsTitle", resourceCulture) ?? "Window Resize & Capture Settings";
             }
         }
 
-        internal static string SettingsPresetSizes {
+        internal static string SettingsGeneral {
             get {
-                return ResourceManager.GetString("SettingsPresetSizes", resourceCulture) ?? "Preset Sizes";
+                return ResourceManager.GetString("SettingsGeneral", resourceCulture) ?? "General";
+            }
+        }
+
+        internal static string SettingsName {
+            get {
+                return ResourceManager.GetString("SettingsName", resourceCulture) ?? "Name";
             }
         }
 
@@ -234,28 +240,5 @@ namespace WindowsResizeCapture {
             }
         }
 
-        internal static string SettingsLanguage {
-            get {
-                return ResourceManager.GetString("SettingsLanguage", resourceCulture) ?? "Language";
-            }
-        }
-
-        internal static string SettingsLanguageSystem {
-            get {
-                return ResourceManager.GetString("SettingsLanguageSystem", resourceCulture) ?? "System Default";
-            }
-        }
-
-        internal static string SettingsLanguageRestartTitle {
-            get {
-                return ResourceManager.GetString("SettingsLanguageRestartTitle", resourceCulture) ?? "Language Changed";
-            }
-        }
-
-        internal static string SettingsLanguageRestartBody {
-            get {
-                return ResourceManager.GetString("SettingsLanguageRestartBody", resourceCulture) ?? "The app needs to restart to apply the new language. Restart now?";
-            }
-        }
     }
 }

@@ -1,31 +1,28 @@
 using System;
 using System.Drawing;
-using System.Globalization;
 using System.Windows.Forms;
 
 namespace WindowsResizeCapture;
 
-// The Settings window. Built entirely in code (no designer). Provides
-// controls for preset sizes, launch-at-login, window behaviour options,
-// screenshot destinations, and language selection. Hides instead of
-// closing so it can be reused without reconstruction.
+// The Settings window. Built entirely in code (no designer). A three-tab
+// layout: General (preset sizes, launch at login), Screenshot (capture
+// destinations), and Behaviour (post-resize window handling). Hides
+// instead of closing so it can be reused without reconstruction.
 public class SettingsForm : Form
 {
     private readonly SettingsStore _store = SettingsStore.Shared;
+
+    // General tab controls
     private ListBox _builtInList = null!;
     private ListBox _customList = null!;
     private TextBox _widthBox = null!;
     private TextBox _heightBox = null!;
+    private TextBox _nameBox = null!;
     private Button _addButton = null!;
     private Button _removeButton = null!;
     private CheckBox _launchAtLoginCheck = null!;
 
-    // Behaviour controls
-    private CheckBox _bringToFrontCheck = null!;
-    private Button[] _positionButtons = null!;
-    private CheckBox _moveToMainScreenCheck = null!;
-
-    // Screenshot controls
+    // Screenshot tab controls
     private CheckBox _screenshotEnabledCheck = null!;
     private Panel _screenshotOptionsPanel = null!;
     private CheckBox _screenshotSaveToFileCheck = null!;
@@ -33,11 +30,10 @@ public class SettingsForm : Form
     private Button _chooseFolderButton = null!;
     private Label _folderPathLabel = null!;
 
-    // Language controls
-    private ComboBox _languageCombo = null!;
-
-    // Y-coordinate where the collapsible screenshot options panel begins
-    private int _screenshotOptionsPanelTop;
+    // Behaviour tab controls
+    private CheckBox _bringToFrontCheck = null!;
+    private CheckBox _moveToMainScreenCheck = null!;
+    private Button[] _positionButtons = null!;
 
     // Wingdings 3 arrow glyphs mapped to the 3x3 position grid
     // (TL, T, TR, L, C, R, BL, B, BR)
@@ -59,8 +55,8 @@ public class SettingsForm : Form
 
     // ── Layout construction ──────────────────────────────────────────────
 
-    // Construct all controls top-to-bottom: preset sizes, launch-at-login,
-    // behaviour options, screenshot options, and language picker.
+    // Construct the window chrome and the three-tab layout. Each tab is
+    // built by its own helper so the sections stay readable.
     private void BuildLayout()
     {
         Text = Strings.SettingsTitle;
@@ -68,24 +64,30 @@ public class SettingsForm : Form
         MaximizeBox = false;
         StartPosition = FormStartPosition.CenterScreen;
         ShowInTaskbar = true;
+        ClientSize = new Size(420, 356);
 
-        int y = 12;
-
-        // ── Preset sizes header ──
-        Controls.Add(new Label
+        var tabs = new TabControl
         {
-            Text = Strings.SettingsPresetSizes,
-            Font = new Font(Font, FontStyle.Bold),
-            Location = new Point(12, y),
-            AutoSize = true
-        });
-        y += 28;
+            Location = new Point(8, 8),
+            Size = new Size(404, 340)
+        };
+
+        tabs.TabPages.Add(BuildGeneralTab());
+        tabs.TabPages.Add(BuildScreenshotTab());
+        tabs.TabPages.Add(BuildBehaviourTab());
+        Controls.Add(tabs);
+    }
+
+    // General tab: built-in preset list, custom size editor, launch at login.
+    private TabPage BuildGeneralTab()
+    {
+        var tab = new TabPage(Strings.SettingsGeneral);
 
         // ── Built-in sizes group ──
         var builtInGroup = new GroupBox
         {
             Text = Strings.SettingsBuiltIn,
-            Location = new Point(12, y),
+            Location = new Point(8, 8),
             Size = new Size(380, 100)
         };
 
@@ -97,15 +99,14 @@ public class SettingsForm : Form
             BorderStyle = BorderStyle.None
         };
         builtInGroup.Controls.Add(_builtInList);
-        Controls.Add(builtInGroup);
-        y += 108;
+        tab.Controls.Add(builtInGroup);
 
         // ── Custom sizes group ──
         var customGroup = new GroupBox
         {
             Text = Strings.SettingsCustom,
-            Location = new Point(12, y),
-            Size = new Size(380, 120)
+            Location = new Point(8, 116),
+            Size = new Size(380, 150)
         };
 
         _customList = new ListBox
@@ -120,8 +121,8 @@ public class SettingsForm : Form
         _removeButton = new Button
         {
             Text = Strings.SettingsRemove,
-            Location = new Point(296, 20),
-            Size = new Size(76, 28),
+            Location = new Point(292, 20),
+            Size = new Size(80, 28),
             Enabled = false
         };
         _removeButton.Click += OnRemovePreset;
@@ -131,159 +132,81 @@ public class SettingsForm : Form
         _customList.SelectedIndexChanged += (_, _) =>
             _removeButton.Enabled = _customList.SelectedIndex >= 0;
 
-        // ── Add-size row (width × height + Add button) ──
-        var addPanel = new Panel
-        {
-            Location = new Point(8, 80),
-            Size = new Size(364, 30)
-        };
-
-        addPanel.Controls.Add(new Label
+        // ── Add-size rows: width × height, then optional name + Add ──
+        customGroup.Controls.Add(new Label
         {
             Text = Strings.SettingsWidth,
-            Location = new Point(0, 5),
+            Location = new Point(8, 87),
             AutoSize = true
         });
 
-        _widthBox = new TextBox { Location = new Point(50, 2), Size = new Size(70, 23) };
-        addPanel.Controls.Add(_widthBox);
+        _widthBox = new TextBox { Location = new Point(64, 84), Size = new Size(60, 23) };
+        customGroup.Controls.Add(_widthBox);
 
-        addPanel.Controls.Add(new Label
+        customGroup.Controls.Add(new Label
         {
             Text = Strings.SettingsDimensionSeparator,
-            Location = new Point(125, 5),
+            Location = new Point(130, 87),
             AutoSize = true
         });
 
-        addPanel.Controls.Add(new Label
+        customGroup.Controls.Add(new Label
         {
             Text = Strings.SettingsHeight,
-            Location = new Point(140, 5),
+            Location = new Point(146, 87),
             AutoSize = true
         });
 
-        _heightBox = new TextBox { Location = new Point(190, 2), Size = new Size(70, 23) };
-        addPanel.Controls.Add(_heightBox);
+        _heightBox = new TextBox { Location = new Point(204, 84), Size = new Size(60, 23) };
+        customGroup.Controls.Add(_heightBox);
+
+        customGroup.Controls.Add(new Label
+        {
+            Text = Strings.SettingsName,
+            Location = new Point(8, 119),
+            AutoSize = true
+        });
+
+        _nameBox = new TextBox { Location = new Point(64, 116), Size = new Size(200, 23) };
+        customGroup.Controls.Add(_nameBox);
 
         _addButton = new Button
         {
             Text = Strings.SettingsAdd,
-            Location = new Point(270, 1),
-            Size = new Size(60, 25)
+            Location = new Point(292, 114),
+            Size = new Size(80, 26)
         };
         _addButton.Click += OnAddPreset;
-        addPanel.Controls.Add(_addButton);
+        customGroup.Controls.Add(_addButton);
 
-        customGroup.Controls.Add(addPanel);
-        Controls.Add(customGroup);
-        y += 128;
+        tab.Controls.Add(customGroup);
 
         // ── Launch at login ──
         _launchAtLoginCheck = new CheckBox
         {
             Text = Strings.SettingsLaunchAtLogin,
-            Location = new Point(12, y),
+            Location = new Point(12, 276),
             AutoSize = true,
             Checked = _store.LaunchAtLogin
         };
         _launchAtLoginCheck.CheckedChanged += (_, _) =>
             _store.LaunchAtLogin = _launchAtLoginCheck.Checked;
-        Controls.Add(_launchAtLoginCheck);
-        y += 32;
+        tab.Controls.Add(_launchAtLoginCheck);
 
-        // ── Behaviour section ──
-        Controls.Add(new Label
-        {
-            Text = Strings.SettingsBehaviour,
-            Font = new Font(Font, FontStyle.Bold),
-            Location = new Point(12, y),
-            AutoSize = true
-        });
-        y += 24;
+        return tab;
+    }
 
-        // Bring to front
-        _bringToFrontCheck = new CheckBox
-        {
-            Text = Strings.SettingsBringToFront,
-            Location = new Point(12, y),
-            AutoSize = true,
-            Checked = _store.BringToFront
-        };
-        _bringToFrontCheck.CheckedChanged += (_, _) =>
-        {
-            _store.BringToFront = _bringToFrontCheck.Checked;
-            _store.SaveAndNotify();
-        };
-        Controls.Add(_bringToFrontCheck);
-        y += 26;
-
-        // Move to main screen
-        _moveToMainScreenCheck = new CheckBox
-        {
-            Text = Strings.SettingsMoveToMainScreen,
-            Location = new Point(12, y),
-            AutoSize = true,
-            Checked = _store.MoveToMainScreen
-        };
-        _moveToMainScreenCheck.CheckedChanged += (_, _) =>
-        {
-            _store.MoveToMainScreen = _moveToMainScreenCheck.Checked;
-            _store.SaveAndNotify();
-        };
-        Controls.Add(_moveToMainScreenCheck);
-        y += 28;
-
-        // Position-after-resize label and 9-button grid
-        Controls.Add(new Label
-        {
-            Text = Strings.SettingsWindowPosition,
-            Location = new Point(12, y + 2),
-            AutoSize = true
-        });
-
-        int gridLeft = 140;
-        int buttonSize = 26;
-        int buttonGap = 1;
-        _positionButtons = new Button[9];
-
-        var wingdings3 = new Font("Wingdings 3", 10f);
-        for (int i = 0; i < 9; i++)
-        {
-            var btn = new Button
-            {
-                Size = new Size(buttonSize, buttonSize),
-                Location = new Point(gridLeft + i * (buttonSize + buttonGap), y - 2),
-                FlatStyle = FlatStyle.Flat,
-                Tag = PositionOrder[i],
-                Font = wingdings3,
-                Text = PositionGlyphs[i],
-                TextAlign = ContentAlignment.MiddleCenter,
-                Padding = Padding.Empty
-            };
-            btn.FlatAppearance.BorderSize = 1;
-            btn.Click += OnPositionButtonClick;
-            _positionButtons[i] = btn;
-            Controls.Add(btn);
-        }
-
-        RefreshPositionButtonHighlights();
-        y += buttonSize + 8;
-
-        // ── Screenshot section ──
-        Controls.Add(new Label
-        {
-            Text = Strings.SettingsScreenshot,
-            Font = new Font(Font, FontStyle.Bold),
-            Location = new Point(12, y),
-            AutoSize = true
-        });
-        y += 24;
+    // Screenshot tab: master toggle plus a panel of destination options
+    // that hides while screenshots are disabled.
+    private TabPage BuildScreenshotTab()
+    {
+        var tab = new TabPage(Strings.SettingsScreenshot);
 
         // Master screenshot toggle
         _screenshotEnabledCheck = new CheckBox
         {
             Text = Strings.SettingsScreenshotEnabled,
-            Location = new Point(12, y),
+            Location = new Point(12, 12),
             AutoSize = true,
             Checked = _store.ScreenshotEnabled
         };
@@ -292,17 +215,16 @@ public class SettingsForm : Form
             _store.ScreenshotEnabled = _screenshotEnabledCheck.Checked;
             _store.SaveAndNotify();
             SynchronizeScreenshotControls();
-            AdjustScreenshotPanelVisibility();
+            _screenshotOptionsPanel.Visible = _store.ScreenshotEnabled;
         };
-        Controls.Add(_screenshotEnabledCheck);
-        y += 26;
+        tab.Controls.Add(_screenshotEnabledCheck);
 
-        // Collapsible panel for screenshot destination options
-        _screenshotOptionsPanelTop = y;
+        // Panel for screenshot destination options, hidden when disabled
         _screenshotOptionsPanel = new Panel
         {
-            Location = new Point(0, y),
-            Size = new Size(420, 86)
+            Location = new Point(0, 40),
+            Size = new Size(396, 86),
+            Visible = _store.ScreenshotEnabled
         };
 
         int panelY = 0;
@@ -340,7 +262,7 @@ public class SettingsForm : Form
         {
             Text = FormatFolderPath(),
             Location = new Point(_chooseFolderButton.Right + 8, panelY + 4),
-            Size = new Size(240, 20),
+            Size = new Size(220, 20),
             ForeColor = Color.Gray,
             AutoEllipsis = true
         };
@@ -362,51 +284,86 @@ public class SettingsForm : Form
             SynchronizeScreenshotControls();
         };
         _screenshotOptionsPanel.Controls.Add(_screenshotCopyToClipboardCheck);
-        Controls.Add(_screenshotOptionsPanel);
+        tab.Controls.Add(_screenshotOptionsPanel);
 
-        // ── Language section ──
-        int languageY = _screenshotOptionsPanelTop + _screenshotOptionsPanel.Height + 8;
+        return tab;
+    }
 
-        Controls.Add(new Label
+    // Behaviour tab: post-resize options and the 3x3 snap-position grid.
+    private TabPage BuildBehaviourTab()
+    {
+        var tab = new TabPage(Strings.SettingsBehaviour);
+
+        // Bring to front
+        _bringToFrontCheck = new CheckBox
         {
-            Text = Strings.SettingsLanguage,
-            Font = new Font(Font, FontStyle.Bold),
-            Location = new Point(12, languageY),
+            Text = Strings.SettingsBringToFront,
+            Location = new Point(12, 12),
             AutoSize = true,
-            Name = "_langHeader"
-        });
-        languageY += 24;
-
-        _languageCombo = new ComboBox
-        {
-            Location = new Point(12, languageY),
-            Size = new Size(250, 24),
-            DropDownStyle = ComboBoxStyle.DropDownList,
-            Name = "_languageCombo"
+            Checked = _store.BringToFront
         };
-
-        // Populate: "System default" first, then every shipped language
-        _languageCombo.Items.Add(Strings.SettingsLanguageSystem);
-        foreach (var (_, nativeName) in SettingsStore.SupportedLanguages)
-            _languageCombo.Items.Add(nativeName);
-
-        // Select the currently active language
-        if (_store.AppLanguage == "system" || string.IsNullOrEmpty(_store.AppLanguage))
+        _bringToFrontCheck.CheckedChanged += (_, _) =>
         {
-            _languageCombo.SelectedIndex = 0;
-        }
-        else
+            _store.BringToFront = _bringToFrontCheck.Checked;
+            _store.SaveAndNotify();
+        };
+        tab.Controls.Add(_bringToFrontCheck);
+
+        // Move to main screen
+        _moveToMainScreenCheck = new CheckBox
         {
-            int langIndex = Array.FindIndex(SettingsStore.SupportedLanguages,
-                l => l.Code == _store.AppLanguage);
-            _languageCombo.SelectedIndex = langIndex >= 0 ? langIndex + 1 : 0;
+            Text = Strings.SettingsMoveToMainScreen,
+            Location = new Point(12, 40),
+            AutoSize = true,
+            Checked = _store.MoveToMainScreen
+        };
+        _moveToMainScreenCheck.CheckedChanged += (_, _) =>
+        {
+            _store.MoveToMainScreen = _moveToMainScreenCheck.Checked;
+            _store.SaveAndNotify();
+        };
+        tab.Controls.Add(_moveToMainScreenCheck);
+
+        // Position-after-resize label with a 3x3 tile grid below it
+        tab.Controls.Add(new Label
+        {
+            Text = Strings.SettingsWindowPosition,
+            Location = new Point(12, 72),
+            AutoSize = true
+        });
+
+        int gridTop = 96;
+        int buttonSize = 32;
+        int buttonGap = 2;
+        _positionButtons = new Button[9];
+
+        var wingdings3 = new Font("Wingdings 3", 10f);
+        for (int i = 0; i < 9; i++)
+        {
+            // Arrange the nine buttons as three rows of three tiles
+            int col = i % 3;
+            int row = i / 3;
+            var btn = new Button
+            {
+                Size = new Size(buttonSize, buttonSize),
+                Location = new Point(
+                    12 + col * (buttonSize + buttonGap),
+                    gridTop + row * (buttonSize + buttonGap)),
+                FlatStyle = FlatStyle.Flat,
+                Tag = PositionOrder[i],
+                Font = wingdings3,
+                Text = PositionGlyphs[i],
+                TextAlign = ContentAlignment.MiddleCenter,
+                Padding = Padding.Empty
+            };
+            btn.FlatAppearance.BorderSize = 1;
+            btn.Click += OnPositionButtonClick;
+            _positionButtons[i] = btn;
+            tab.Controls.Add(btn);
         }
 
-        _languageCombo.SelectedIndexChanged += OnLanguageChanged;
-        Controls.Add(_languageCombo);
-
-        // Set initial screenshot panel visibility
-        AdjustScreenshotPanelVisibility();
+        RefreshPositionButtonHighlights();
+        return tab;
     }
 
     // ── Data population ──────────────────────────────────────────────────
@@ -417,12 +374,7 @@ public class SettingsForm : Form
         // Built-in sizes (read-only display)
         _builtInList.Items.Clear();
         foreach (var size in SettingsStore.BuiltInSizes)
-        {
-            string display = size.DisplayName;
-            if (!string.IsNullOrEmpty(size.Label))
-                display += $"    {size.Label}";
-            _builtInList.Items.Add(display);
-        }
+            _builtInList.Items.Add(FormatSize(size));
 
         RefreshCustomList();
     }
@@ -440,25 +392,37 @@ public class SettingsForm : Form
         else
         {
             foreach (var size in _store.CustomSizes)
-                _customList.Items.Add(size.DisplayName);
+                _customList.Items.Add(FormatSize(size));
             _customList.Enabled = true;
         }
 
         _removeButton.Enabled = false;
     }
 
+    // Render a preset as "W x H" followed by its label when one is set.
+    private static string FormatSize(PresetSize size)
+    {
+        string display = size.DisplayName;
+        if (!string.IsNullOrEmpty(size.Label))
+            display += $"    {size.Label}";
+        return display;
+    }
+
     // ── Event handlers ───────────────────────────────────────────────────
 
-    // Parse the width/height inputs and add a new custom preset.
+    // Parse the width/height inputs and add a new custom preset with an
+    // optional user-supplied name.
     private void OnAddPreset(object? sender, EventArgs e)
     {
         if (int.TryParse(_widthBox.Text, out int w) &&
             int.TryParse(_heightBox.Text, out int h) &&
             w > 0 && h > 0)
         {
-            _store.AddSize(new PresetSize(w, h));
+            string name = _nameBox.Text.Trim();
+            _store.AddSize(new PresetSize(w, h, name.Length > 0 ? name : null));
             _widthBox.Clear();
             _heightBox.Clear();
+            _nameBox.Clear();
             RefreshCustomList();
         }
     }
@@ -484,36 +448,6 @@ public class SettingsForm : Form
         _store.Position = (_store.Position == pos) ? null : pos;
         _store.SaveAndNotify();
         RefreshPositionButtonHighlights();
-    }
-
-    // Apply the newly selected language and offer to restart the app
-    // so that all UI strings update.
-    private void OnLanguageChanged(object? sender, EventArgs e)
-    {
-        int index = _languageCombo.SelectedIndex;
-        string newLanguage = index == 0 ? "system" : SettingsStore.SupportedLanguages[index - 1].Code;
-
-        if (newLanguage == _store.AppLanguage)
-            return;
-
-        _store.ApplyLanguage(newLanguage);
-
-        // Prompt the user to restart for the change to take full effect
-        var result = MessageBox.Show(
-            Strings.SettingsLanguageRestartBody,
-            Strings.SettingsLanguageRestartTitle,
-            MessageBoxButtons.YesNo,
-            MessageBoxIcon.Information);
-
-        if (result == DialogResult.Yes)
-        {
-            var exePath = Environment.ProcessPath;
-            if (!string.IsNullOrEmpty(exePath))
-            {
-                System.Diagnostics.Process.Start(exePath);
-                Application.Exit();
-            }
-        }
     }
 
     // Open a folder browser to choose the screenshot save location.
@@ -555,29 +489,6 @@ public class SettingsForm : Form
             btn.BackColor = selected ? Color.DodgerBlue : SystemColors.Control;
             btn.ForeColor = selected ? Color.White : SystemColors.ControlText;
         }
-    }
-
-    // Show or hide the screenshot options panel and reflow the language
-    // section and form height accordingly.
-    private void AdjustScreenshotPanelVisibility()
-    {
-        bool visible = _store.ScreenshotEnabled;
-        _screenshotOptionsPanel.Visible = visible;
-
-        // Calculate where the language section starts
-        int languageY = visible
-            ? _screenshotOptionsPanelTop + _screenshotOptionsPanel.Height + 8
-            : _screenshotOptionsPanelTop + 8;
-
-        // Reposition the language header and combo box
-        var langHeader = Controls.Find("_langHeader", false);
-        if (langHeader.Length > 0)
-            langHeader[0].Location = new Point(12, languageY);
-        _languageCombo.Location = new Point(12, languageY + 24);
-
-        // Resize the form to fit the visible content
-        int contentBottom = languageY + 24 + _languageCombo.Height + 12;
-        ClientSize = new Size(404, contentBottom);
     }
 
     // Return the folder path for display, or a placeholder if none is set.

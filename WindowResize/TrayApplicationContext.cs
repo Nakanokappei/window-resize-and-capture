@@ -20,9 +20,6 @@ public class TrayApplicationContext : ApplicationContext
     // and subscribe to settings changes for live menu rebuilds.
     public TrayApplicationContext()
     {
-        // Apply the saved language before any UI strings are resolved
-        _store.InitializeLanguage();
-
         _contextMenu = new ContextMenuStrip { ShowImageMargin = true };
         BuildMenu();
 

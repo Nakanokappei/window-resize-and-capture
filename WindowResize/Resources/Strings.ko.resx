@@ -39,8 +39,7 @@
   <data name="AlertResizeFailedTitle" xml:space="preserve"><value>크기 조절 실패</value></data>
   <data name="AlertResizeFailedBody" xml:space="preserve"><value>윈도우 크기를 조절할 수 없습니다. 해당 윈도우가 크기 조절을 지원하지 않거나, 전체 화면 모드일 수 있습니다.</value></data>
   <data name="AlertButtonOK" xml:space="preserve"><value>확인</value></data>
-  <data name="SettingsTitle" xml:space="preserve"><value>Window Resize 설정</value></data>
-  <data name="SettingsPresetSizes" xml:space="preserve"><value>프리셋 크기</value></data>
+  <data name="SettingsTitle" xml:space="preserve"><value>Window Resize &amp; Capture 설정</value></data>
   <data name="SettingsBuiltIn" xml:space="preserve"><value>기본 제공</value></data>
   <data name="SettingsCustom" xml:space="preserve"><value>사용자 지정</value></data>
   <data name="SettingsNoCustomSizes" xml:space="preserve"><value>추가된 사용자 지정 크기 없음</value></data>
@@ -62,8 +61,6 @@
   <data name="SettingsWindowPosition" xml:space="preserve"><value>크기 조절 후 위치</value></data>
   <data name="SettingsMoveToMainScreen" xml:space="preserve"><value>주 화면으로 이동</value></data>
   <data name="MenuCurrentSize" xml:space="preserve"><value>현재 크기</value></data>
-  <data name="SettingsLanguage" xml:space="preserve"><value>언어</value></data>
-  <data name="SettingsLanguageSystem" xml:space="preserve"><value>시스템 설정</value></data>
-  <data name="SettingsLanguageRestartTitle" xml:space="preserve"><value>언어가 변경되었습니다</value></data>
-  <data name="SettingsLanguageRestartBody" xml:space="preserve"><value>새 언어를 적용하려면 앱을 다시 시작해야 합니다. 지금 다시 시작하시겠습니까?</value></data>
+  <data name="SettingsGeneral" xml:space="preserve"><value>일반</value></data>
+  <data name="SettingsName" xml:space="preserve"><value>이름</value></data>
 </root>

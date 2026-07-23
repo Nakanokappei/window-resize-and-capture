@@ -39,8 +39,7 @@
   <data name="AlertResizeFailedTitle" xml:space="preserve"><value>リサイズに失敗しました</value></data>
   <data name="AlertResizeFailedBody" xml:space="preserve"><value>ウインドウのサイズを変更できませんでした。ウインドウがリサイズに対応していないか、フルスクリーンモードの可能性があります。</value></data>
   <data name="AlertButtonOK" xml:space="preserve"><value>OK</value></data>
-  <data name="SettingsTitle" xml:space="preserve"><value>Window Resize 設定</value></data>
-  <data name="SettingsPresetSizes" xml:space="preserve"><value>プリセットサイズ</value></data>
+  <data name="SettingsTitle" xml:space="preserve"><value>Window Resize &amp; Capture 設定</value></data>
   <data name="SettingsBuiltIn" xml:space="preserve"><value>内蔵</value></data>
   <data name="SettingsCustom" xml:space="preserve"><value>カスタム</value></data>
   <data name="SettingsNoCustomSizes" xml:space="preserve"><value>カスタムサイズはまだありません</value></data>
@@ -62,8 +61,6 @@
   <data name="SettingsWindowPosition" xml:space="preserve"><value>リサイズ後の配置</value></data>
   <data name="SettingsMoveToMainScreen" xml:space="preserve"><value>メインスクリーンに移動</value></data>
   <data name="MenuCurrentSize" xml:space="preserve"><value>現在のサイズ</value></data>
-  <data name="SettingsLanguage" xml:space="preserve"><value>言語</value></data>
-  <data name="SettingsLanguageSystem" xml:space="preserve"><value>システム設定に従う</value></data>
-  <data name="SettingsLanguageRestartTitle" xml:space="preserve"><value>言語を変更しました</value></data>
-  <data name="SettingsLanguageRestartBody" xml:space="preserve"><value>新しい言語を適用するにはアプリの再起動が必要です。今すぐ再起動しますか?</value></data>
+  <data name="SettingsGeneral" xml:space="preserve"><value>全般</value></data>
+  <data name="SettingsName" xml:space="preserve"><value>名前</value></data>
 </root>

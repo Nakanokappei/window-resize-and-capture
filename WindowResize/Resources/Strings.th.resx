@@ -39,8 +39,7 @@
   <data name="AlertResizeFailedTitle" xml:space="preserve"><value>ปรับขนาดไม่สำเร็จ</value></data>
   <data name="AlertResizeFailedBody" xml:space="preserve"><value>ไม่สามารถปรับขนาดหน้าต่างได้ หน้าต่างอาจไม่รองรับการปรับขนาด หรืออยู่ในโหมดเต็มหน้าจอ</value></data>
   <data name="AlertButtonOK" xml:space="preserve"><value>ตกลง</value></data>
-  <data name="SettingsTitle" xml:space="preserve"><value>การตั้งค่า Window Resize</value></data>
-  <data name="SettingsPresetSizes" xml:space="preserve"><value>ขนาดที่ตั้งไว้</value></data>
+  <data name="SettingsTitle" xml:space="preserve"><value>การตั้งค่า Window Resize &amp; Capture</value></data>
   <data name="SettingsBuiltIn" xml:space="preserve"><value>ในตัว</value></data>
   <data name="SettingsCustom" xml:space="preserve"><value>กำหนดเอง</value></data>
   <data name="SettingsNoCustomSizes" xml:space="preserve"><value>ยังไม่มีขนาดที่กำหนดเอง</value></data>
@@ -62,8 +61,6 @@
   <data name="SettingsWindowPosition" xml:space="preserve"><value>ตำแหน่งหลังปรับขนาด</value></data>
   <data name="SettingsMoveToMainScreen" xml:space="preserve"><value>ย้ายไปหน้าจอหลัก</value></data>
   <data name="MenuCurrentSize" xml:space="preserve"><value>ขนาดปัจจุบัน</value></data>
-  <data name="SettingsLanguage" xml:space="preserve"><value>ภาษา</value></data>
-  <data name="SettingsLanguageSystem" xml:space="preserve"><value>ค่าเริ่มต้นของระบบ</value></data>
-  <data name="SettingsLanguageRestartTitle" xml:space="preserve"><value>เปลี่ยนภาษาแล้ว</value></data>
-  <data name="SettingsLanguageRestartBody" xml:space="preserve"><value>แอปจำเป็นต้องเริ่มต้นใหม่เพื่อใช้ภาษาใหม่ เริ่มใหม่ตอนนี้หรือไม่?</value></data>
+  <data name="SettingsGeneral" xml:space="preserve"><value>ทั่วไป</value></data>
+  <data name="SettingsName" xml:space="preserve"><value>ชื่อ</value></data>
 </root>

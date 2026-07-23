@@ -39,8 +39,7 @@
   <data name="AlertResizeFailedTitle" xml:space="preserve"><value>Gagal Mengubah Ukuran</value></data>
   <data name="AlertResizeFailedBody" xml:space="preserve"><value>Tidak dapat mengubah ukuran jendela. Jendela mungkin tidak mendukung pengubahan ukuran atau sedang dalam mode layar penuh.</value></data>
   <data name="AlertButtonOK" xml:space="preserve"><value>OK</value></data>
-  <data name="SettingsTitle" xml:space="preserve"><value>Pengaturan Window Resize</value></data>
-  <data name="SettingsPresetSizes" xml:space="preserve"><value>Ukuran Preset</value></data>
+  <data name="SettingsTitle" xml:space="preserve"><value>Pengaturan Window Resize &amp; Capture</value></data>
   <data name="SettingsBuiltIn" xml:space="preserve"><value>Bawaan</value></data>
   <data name="SettingsCustom" xml:space="preserve"><value>Kustom</value></data>
   <data name="SettingsNoCustomSizes" xml:space="preserve"><value>Belum ada ukuran kustom</value></data>
@@ -62,8 +61,6 @@
   <data name="SettingsWindowPosition" xml:space="preserve"><value>Posisi setelah mengubah ukuran</value></data>
   <data name="SettingsMoveToMainScreen" xml:space="preserve"><value>Pindahkan ke layar utama</value></data>
   <data name="MenuCurrentSize" xml:space="preserve"><value>Ukuran saat ini</value></data>
-  <data name="SettingsLanguage" xml:space="preserve"><value>Bahasa</value></data>
-  <data name="SettingsLanguageSystem" xml:space="preserve"><value>Bawaan Sistem</value></data>
-  <data name="SettingsLanguageRestartTitle" xml:space="preserve"><value>Bahasa Diubah</value></data>
-  <data name="SettingsLanguageRestartBody" xml:space="preserve"><value>Aplikasi perlu dimulai ulang untuk menerapkan bahasa baru. Mulai ulang sekarang?</value></data>
+  <data name="SettingsGeneral" xml:space="preserve"><value>Umum</value></data>
+  <data name="SettingsName" xml:space="preserve"><value>Nama</value></data>
 </root>

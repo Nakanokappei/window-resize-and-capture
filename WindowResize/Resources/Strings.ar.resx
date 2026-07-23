@@ -39,8 +39,7 @@
   <data name="AlertResizeFailedTitle" xml:space="preserve"><value>فشل تغيير الحجم</value></data>
   <data name="AlertResizeFailedBody" xml:space="preserve"><value>تعذّر تغيير حجم النافذة. قد لا تدعم النافذة تغيير الحجم، أو قد تكون في وضع ملء الشاشة.</value></data>
   <data name="AlertButtonOK" xml:space="preserve"><value>موافق</value></data>
-  <data name="SettingsTitle" xml:space="preserve"><value>إعدادات Window Resize</value></data>
-  <data name="SettingsPresetSizes" xml:space="preserve"><value>الأحجام المحددة مسبقًا</value></data>
+  <data name="SettingsTitle" xml:space="preserve"><value>إعدادات Window Resize &amp; Capture</value></data>
   <data name="SettingsBuiltIn" xml:space="preserve"><value>مدمجة</value></data>
   <data name="SettingsCustom" xml:space="preserve"><value>مخصصة</value></data>
   <data name="SettingsNoCustomSizes" xml:space="preserve"><value>لم تتم إضافة أحجام مخصصة</value></data>
@@ -62,8 +61,6 @@
   <data name="SettingsWindowPosition" xml:space="preserve"><value>الموضع بعد تغيير الحجم</value></data>
   <data name="SettingsMoveToMainScreen" xml:space="preserve"><value>نقل إلى الشاشة الرئيسية</value></data>
   <data name="MenuCurrentSize" xml:space="preserve"><value>الحجم الحالي</value></data>
-  <data name="SettingsLanguage" xml:space="preserve"><value>اللغة</value></data>
-  <data name="SettingsLanguageSystem" xml:space="preserve"><value>إعداد النظام</value></data>
-  <data name="SettingsLanguageRestartTitle" xml:space="preserve"><value>تم تغيير اللغة</value></data>
-  <data name="SettingsLanguageRestartBody" xml:space="preserve"><value>يجب إعادة تشغيل التطبيق لتطبيق اللغة الجديدة. إعادة التشغيل الآن؟</value></data>
+  <data name="SettingsGeneral" xml:space="preserve"><value>عام</value></data>
+  <data name="SettingsName" xml:space="preserve"><value>الاسم</value></data>
 </root>

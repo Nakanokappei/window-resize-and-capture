@@ -39,8 +39,7 @@
   <data name="AlertResizeFailedTitle" xml:space="preserve"><value>Đổi kích thước thất bại</value></data>
   <data name="AlertResizeFailedBody" xml:space="preserve"><value>Không thể đổi kích thước cửa sổ. Cửa sổ có thể không hỗ trợ đổi kích thước hoặc đang ở chế độ toàn màn hình.</value></data>
   <data name="AlertButtonOK" xml:space="preserve"><value>OK</value></data>
-  <data name="SettingsTitle" xml:space="preserve"><value>Cài đặt Window Resize</value></data>
-  <data name="SettingsPresetSizes" xml:space="preserve"><value>Kích thước đặt sẵn</value></data>
+  <data name="SettingsTitle" xml:space="preserve"><value>Cài đặt Window Resize &amp; Capture</value></data>
   <data name="SettingsBuiltIn" xml:space="preserve"><value>Có sẵn</value></data>
   <data name="SettingsCustom" xml:space="preserve"><value>Tùy chỉnh</value></data>
   <data name="SettingsNoCustomSizes" xml:space="preserve"><value>Chưa thêm kích thước tùy chỉnh nào</value></data>
@@ -62,8 +61,6 @@
   <data name="SettingsWindowPosition" xml:space="preserve"><value>Vị trí sau khi thay đổi kích thước</value></data>
   <data name="SettingsMoveToMainScreen" xml:space="preserve"><value>Di chuyển đến màn hình chính</value></data>
   <data name="MenuCurrentSize" xml:space="preserve"><value>Kích thước hiện tại</value></data>
-  <data name="SettingsLanguage" xml:space="preserve"><value>Ngôn ngữ</value></data>
-  <data name="SettingsLanguageSystem" xml:space="preserve"><value>Mặc định hệ thống</value></data>
-  <data name="SettingsLanguageRestartTitle" xml:space="preserve"><value>Đã thay đổi ngôn ngữ</value></data>
-  <data name="SettingsLanguageRestartBody" xml:space="preserve"><value>Ứng dụng cần khởi động lại để áp dụng ngôn ngữ mới. Khởi động lại ngay?</value></data>
+  <data name="SettingsGeneral" xml:space="preserve"><value>Chung</value></data>
+  <data name="SettingsName" xml:space="preserve"><value>Tên</value></data>
 </root>

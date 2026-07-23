@@ -39,8 +39,7 @@
   <data name="AlertResizeFailedTitle" xml:space="preserve"><value>Не удалось изменить размер</value></data>
   <data name="AlertResizeFailedBody" xml:space="preserve"><value>Не удалось изменить размер окна. Окно может не поддерживать изменение размера или находится в полноэкранном режиме.</value></data>
   <data name="AlertButtonOK" xml:space="preserve"><value>OK</value></data>
-  <data name="SettingsTitle" xml:space="preserve"><value>Настройки Window Resize</value></data>
-  <data name="SettingsPresetSizes" xml:space="preserve"><value>Предустановленные размеры</value></data>
+  <data name="SettingsTitle" xml:space="preserve"><value>Настройки Window Resize &amp; Capture</value></data>
   <data name="SettingsBuiltIn" xml:space="preserve"><value>Встроенные</value></data>
   <data name="SettingsCustom" xml:space="preserve"><value>Пользовательские</value></data>
   <data name="SettingsNoCustomSizes" xml:space="preserve"><value>Пользовательские размеры не добавлены</value></data>
@@ -62,8 +61,6 @@
   <data name="SettingsWindowPosition" xml:space="preserve"><value>Положение после изменения размера</value></data>
   <data name="SettingsMoveToMainScreen" xml:space="preserve"><value>Переместить на основной экран</value></data>
   <data name="MenuCurrentSize" xml:space="preserve"><value>Текущий размер</value></data>
-  <data name="SettingsLanguage" xml:space="preserve"><value>Язык</value></data>
-  <data name="SettingsLanguageSystem" xml:space="preserve"><value>Системный</value></data>
-  <data name="SettingsLanguageRestartTitle" xml:space="preserve"><value>Язык изменён</value></data>
-  <data name="SettingsLanguageRestartBody" xml:space="preserve"><value>Для применения нового языка необходимо перезапустить приложение. Перезапустить сейчас?</value></data>
+  <data name="SettingsGeneral" xml:space="preserve"><value>Общие</value></data>
+  <data name="SettingsName" xml:space="preserve"><value>Название</value></data>
 </root>

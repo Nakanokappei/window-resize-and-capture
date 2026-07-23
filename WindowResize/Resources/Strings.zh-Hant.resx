@@ -39,8 +39,7 @@
   <data name="AlertResizeFailedTitle" xml:space="preserve"><value>調整大小失敗</value></data>
   <data name="AlertResizeFailedBody" xml:space="preserve"><value>無法調整視窗大小。該視窗可能不支援調整大小，或者正處於全螢幕模式。</value></data>
   <data name="AlertButtonOK" xml:space="preserve"><value>好</value></data>
-  <data name="SettingsTitle" xml:space="preserve"><value>Window Resize 設定</value></data>
-  <data name="SettingsPresetSizes" xml:space="preserve"><value>預設大小</value></data>
+  <data name="SettingsTitle" xml:space="preserve"><value>Window Resize &amp; Capture 設定</value></data>
   <data name="SettingsBuiltIn" xml:space="preserve"><value>內建</value></data>
   <data name="SettingsCustom" xml:space="preserve"><value>自訂</value></data>
   <data name="SettingsNoCustomSizes" xml:space="preserve"><value>尚未加入自訂大小</value></data>
@@ -62,8 +61,6 @@
   <data name="SettingsWindowPosition" xml:space="preserve"><value>調整後的位置</value></data>
   <data name="SettingsMoveToMainScreen" xml:space="preserve"><value>移至主螢幕</value></data>
   <data name="MenuCurrentSize" xml:space="preserve"><value>目前大小</value></data>
-  <data name="SettingsLanguage" xml:space="preserve"><value>語言</value></data>
-  <data name="SettingsLanguageSystem" xml:space="preserve"><value>跟隨系統</value></data>
-  <data name="SettingsLanguageRestartTitle" xml:space="preserve"><value>語言已變更</value></data>
-  <data name="SettingsLanguageRestartBody" xml:space="preserve"><value>需要重新啟動應用程式以套用新語言。立即重新啟動嗎?</value></data>
+  <data name="SettingsGeneral" xml:space="preserve"><value>一般</value></data>
+  <data name="SettingsName" xml:space="preserve"><value>名稱</value></data>
 </root>

@@ -71,10 +71,7 @@
   </data>
   <!-- Settings window -->
   <data name="SettingsTitle" xml:space="preserve">
-    <value>Window Resize Settings</value>
-  </data>
-  <data name="SettingsPresetSizes" xml:space="preserve">
-    <value>Preset Sizes</value>
+    <value>Window Resize &amp; Capture Settings</value>
   </data>
   <data name="SettingsBuiltIn" xml:space="preserve">
     <value>Built-in</value>
@@ -143,16 +140,10 @@
     <value>Current</value>
   </data>
   <!-- Language settings -->
-  <data name="SettingsLanguage" xml:space="preserve">
-    <value>Language</value>
+  <data name="SettingsGeneral" xml:space="preserve">
+    <value>General</value>
   </data>
-  <data name="SettingsLanguageSystem" xml:space="preserve">
-    <value>System Default</value>
-  </data>
-  <data name="SettingsLanguageRestartTitle" xml:space="preserve">
-    <value>Language Changed</value>
-  </data>
-  <data name="SettingsLanguageRestartBody" xml:space="preserve">
-    <value>The app needs to restart to apply the new language. Restart now?</value>
+  <data name="SettingsName" xml:space="preserve">
+    <value>Name</value>
   </data>
 </root>

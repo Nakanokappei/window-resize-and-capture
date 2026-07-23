@@ -39,8 +39,7 @@
   <data name="AlertResizeFailedTitle" xml:space="preserve"><value>Größenänderung fehlgeschlagen</value></data>
   <data name="AlertResizeFailedBody" xml:space="preserve"><value>Das Fenster konnte nicht in der Größe verändert werden. Das Fenster unterstützt möglicherweise keine Größenänderung oder befindet sich im Vollbildmodus.</value></data>
   <data name="AlertButtonOK" xml:space="preserve"><value>OK</value></data>
-  <data name="SettingsTitle" xml:space="preserve"><value>Window Resize Einstellungen</value></data>
-  <data name="SettingsPresetSizes" xml:space="preserve"><value>Voreingestellte Größen</value></data>
+  <data name="SettingsTitle" xml:space="preserve"><value>Window Resize &amp; Capture Einstellungen</value></data>
   <data name="SettingsBuiltIn" xml:space="preserve"><value>Integriert</value></data>
   <data name="SettingsCustom" xml:space="preserve"><value>Benutzerdefiniert</value></data>
   <data name="SettingsNoCustomSizes" xml:space="preserve"><value>Keine benutzerdefinierten Größen hinzugefügt</value></data>
@@ -62,8 +61,6 @@
   <data name="SettingsWindowPosition" xml:space="preserve"><value>Position nach dem Ändern</value></data>
   <data name="SettingsMoveToMainScreen" xml:space="preserve"><value>Zum Hauptbildschirm verschieben</value></data>
   <data name="MenuCurrentSize" xml:space="preserve"><value>Aktuelle Größe</value></data>
-  <data name="SettingsLanguage" xml:space="preserve"><value>Sprache</value></data>
-  <data name="SettingsLanguageSystem" xml:space="preserve"><value>Systemstandard</value></data>
-  <data name="SettingsLanguageRestartTitle" xml:space="preserve"><value>Sprache geändert</value></data>
-  <data name="SettingsLanguageRestartBody" xml:space="preserve"><value>Die App muss neu gestartet werden, um die neue Sprache anzuwenden. Jetzt neu starten?</value></data>
+  <data name="SettingsGeneral" xml:space="preserve"><value>Allgemein</value></data>
+  <data name="SettingsName" xml:space="preserve"><value>Name</value></data>
 </root>
