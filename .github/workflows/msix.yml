@@ -6,6 +6,10 @@ on:
       - 'v*'
   workflow_dispatch:
 
+# Allow the release step to attach the MSIX to the GitHub Release
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: windows-latest
