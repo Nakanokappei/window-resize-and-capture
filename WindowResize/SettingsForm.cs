@@ -70,11 +70,6 @@ public class SettingsForm : Form
         MaximizeBox = false;
         StartPosition = FormStartPosition.CenterScreen;
         ShowInTaskbar = true;
-        // Scale the fixed pixel layout with the monitor DPI so the window
-        // stays usable at 200%+ display scaling. The layout below is
-        // designed at 96 DPI.
-        AutoScaleDimensions = new SizeF(96F, 96F);
-        AutoScaleMode = AutoScaleMode.Dpi;
         ClientSize = new Size(420, 356);
 
         var tabs = new TabControl

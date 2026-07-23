@@ -33,10 +33,11 @@ static class Program
         // of whether the app exits normally or via an unhandled exception.
         try
         {
-            // Declare DPI awareness so forms with AutoScaleMode.Dpi scale
-            // their layout instead of being bitmap-stretched (blurry) at
-            // high display scaling
-            Application.SetHighDpiMode(HighDpiMode.SystemAware);
+            // Let Windows scale the whole window at high display scaling
+            // (the fixed pixel layout stays intact), but render GDI text
+            // sharply instead of bitmap-stretching it. SystemAware was
+            // tried and left the window unscaled (tiny) at 200%.
+            Application.SetHighDpiMode(HighDpiMode.DpiUnawareGdiScaled);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new TrayApplicationContext());
