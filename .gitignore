@@ -14,6 +14,13 @@ obj/
 *.swp
 *~
 .DS_Store
+Thumbs.db
+
+## Local-only working files (not for sharing)
+.claude/
+HANDOFF.md
+*.af
+store-hero.png
 
 ## Build artifacts
 *.msix
