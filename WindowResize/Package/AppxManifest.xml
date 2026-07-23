@@ -6,8 +6,10 @@
   xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
   IgnorableNamespaces="uap rescap desktop">
 
+  <!-- Identity Name is assigned by the Store at first reservation and is
+       permanent; it does not change when the app is renamed. -->
   <Identity
-    Name="WindowsResizeCapture"
+    Name="KappeiNakano.WindowResizeforWindows"
     Publisher="CN=CBBEB0B6-F2F8-4A20-93BF-7BB185208944"
     Version="1.7.0.0"
     ProcessorArchitecture="x64" />
