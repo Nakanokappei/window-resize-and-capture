@@ -61,8 +61,14 @@ public static class WindowManager
     [DllImport("dwmapi.dll")]
     private static extern int DwmGetWindowAttribute(IntPtr hwnd, int dwAttribute, out int pvAttribute, int cbAttribute);
 
+    // SendMessageTimeout (not SendMessage) so that querying a window whose
+    // owning thread is hung cannot freeze our UI thread: it aborts quickly
+    // instead of blocking until the system hang timeout, which was surfacing
+    // as a HANG_QUIESCE crash bucket.
     [DllImport("user32.dll", CharSet = CharSet.Auto)]
-    private static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+    private static extern IntPtr SendMessageTimeout(
+        IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam,
+        uint fuFlags, uint uTimeout, out IntPtr lpdwResult);
 
     [DllImport("user32.dll")]
     private static extern IntPtr GetClassLongPtr(IntPtr hWnd, int nIndex);
@@ -99,6 +105,11 @@ public static class WindowManager
     private const IntPtr ICON_SMALL2 = 2;
     private const int GCLP_HICONSM = -34;
     private const int GCLP_HICON = -14;
+
+    // SendMessageTimeout: abort immediately if the target window is hung,
+    // and cap the wait for a merely-busy window at this many milliseconds.
+    private const uint SMTO_ABORTIFHUNG = 0x0002;
+    private const uint IconMessageTimeoutMs = 200;
 
     private const int GWL_STYLE = -16;
     private const int GWL_EXSTYLE = -20;
@@ -252,11 +263,17 @@ public static class WindowManager
         {
             IntPtr iconHandle = IntPtr.Zero;
 
-            // Try WM_GETICON: small2 → small → big
+            // Try WM_GETICON: small2 → small → big. Use SendMessageTimeout so
+            // a hung target window cannot block our UI thread; on timeout or
+            // failure the result stays zero and we fall through to the class icon.
             foreach (var sizeHint in new[] { ICON_SMALL2, ICON_SMALL, ICON_BIG })
             {
-                iconHandle = SendMessage(hWnd, WM_GETICON, sizeHint, IntPtr.Zero);
-                if (iconHandle != IntPtr.Zero) break;
+                IntPtr sendResult = SendMessageTimeout(
+                    hWnd, WM_GETICON, sizeHint, IntPtr.Zero,
+                    SMTO_ABORTIFHUNG, IconMessageTimeoutMs, out iconHandle);
+
+                if (sendResult != IntPtr.Zero && iconHandle != IntPtr.Zero) break;
+                iconHandle = IntPtr.Zero;
             }
 
             // Fall back to the window-class icon: small → large
