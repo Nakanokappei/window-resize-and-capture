@@ -40,6 +40,10 @@ public partial class SettingsStore
     public WindowPosition? Position { get; set; }
     public bool MoveToMainScreen { get; set; }
 
+    // When true, preset dimensions size the window's client area (content)
+    // rather than its outer frame, so the visible content matches the number.
+    public bool ResizeClientArea { get; set; }
+
     // True when any post-resize positioning feature is enabled, which
     // determines whether the "Current Size" menu item should appear.
     public bool IsPositioningActive =>
@@ -92,6 +96,10 @@ public partial class SettingsStore
                 _screenshotEnabled = false;
         }
     }
+
+    // When true, the screenshot captures only the window's client area
+    // (content), excluding the title bar and frame.
+    public bool CaptureClientArea { get; set; }
 
     // Launch-at-login property that dispatches to the registry or
     // StartupTask API depending on the deployment model.
@@ -248,12 +256,14 @@ public partial class SettingsStore
             BringToFront = data?.BringToFront ?? true;
             Position = data?.Position;
             MoveToMainScreen = data?.MoveToMainScreen ?? false;
+            ResizeClientArea = data?.ResizeClientArea ?? false;
 
             // Screenshot settings (bypass property setters to avoid auto-logic)
             _screenshotEnabled = data?.ScreenshotEnabled ?? false;
             _screenshotSaveToFile = data?.ScreenshotSaveToFile ?? true;
             ScreenshotSaveFolderPath = data?.ScreenshotSaveFolderPath ?? "";
             _screenshotCopyToClipboard = data?.ScreenshotCopyToClipboard ?? false;
+            CaptureClientArea = data?.CaptureClientArea ?? false;
         }
         catch { }
     }
@@ -269,10 +279,12 @@ public partial class SettingsStore
                 BringToFront = BringToFront,
                 Position = Position,
                 MoveToMainScreen = MoveToMainScreen,
+                ResizeClientArea = ResizeClientArea,
                 ScreenshotEnabled = ScreenshotEnabled,
                 ScreenshotSaveToFile = ScreenshotSaveToFile,
                 ScreenshotSaveFolderPath = ScreenshotSaveFolderPath,
-                ScreenshotCopyToClipboard = ScreenshotCopyToClipboard
+                ScreenshotCopyToClipboard = ScreenshotCopyToClipboard,
+                CaptureClientArea = CaptureClientArea
             };
             string json = JsonSerializer.Serialize(data, SettingsJsonContext.Default.SettingsData);
             File.WriteAllText(_settingsPath, json);
@@ -302,10 +314,12 @@ public partial class SettingsStore
         public bool BringToFront { get; set; } = true;
         public WindowPosition? Position { get; set; }
         public bool MoveToMainScreen { get; set; }
+        public bool ResizeClientArea { get; set; }
         public bool ScreenshotEnabled { get; set; }
         public bool ScreenshotSaveToFile { get; set; } = true;
         public string ScreenshotSaveFolderPath { get; set; } = "";
         public bool ScreenshotCopyToClipboard { get; set; }
+        public bool CaptureClientArea { get; set; }
     }
 
     // Source-generated JSON serializer context for trim-safe serialization.

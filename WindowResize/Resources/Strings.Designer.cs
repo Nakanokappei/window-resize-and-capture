@@ -90,6 +90,12 @@ namespace WindowsResizeCapture {
             }
         }
 
+        internal static string AlertResizeElevatedBody {
+            get {
+                return ResourceManager.GetString("AlertResizeElevatedBody", resourceCulture) ?? "This window belongs to an app running as administrator, so Windows will not let Window Resize & Capture resize it. Run this app as administrator to resize windows like this.";
+            }
+        }
+
         internal static string AlertButtonOK {
             get {
                 return ResourceManager.GetString("AlertButtonOK", resourceCulture) ?? "OK";
@@ -255,6 +261,18 @@ namespace WindowsResizeCapture {
         internal static string SettingsScreenshotCopyToClipboard {
             get {
                 return ResourceManager.GetString("SettingsScreenshotCopyToClipboard", resourceCulture) ?? "Copy to clipboard";
+            }
+        }
+
+        internal static string SettingsResizeClientArea {
+            get {
+                return ResourceManager.GetString("SettingsResizeClientArea", resourceCulture) ?? "Size the client area, not the whole window";
+            }
+        }
+
+        internal static string SettingsCaptureClientArea {
+            get {
+                return ResourceManager.GetString("SettingsCaptureClientArea", resourceCulture) ?? "Capture the client area only";
             }
         }
 

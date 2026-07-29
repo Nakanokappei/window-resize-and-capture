@@ -173,4 +173,13 @@
   <data name="SettingsPositionBottomRight" xml:space="preserve">
     <value>Bottom right</value>
   </data>
+  <data name="SettingsResizeClientArea" xml:space="preserve">
+    <value>Size the client area, not the whole window</value>
+  </data>
+  <data name="SettingsCaptureClientArea" xml:space="preserve">
+    <value>Capture the client area only</value>
+  </data>
+  <data name="AlertResizeElevatedBody" xml:space="preserve">
+    <value>This window belongs to an app running as administrator, so Windows will not let Window Resize &amp; Capture resize it. Run this app as administrator to resize windows like this.</value>
+  </data>
 </root>

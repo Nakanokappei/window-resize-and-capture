@@ -23,6 +23,12 @@ public static class ScreenshotHelper
     private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
 
     [DllImport("user32.dll")]
+    private static extern bool GetClientRect(IntPtr hWnd, out RECT lpRect);
+
+    [DllImport("user32.dll")]
+    private static extern bool ClientToScreen(IntPtr hWnd, ref POINT lpPoint);
+
+    [DllImport("user32.dll")]
     private static extern IntPtr GetDC(IntPtr hWnd);
 
     [DllImport("user32.dll")]
@@ -58,6 +64,12 @@ public static class ScreenshotHelper
         public int Left, Top, Right, Bottom;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
+    private struct POINT
+    {
+        public int X, Y;
+    }
+
     // ── Public API ───────────────────────────────────────────────────────
 
     // Schedule a delayed capture of the given window. The delay allows the
@@ -81,7 +93,7 @@ public static class ScreenshotHelper
 
             try
             {
-                using var rawCapture = CaptureWindowBitmap(window.Handle);
+                using var rawCapture = CaptureWindowBitmap(window.Handle, store.CaptureClientArea);
                 if (rawCapture == null)
                     return;
 
@@ -111,28 +123,31 @@ public static class ScreenshotHelper
     // Temporarily switches the thread to Per-Monitor V2 DPI awareness so
     // that GetWindowRect returns physical-pixel dimensions, avoiding the
     // quarter-capture bug under DPI virtualisation.
-    private static Bitmap? CaptureWindowBitmap(IntPtr hWnd)
+    // In client-only mode the full window is captured (the reliable
+    // PW_RENDERFULLCONTENT path) and then cropped to the client area, because
+    // PW_CLIENTONLY is ignored when PW_RENDERFULLCONTENT is set.
+    private static Bitmap? CaptureWindowBitmap(IntPtr hWnd, bool clientOnly)
     {
         IntPtr prevDpiContext = SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
         try
         {
-            if (!GetWindowRect(hWnd, out RECT rect))
+            if (!GetWindowRect(hWnd, out RECT windowRect))
                 return null;
 
-            int width = rect.Right - rect.Left;
-            int height = rect.Bottom - rect.Top;
+            int width = windowRect.Right - windowRect.Left;
+            int height = windowRect.Bottom - windowRect.Top;
             if (width <= 0 || height <= 0)
                 return null;
 
             // Create a native GDI memory DC compatible with the window's DC,
-            // then ask PrintWindow to render into it.
+            // then ask PrintWindow to render the whole window into it.
             IntPtr windowDC = GetDC(hWnd);
             IntPtr memoryDC = CreateCompatibleDC(windowDC);
             IntPtr hBitmap = CreateCompatibleBitmap(windowDC, width, height);
             IntPtr previousBitmap = SelectObject(memoryDC, hBitmap);
 
             bool success = PrintWindow(hWnd, memoryDC, PW_RENDERFULLCONTENT);
-            Bitmap? result = success ? Image.FromHbitmap(hBitmap) : null;
+            Bitmap? fullCapture = success ? Image.FromHbitmap(hBitmap) : null;
 
             // Release all GDI resources in reverse order
             SelectObject(memoryDC, previousBitmap);
@@ -140,13 +155,47 @@ public static class ScreenshotHelper
             DeleteDC(memoryDC);
             ReleaseDC(hWnd, windowDC);
 
-            return result;
+            if (fullCapture == null || !clientOnly)
+                return fullCapture;
+
+            // Crop the full-window bitmap down to the client area.
+            using (fullCapture)
+                return CropToClientArea(hWnd, fullCapture, windowRect);
         }
         finally
         {
             // Always restore the previous DPI context
             SetThreadDpiAwarenessContext(prevDpiContext);
         }
+    }
+
+    // Return the client-area sub-rectangle of a full-window capture. The
+    // client origin is located by mapping its (0,0) to screen coordinates and
+    // subtracting the window's top-left; all values are physical pixels under
+    // the Per-Monitor V2 context active during capture.
+    private static Bitmap CropToClientArea(IntPtr hWnd, Bitmap fullCapture, RECT windowRect)
+    {
+        if (!GetClientRect(hWnd, out RECT clientRect))
+            return (Bitmap)fullCapture.Clone();
+
+        int clientWidth = clientRect.Right - clientRect.Left;
+        int clientHeight = clientRect.Bottom - clientRect.Top;
+        if (clientWidth <= 0 || clientHeight <= 0)
+            return (Bitmap)fullCapture.Clone();
+
+        // Locate the client area's top-left corner within the window bitmap
+        var clientOrigin = new POINT { X = 0, Y = 0 };
+        ClientToScreen(hWnd, ref clientOrigin);
+        int offsetX = clientOrigin.X - windowRect.Left;
+        int offsetY = clientOrigin.Y - windowRect.Top;
+
+        // Clamp the crop rectangle to the captured bitmap's bounds
+        var crop = new Rectangle(offsetX, offsetY, clientWidth, clientHeight);
+        crop.Intersect(new Rectangle(0, 0, fullCapture.Width, fullCapture.Height));
+        if (crop.Width <= 0 || crop.Height <= 0)
+            return (Bitmap)fullCapture.Clone();
+
+        return fullCapture.Clone(crop, fullCapture.PixelFormat);
     }
 
     // Persist the bitmap as a PNG file using the naming convention

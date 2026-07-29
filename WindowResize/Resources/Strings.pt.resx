@@ -72,4 +72,7 @@
   <data name="SettingsPositionBottomLeft" xml:space="preserve"><value>Inferior esquerdo</value></data>
   <data name="SettingsPositionBottom" xml:space="preserve"><value>Inferior</value></data>
   <data name="SettingsPositionBottomRight" xml:space="preserve"><value>Inferior direito</value></data>
+  <data name="SettingsResizeClientArea" xml:space="preserve"><value>Redimensionar a area do cliente, nao a janela inteira</value></data>
+  <data name="SettingsCaptureClientArea" xml:space="preserve"><value>Capturar apenas a area do cliente</value></data>
+  <data name="AlertResizeElevatedBody" xml:space="preserve"><value>Esta janela pertence a um aplicativo em execucao como administrador, por isso o Windows nao permite que o Window Resize &amp; Capture a redimensione. Execute este aplicativo como administrador para redimensionar janelas como esta.</value></data>
 </root>

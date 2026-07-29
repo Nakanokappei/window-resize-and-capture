@@ -4,9 +4,23 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
 using System.Text;
 
 namespace WindowsResizeCapture;
+
+// Result of a resize attempt, so the UI can explain a failure the user did
+// not cause (rather than looking like a bug in this app).
+public enum ResizeOutcome
+{
+    Success,
+    // The target window is owned by an elevated (administrator) process,
+    // which Windows forbids a non-elevated app from resizing.
+    NeedsElevation,
+    // The window rejected the resize for another reason (fixed size,
+    // full-screen, or it closed mid-operation).
+    Failed
+}
 
 // Metadata for a single visible application window discovered by enumeration.
 public class WindowInfo
@@ -19,6 +33,9 @@ public class WindowInfo
     public int Top { get; set; }
     public int Width { get; set; }
     public int Height { get; set; }
+    // Client-area (content) dimensions, excluding the title bar and frame.
+    public int ClientWidth { get; set; }
+    public int ClientHeight { get; set; }
     public Icon? AppIcon { get; set; }
 }
 
@@ -51,6 +68,9 @@ public static class WindowManager
 
     [DllImport("user32.dll")]
     private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+
+    [DllImport("user32.dll")]
+    private static extern bool GetClientRect(IntPtr hWnd, out RECT lpRect);
 
     [DllImport("user32.dll")]
     private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
@@ -97,6 +117,12 @@ public static class WindowManager
     [DllImport("user32.dll")]
     private static extern bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFO lpmi);
 
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern IntPtr OpenProcess(uint dwDesiredAccess, bool bInheritHandle, uint dwProcessId);
+
+    [DllImport("kernel32.dll")]
+    private static extern bool CloseHandle(IntPtr hObject);
+
     // ── Constants ────────────────────────────────────────────────────────
 
     private const uint WM_GETICON = 0x007F;
@@ -121,6 +147,11 @@ public static class WindowManager
     private const uint SWP_NOMOVE = 0x0002;
     private const uint SWP_NOSIZE = 0x0001;
     private const uint SWP_NOZORDER = 0x0004;
+    private const int ERROR_ACCESS_DENIED = 5;
+
+    // Full query access; a medium-integrity process is denied this on a
+    // higher-integrity (elevated) target, which is how we detect elevation.
+    private const uint PROCESS_QUERY_INFORMATION = 0x0400;
     private const uint MONITOR_DEFAULTTONEAREST = 2;
     private const uint MONITOR_DEFAULTTOPRIMARY = 1;
     private const int SW_RESTORE = 9;
@@ -199,6 +230,9 @@ public static class WindowManager
             if (width <= 0 || height <= 0)
                 return true;
 
+            // Client-area dimensions for the client-size resize/display mode
+            GetClientRect(hWnd, out RECT clientRect);
+
             windows.Add(new WindowInfo
             {
                 Handle = hWnd,
@@ -209,6 +243,8 @@ public static class WindowManager
                 Top = rect.Top,
                 Width = width,
                 Height = height,
+                ClientWidth = clientRect.Right - clientRect.Left,
+                ClientHeight = clientRect.Bottom - clientRect.Top,
                 AppIcon = ExtractWindowIcon(hWnd)
             });
 
@@ -220,24 +256,46 @@ public static class WindowManager
 
     // Resize the given window to the preset dimensions, then optionally
     // reposition it on a target screen and bring it to the foreground.
-    // Returns false if the initial SetWindowPos resize call fails.
-    public static bool ResizeWindow(WindowInfo window, PresetSize size,
-        bool bringToFront = false, WindowPosition? position = null, bool moveToMainScreen = false)
+    // Returns an outcome so the caller can explain why a resize was refused.
+    public static ResizeOutcome ResizeWindow(WindowInfo window, PresetSize size,
+        bool bringToFront = false, WindowPosition? position = null, bool moveToMainScreen = false,
+        bool clientArea = false)
     {
+        int targetWidth = size.Width;
+        int targetHeight = size.Height;
+
+        // When sizing by client area, grow the target by the window's current
+        // non-client border (title bar + frame) so the content — not the outer
+        // frame — ends up at the requested dimensions.
+        if (clientArea &&
+            GetWindowRect(window.Handle, out RECT outerRect) &&
+            GetClientRect(window.Handle, out RECT clientRect))
+        {
+            targetWidth += (outerRect.Right - outerRect.Left) - (clientRect.Right - clientRect.Left);
+            targetHeight += (outerRect.Bottom - outerRect.Top) - (clientRect.Bottom - clientRect.Top);
+        }
+
         // Step 1 — resize without moving or changing Z-order
         bool resized = SetWindowPos(
             window.Handle, IntPtr.Zero,
-            0, 0, size.Width, size.Height,
+            0, 0, targetWidth, targetHeight,
             SWP_NOMOVE | SWP_NOZORDER);
 
-        if (!resized) return false;
+        // Distinguish an elevation block from other failures so the UI can
+        // point the user at "Run as administrator".
+        if (!resized)
+        {
+            return IsResizeBlockedByElevation(window.Handle)
+                ? ResizeOutcome.NeedsElevation
+                : ResizeOutcome.Failed;
+        }
 
         // Step 2 — snap to a screen position if any positioning is requested
         if (position != null || moveToMainScreen)
         {
             var workArea = ResolveTargetWorkArea(window.Handle, moveToMainScreen);
             var anchor = position ?? WindowPosition.Center;
-            var origin = CalculateSnapOrigin(anchor, size.Width, size.Height, workArea);
+            var origin = CalculateSnapOrigin(anchor, targetWidth, targetHeight, workArea);
 
             SetWindowPos(
                 window.Handle, IntPtr.Zero,
@@ -249,10 +307,44 @@ public static class WindowManager
         if (bringToFront)
             BringToForeground(window.Handle);
 
-        return true;
+        return ResizeOutcome.Success;
     }
 
     // ── Private helpers ──────────────────────────────────────────────────
+
+    // Decide whether a failed resize was blocked because the target window
+    // runs at a higher integrity level (e.g. as administrator) than we do.
+    // A medium-integrity process is denied PROCESS_QUERY_INFORMATION on an
+    // elevated target but granted it on a same-integrity one, so an
+    // access-denied here means the window is elevated.
+    private static bool IsResizeBlockedByElevation(IntPtr hWnd)
+    {
+        // If we are already elevated, elevation is not the blocker.
+        if (IsCurrentProcessElevated())
+            return false;
+
+        GetWindowThreadProcessId(hWnd, out uint processId);
+
+        IntPtr handle = OpenProcess(PROCESS_QUERY_INFORMATION, false, processId);
+        if (handle != IntPtr.Zero)
+        {
+            CloseHandle(handle);
+            return false;
+        }
+
+        return Marshal.GetLastWin32Error() == ERROR_ACCESS_DENIED;
+    }
+
+    // Whether this process is running with an elevated (administrator) token.
+    private static bool IsCurrentProcessElevated()
+    {
+        try
+        {
+            using var identity = WindowsIdentity.GetCurrent();
+            return new WindowsPrincipal(identity).IsInRole(WindowsBuiltInRole.Administrator);
+        }
+        catch { return false; }
+    }
 
     // Try multiple Win32 strategies to obtain the application icon for a
     // window: first WM_GETICON with decreasing size preference, then the

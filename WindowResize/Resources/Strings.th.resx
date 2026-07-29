@@ -72,4 +72,7 @@
   <data name="SettingsPositionBottomLeft" xml:space="preserve"><value>ล่างซ้าย</value></data>
   <data name="SettingsPositionBottom" xml:space="preserve"><value>ล่าง</value></data>
   <data name="SettingsPositionBottomRight" xml:space="preserve"><value>ล่างขวา</value></data>
+  <data name="SettingsResizeClientArea" xml:space="preserve"><value>ปรับขนาดพื้นที่ไคลเอนต์ ไม่ใช่ทั้งหน้าต่าง</value></data>
+  <data name="SettingsCaptureClientArea" xml:space="preserve"><value>จับภาพเฉพาะพื้นที่ไคลเอนต์</value></data>
+  <data name="AlertResizeElevatedBody" xml:space="preserve"><value>หน้าต่างนี้เป็นของแอปที่กำลังทำงานในฐานะผู้ดูแลระบบ Windows จึงไม่อนุญาตให้ Window Resize &amp; Capture ปรับขนาด โปรดเรียกใช้แอปนี้ในฐานะผู้ดูแลระบบเพื่อปรับขนาดหน้าต่างลักษณะนี้</value></data>
 </root>

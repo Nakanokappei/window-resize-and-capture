@@ -195,11 +195,18 @@ public class TrayApplicationContext : ApplicationContext
         // Determine the resolution of the display containing this window
         var screenBounds = ScreenBoundsForWindow(window);
 
-        // If any positioning feature is active, offer a "reposition only" item
+        // If any positioning feature is active, offer a "reposition only" item.
+        // Report the current size in the same coordinate system as the presets:
+        // client dimensions when client-area sizing is on, outer dimensions
+        // otherwise. Passing the matching value keeps this a pure reposition —
+        // in client mode ResizeWindow re-adds the border to preserve the frame.
         if (_store.IsPositioningActive)
         {
-            var currentSize = new PresetSize(window.Width, window.Height, Strings.MenuCurrentSize);
-            var currentItem = new ToolStripMenuItem($"{window.Width} x {window.Height}")
+            int currentWidth = _store.ResizeClientArea ? window.ClientWidth : window.Width;
+            int currentHeight = _store.ResizeClientArea ? window.ClientHeight : window.Height;
+
+            var currentSize = new PresetSize(currentWidth, currentHeight, Strings.MenuCurrentSize);
+            var currentItem = new ToolStripMenuItem($"{currentWidth} x {currentHeight}")
             {
                 ShortcutKeyDisplayString = Strings.MenuCurrentSize
             };
@@ -231,23 +238,36 @@ public class TrayApplicationContext : ApplicationContext
     // capture a screenshot if successful, or show an error dialog.
     private void PerformResize(WindowInfo window, PresetSize size)
     {
-        bool success = WindowManager.ResizeWindow(
+        var outcome = WindowManager.ResizeWindow(
             window, size,
             bringToFront: _store.BringToFront,
             position: _store.Position,
-            moveToMainScreen: _store.MoveToMainScreen);
+            moveToMainScreen: _store.MoveToMainScreen,
+            clientArea: _store.ResizeClientArea);
 
-        if (success)
+        // On success capture a screenshot; on failure explain the cause so
+        // the user doesn't mistake a Windows restriction for an app bug.
+        switch (outcome)
         {
-            ScreenshotHelper.CaptureAfterResize(window, size);
-        }
-        else
-        {
-            MessageBox.Show(
-                Strings.AlertResizeFailedBody,
-                Strings.AlertResizeFailedTitle,
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Warning);
+            case ResizeOutcome.Success:
+                ScreenshotHelper.CaptureAfterResize(window, size);
+                break;
+
+            case ResizeOutcome.NeedsElevation:
+                MessageBox.Show(
+                    Strings.AlertResizeElevatedBody,
+                    Strings.AlertResizeFailedTitle,
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                break;
+
+            default:
+                MessageBox.Show(
+                    Strings.AlertResizeFailedBody,
+                    Strings.AlertResizeFailedTitle,
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                break;
         }
     }
 

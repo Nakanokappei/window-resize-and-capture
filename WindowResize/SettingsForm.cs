@@ -20,6 +20,7 @@ public class SettingsForm : Form
     private TextBox _nameBox = null!;
     private Button _addButton = null!;
     private Button _removeButton = null!;
+    private CheckBox _resizeClientAreaCheck = null!;
     private CheckBox _launchAtLoginCheck = null!;
 
     // Screenshot tab controls
@@ -27,6 +28,7 @@ public class SettingsForm : Form
     private Panel _screenshotOptionsPanel = null!;
     private CheckBox _screenshotSaveToFileCheck = null!;
     private CheckBox _screenshotCopyToClipboardCheck = null!;
+    private CheckBox _captureClientAreaCheck = null!;
     private Button _chooseFolderButton = null!;
     private Label _folderPathLabel = null!;
 
@@ -70,12 +72,12 @@ public class SettingsForm : Form
         MaximizeBox = false;
         StartPosition = FormStartPosition.CenterScreen;
         ShowInTaskbar = true;
-        ClientSize = new Size(420, 356);
+        ClientSize = new Size(420, 384);
 
         var tabs = new TabControl
         {
             Location = new Point(8, 8),
-            Size = new Size(404, 340)
+            Size = new Size(404, 368)
         };
 
         tabs.TabPages.Add(BuildGeneralTab());
@@ -204,11 +206,26 @@ public class SettingsForm : Form
 
         tab.Controls.Add(customGroup);
 
+        // ── Size by client area ──
+        _resizeClientAreaCheck = new CheckBox
+        {
+            Text = Strings.SettingsResizeClientArea,
+            Location = new Point(12, 274),
+            AutoSize = true,
+            Checked = _store.ResizeClientArea
+        };
+        _resizeClientAreaCheck.CheckedChanged += (_, _) =>
+        {
+            _store.ResizeClientArea = _resizeClientAreaCheck.Checked;
+            _store.SaveAndNotify();
+        };
+        tab.Controls.Add(_resizeClientAreaCheck);
+
         // ── Launch at login ──
         _launchAtLoginCheck = new CheckBox
         {
             Text = Strings.SettingsLaunchAtLogin,
-            Location = new Point(12, 276),
+            Location = new Point(12, 300),
             AutoSize = true,
             Checked = _store.LaunchAtLogin
         };
@@ -246,7 +263,7 @@ public class SettingsForm : Form
         _screenshotOptionsPanel = new Panel
         {
             Location = new Point(0, 40),
-            Size = new Size(396, 86),
+            Size = new Size(396, 112),
             Visible = _store.ScreenshotEnabled
         };
 
@@ -309,6 +326,22 @@ public class SettingsForm : Form
             SynchronizeScreenshotControls();
         };
         _screenshotOptionsPanel.Controls.Add(_screenshotCopyToClipboardCheck);
+        panelY += 26;
+
+        // Capture client area only
+        _captureClientAreaCheck = new CheckBox
+        {
+            Text = Strings.SettingsCaptureClientArea,
+            Location = new Point(28, panelY),
+            AutoSize = true,
+            Checked = _store.CaptureClientArea
+        };
+        _captureClientAreaCheck.CheckedChanged += (_, _) =>
+        {
+            _store.CaptureClientArea = _captureClientAreaCheck.Checked;
+            _store.SaveAndNotify();
+        };
+        _screenshotOptionsPanel.Controls.Add(_captureClientAreaCheck);
         tab.Controls.Add(_screenshotOptionsPanel);
 
         return tab;

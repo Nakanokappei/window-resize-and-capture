@@ -72,4 +72,7 @@
   <data name="SettingsPositionBottomLeft" xml:space="preserve"><value>Kiri bawah</value></data>
   <data name="SettingsPositionBottom" xml:space="preserve"><value>Bawah</value></data>
   <data name="SettingsPositionBottomRight" xml:space="preserve"><value>Kanan bawah</value></data>
+  <data name="SettingsResizeClientArea" xml:space="preserve"><value>Ubah ukuran area klien, bukan seluruh jendela</value></data>
+  <data name="SettingsCaptureClientArea" xml:space="preserve"><value>Tangkap hanya area klien</value></data>
+  <data name="AlertResizeElevatedBody" xml:space="preserve"><value>Jendela ini milik aplikasi yang berjalan sebagai administrator, sehingga Windows tidak mengizinkan Window Resize &amp; Capture mengubah ukurannya. Jalankan aplikasi ini sebagai administrator untuk mengubah ukuran jendela seperti ini.</value></data>
 </root>

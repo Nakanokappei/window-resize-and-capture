@@ -72,4 +72,7 @@
   <data name="SettingsPositionBottomLeft" xml:space="preserve"><value>왼쪽 아래</value></data>
   <data name="SettingsPositionBottom" xml:space="preserve"><value>아래</value></data>
   <data name="SettingsPositionBottomRight" xml:space="preserve"><value>오른쪽 아래</value></data>
+  <data name="SettingsResizeClientArea" xml:space="preserve"><value>전체 창이 아닌 클라이언트 영역 크기 조정</value></data>
+  <data name="SettingsCaptureClientArea" xml:space="preserve"><value>클라이언트 영역만 캡처</value></data>
+  <data name="AlertResizeElevatedBody" xml:space="preserve"><value>이 창은 관리자 권한으로 실행 중인 앱의 창이므로 Windows가 Window Resize &amp; Capture의 크기 조정을 허용하지 않습니다. 이러한 창의 크기를 조정하려면 이 앱을 관리자 권한으로 실행하세요.</value></data>
 </root>

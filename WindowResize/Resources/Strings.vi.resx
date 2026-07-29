@@ -72,4 +72,7 @@
   <data name="SettingsPositionBottomLeft" xml:space="preserve"><value>Dưới bên trái</value></data>
   <data name="SettingsPositionBottom" xml:space="preserve"><value>Dưới</value></data>
   <data name="SettingsPositionBottomRight" xml:space="preserve"><value>Dưới bên phải</value></data>
+  <data name="SettingsResizeClientArea" xml:space="preserve"><value>Thay doi kich thuoc vung noi dung, khong phai toan bo cua so</value></data>
+  <data name="SettingsCaptureClientArea" xml:space="preserve"><value>Chi chup vung noi dung</value></data>
+  <data name="AlertResizeElevatedBody" xml:space="preserve"><value>Cua so nay thuoc ve mot ung dung dang chay voi quyen quan tri vien, nen Windows khong cho phep Window Resize &amp; Capture thay doi kich thuoc. Hay chay ung dung nay voi quyen quan tri vien de thay doi kich thuoc nhung cua so nhu vay.</value></data>
 </root>
