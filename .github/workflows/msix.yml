@@ -57,8 +57,12 @@ jobs:
           # (the XML declaration and TargetDeviceFamily MinVersion), so we
           # only verify that the Identity version matches the pushed tag and
           # fail loudly on a mismatch.
-          if ($env:GITHUB_REF -match '^refs/tags/v(\d+\.\d+)') {
-            $expected = $Matches[1] + ".0.0"
+          # Accept two- or three-component tags (v1.7 or v1.7.1) and pad the
+          # manifest's 4-part Major.Minor.Build.Revision version with zeros.
+          if ($env:GITHUB_REF -match '^refs/tags/v(\d+\.\d+(\.\d+)?)') {
+            $parts = $Matches[1].Split('.')
+            while ($parts.Count -lt 4) { $parts += '0' }
+            $expected = $parts -join '.'
             $manifest = Get-Content "$layoutDir/AppxManifest.xml" -Raw
             if ($manifest -notmatch "Identity[\s\S]*?Version=`"$([regex]::Escape($expected))`"") {
               throw "Manifest Identity Version does not match tag v$($Matches[1]). Bump AppxManifest.xml before tagging."
