@@ -2,7 +2,7 @@
 ; Build: iscc.exe WindowResize.iss
 
 #define MyAppName "Window Resize & Capture"
-#define MyAppVersion "1.7.1"
+#define MyAppVersion "1.8.0"
 #define MyAppPublisher "Kappei Nakano"
 #define MyAppURL "https://github.com/Nakanokappei/window-resize-and-capture"
 #define MyAppExeName "WindowsResizeCapture.exe"
