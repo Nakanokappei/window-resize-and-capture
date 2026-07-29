@@ -159,17 +159,17 @@ public class TrayApplicationContext : ApplicationContext
     }
 
     // Create a flat menu item for a single window, showing its icon and
-    // the owning process name as a right-aligned tag.
+    // title. No process-name tag: the item always has a size submenu, so
+    // WinForms shows the submenu arrow instead of the tag while still
+    // reserving the tag's column width, which padded the menu out to a
+    // fixed, oversized width. The app icon already identifies the app.
     private void AddFlatWindowItem(
         ToolStripMenuItem parent, WindowInfo window, Font menuFont, float maxMenuWidth)
     {
         string displayTitle = string.IsNullOrEmpty(window.Title) ? Strings.MenuUntitled : window.Title;
         string truncatedTitle = TruncateToFit(displayTitle, menuFont, maxMenuWidth);
 
-        var item = new ToolStripMenuItem(truncatedTitle)
-        {
-            ShortcutKeyDisplayString = window.ProcessName
-        };
+        var item = new ToolStripMenuItem(truncatedTitle);
 
         // Display the application's icon beside the menu item
         if (window.AppIcon != null)
