@@ -39,9 +39,11 @@ public class SettingsForm : Form
     private CheckBox _moveToMainScreenCheck = null!;
     private CheckBox[] _positionButtons = null!;
 
-    // Wingdings 3 arrow glyphs mapped to the 3x3 position grid
-    // (TL, T, TR, L, C, R, BL, B, BR)
-    private static readonly string[] PositionGlyphs = { "å", "ã", "æ", "á", "é", "â", "ç", "ä", "è" };
+    // Geometric glyphs for the 3x3 position grid (TL, T, TR, L, C, R, BL, B,
+    // BR): filled triangles pointing/leaning toward each edge or corner, and
+    // a filled circle for centre. All render in a standard Windows font.
+    private static readonly string[] PositionGlyphs =
+        { "◤", "▲", "◥", "◀", "●", "▶", "◣", "▼", "◢" };
 
     // Selected-tile background: the Windows accent blue, which keeps the
     // white glyph above the 4.5:1 contrast threshold (DodgerBlue did not).
@@ -390,7 +392,7 @@ public class SettingsForm : Form
             AutoSize = true
         });
 
-        // Screen readers cannot pronounce the Wingdings glyphs, so each
+        // Screen readers cannot pronounce the geometric glyphs, so each
         // tile carries a localized position name as its UIA name
         string[] positionNames =
         {
@@ -404,7 +406,7 @@ public class SettingsForm : Form
         int buttonGap = 2;
         _positionButtons = new CheckBox[9];
 
-        var wingdings3 = new Font("Wingdings 3", 10f);
+        var glyphFont = new Font("Segoe UI Symbol", 10f);
         for (int i = 0; i < 9; i++)
         {
             // Arrange the nine tiles as three rows of three. AutoCheck is
@@ -423,7 +425,7 @@ public class SettingsForm : Form
                     gridTop + row * (buttonSize + buttonGap)),
                 FlatStyle = FlatStyle.Flat,
                 Tag = PositionOrder[i],
-                Font = wingdings3,
+                Font = glyphFont,
                 Text = PositionGlyphs[i],
                 TextAlign = ContentAlignment.MiddleCenter,
                 Padding = Padding.Empty,
