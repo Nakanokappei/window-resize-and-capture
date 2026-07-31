@@ -44,7 +44,7 @@ Window Resize and Capture/       # リポジトリルート (W:\01_Active\Window
     ├── SettingsStore.cs         # JSON永続化・自動起動 (Registry/StartupTask)
     ├── SettingsForm.cs          # WinForms設定画面
     ├── SplashForm.cs            # スプラッシュ画面 (バージョン表示)
-    ├── ScreenshotHelper.cs      # スクリーンショットキャプチャ (PrintWindow API)
+    ├── CaptureHelper.cs         # ウィンドウキャプチャ (PrintWindow API)
     ├── Package/
     │   ├── AppxManifest.xml     # MSIX マニフェスト
     │   └── Assets/*.png         # Store 用アセット (10ファイル)
@@ -66,7 +66,7 @@ Window Resize and Capture/       # リポジトリルート (W:\01_Active\Window
 | 権限 | Accessibility権限必要 | 不要 |
 | 設定保存 | UserDefaults | JSON in AppData |
 | 自動起動 | SMAppService | Registry Run key |
-| スクリーンショット | SCScreenshotManager / CGWindowListCreateImage | PrintWindow (P/Invoke) |
+| キャプチャ | SCScreenshotManager / CGWindowListCreateImage | PrintWindow (P/Invoke) |
 | 多言語 | .lproj/Localizable.strings | .resx リソース |
 
 ### ウィンドウ列挙・リサイズ
@@ -101,16 +101,21 @@ Window Resize and Capture/       # リポジトリルート (W:\01_Active\Window
 | 1024 x 768 | XGA |
 | 800 x 600 | SVGA |
 
-### スクリーンショット
+### キャプチャ
+UI 上の呼称は "Capture"（日本語 UI は「キャプチャ」）。識別子・設定キーもこれに揃える。
 - `PrintWindow` API (P/Invoke) で対象ウィンドウをキャプチャ
 - `PW_RENDERFULLCONTENT` フラグでDWM合成ウィンドウ対応
 - リサイズ成功後500ms待機してからキャプチャ（Mac版と同じ）
+- `PrintWindow` はタイムアウトを持たないため、キャプチャはスレッドプールで実行する（v1.8.1 のハング修正）
 - ファイル名形式: `MMddHHmmss_AppName_WindowTitle.png`
 - 設定項目:
-  - `ScreenshotEnabled` — マスタートグル
-  - `ScreenshotSaveToFile` — ファイル保存
-  - `ScreenshotSaveFolderPath` — 保存先フォルダ（FolderBrowserDialogで選択）
-  - `ScreenshotCopyToClipboard` — クリップボードコピー
+  - `CaptureEnabled` — マスタートグル
+  - `CaptureSaveToFile` — ファイル保存
+  - `CaptureSaveFolderPath` — 保存先フォルダ（FolderBrowserDialogで選択）
+  - `CaptureCopyToClipboard` — クリップボードコピー
+  - `CaptureClientArea` — クライアント領域のみ切り出す
+- v1.8.1 以前の設定ファイルは `Screenshot*` キーで保存されている。`SettingsData` の
+  `Legacy*` プロパティが読み取り専用で受け、保存時に新しいキー名へ移行する
 
 #### DPIスケーリング対応
 - **問題:** DPI仮想化環境（Parallels+Retina Mac等、200%スケーリング）で左上1/4しかキャプチャされない
@@ -132,7 +137,8 @@ Window Resize and Capture/       # リポジトリルート (W:\01_Active\Window
 Desktop Bridge (MSIX + `runFullTrust`)。Win32 P/Invoke を多用するため `runFullTrust` が必須。
 
 ### Publisher 情報
-- **アプリ名:** Window Resize for Windows
+- **アプリ名:** Window Resize & Capture
+- **Identity Name:** `KappeiNakano.WindowResizeforWindows`（Store 予約時の名前。改名後も変わらない）
 - **Publisher ID:** `CN=CBBEB0B6-F2F8-4A20-93BF-7BB185208944`
 
 ### 実装状況
@@ -142,7 +148,7 @@ Desktop Bridge (MSIX + `runFullTrust`)。Win32 P/Invoke を多用するため `r
 - [x] SettingsStore.cs 修正 — `IsPackaged()` で自動起動方式を分岐
 - [x] csproj 修正 — TFM を `net8.0-windows10.0.17763.0` に変更
 - [x] GitHub Actions — `.github/workflows/msix.yml` (タグ `v*` でトリガー)
-- [ ] Store 提出 — MSIX アップロード → 審査
+- [x] Store 提出 — v1.8.0.0 公開済み、v1.8.1.0 を提出して認定待ち
 
 ### MSIX ビルド方法
 ```bash
