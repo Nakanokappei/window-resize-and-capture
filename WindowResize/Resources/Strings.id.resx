@@ -32,7 +32,7 @@
   <resheader name="version"><value>2.0</value></resheader>
   <data name="MenuResize" xml:space="preserve"><value>Ubah Ukuran</value></data>
   <data name="MenuSettings" xml:space="preserve"><value>Pengaturan...</value></data>
-  <data name="MenuQuit" xml:space="preserve"><value>Keluar Window Resize</value></data>
+  <data name="MenuQuit" xml:space="preserve"><value>Keluar Window Resize &amp; Capture</value></data>
   <data name="MenuLoading" xml:space="preserve"><value>Memuat...</value></data>
   <data name="MenuNoWindows" xml:space="preserve"><value>(Tidak ada jendela ditemukan)</value></data>
   <data name="MenuUntitled" xml:space="preserve"><value>(Tanpa Judul)</value></data>
@@ -49,7 +49,7 @@
   <data name="SettingsAdd" xml:space="preserve"><value>Tambah</value></data>
   <data name="SettingsRemove" xml:space="preserve"><value>Hapus</value></data>
   <data name="SettingsLaunchAtLogin" xml:space="preserve"><value>Jalankan Saat Login</value></data>
-  <data name="AlreadyRunningBody" xml:space="preserve"><value>Window Resize sudah berjalan.</value></data>
+  <data name="AlreadyRunningBody" xml:space="preserve"><value>Window Resize &amp; Capture sudah berjalan.</value></data>
   <data name="SettingsScreenshot" xml:space="preserve"><value>Tangkapan Layar</value></data>
   <data name="SettingsScreenshotEnabled" xml:space="preserve"><value>Ambil tangkapan layar setelah ubah ukuran</value></data>
   <data name="SettingsScreenshotSaveToFile" xml:space="preserve"><value>Simpan ke file</value></data>

@@ -23,7 +23,7 @@
 
 ### Étapes
 
-1. Cliquez sur l'**icône Window Resize** dans la zone de notification.
+1. Cliquez sur l'**icône Window Resize & Capture** dans la zone de notification.
 2. Survolez **« Redimensionner »** pour ouvrir la liste des fenêtres.
 3. Toutes les fenêtres ouvertes sont affichées avec leur **icône d'application** et leur nom au format **[Nom de l'app] Titre de la fenêtre**. Les titres longs sont automatiquement tronqués.
 4. Survolez une fenêtre pour voir les tailles prédéfinies disponibles.
@@ -48,7 +48,7 @@ Si une taille prédéfinie est supérieure à la résolution de l'écran où se 
 
 ## Paramètres
 
-Cliquez sur l'icône Window Resize dans la zone de notification, puis sélectionnez **« Paramètres... »** pour ouvrir la fenêtre des paramètres.
+Cliquez sur l'icône Window Resize & Capture dans la zone de notification, puis sélectionnez **« Paramètres... »** pour ouvrir la fenêtre des paramètres.
 
 ### Tailles intégrées
 
@@ -83,7 +83,7 @@ Pour supprimer une taille personnalisée, cliquez sur le bouton **« Supprimer �
 
 ### Lancer à la connexion
 
-Activez **« Lancer à la connexion »** pour que Window Resize démarre automatiquement lorsque vous vous connectez à Windows.
+Activez **« Lancer à la connexion »** pour que Window Resize & Capture démarre automatiquement lorsque vous vous connectez à Windows.
 
 ### Capture d'écran
 
@@ -114,7 +114,7 @@ Le menu de redimensionnement n'affiche que les fenêtres qui :
 
 - Sont actuellement visibles à l'écran
 - Possèdent une barre de titre
-- Ne sont pas les fenêtres de l'application Window Resize elle-même
+- Ne sont pas les fenêtres de l'application Window Resize & Capture elle-même
 
 Les fenêtres réduites n'apparaîtront pas dans la liste.
 

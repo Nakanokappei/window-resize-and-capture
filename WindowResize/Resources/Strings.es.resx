@@ -32,7 +32,7 @@
   <resheader name="version"><value>2.0</value></resheader>
   <data name="MenuResize" xml:space="preserve"><value>Redimensionar</value></data>
   <data name="MenuSettings" xml:space="preserve"><value>Ajustes...</value></data>
-  <data name="MenuQuit" xml:space="preserve"><value>Salir de Window Resize</value></data>
+  <data name="MenuQuit" xml:space="preserve"><value>Salir de Window Resize &amp; Capture</value></data>
   <data name="MenuLoading" xml:space="preserve"><value>Cargando...</value></data>
   <data name="MenuNoWindows" xml:space="preserve"><value>(No se encontraron ventanas)</value></data>
   <data name="MenuUntitled" xml:space="preserve"><value>(Sin título)</value></data>
@@ -49,7 +49,7 @@
   <data name="SettingsAdd" xml:space="preserve"><value>Añadir</value></data>
   <data name="SettingsRemove" xml:space="preserve"><value>Eliminar</value></data>
   <data name="SettingsLaunchAtLogin" xml:space="preserve"><value>Iniciar sesión automáticamente</value></data>
-  <data name="AlreadyRunningBody" xml:space="preserve"><value>Window Resize ya se está ejecutando.</value></data>
+  <data name="AlreadyRunningBody" xml:space="preserve"><value>Window Resize &amp; Capture ya se está ejecutando.</value></data>
   <data name="SettingsScreenshot" xml:space="preserve"><value>Captura de pantalla</value></data>
   <data name="SettingsScreenshotEnabled" xml:space="preserve"><value>Capturar pantalla tras redimensionar</value></data>
   <data name="SettingsScreenshotSaveToFile" xml:space="preserve"><value>Guardar en archivo</value></data>

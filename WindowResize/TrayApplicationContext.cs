@@ -77,8 +77,9 @@ public class TrayApplicationContext : ApplicationContext
         _contextMenu.Items.Add(settingsItem);
         _contextMenu.Items.Add(new ToolStripSeparator());
 
-        // Quit item
-        var quitItem = new ToolStripMenuItem(Strings.MenuQuit);
+        // Quit item. Its label carries the app name, whose ampersand a menu
+        // item would otherwise consume as a mnemonic prefix.
+        var quitItem = new ToolStripMenuItem(EscapeMenuMnemonics(Strings.MenuQuit));
         quitItem.Click += (_, _) =>
         {
             _notifyIcon.Visible = false;
@@ -131,7 +132,7 @@ public class TrayApplicationContext : ApplicationContext
 
             // Create an app-level parent with window count badge
             string groupLabel = $"{appWindows[0].ProcessName} ({appWindows.Count})";
-            var groupItem = new ToolStripMenuItem(groupLabel);
+            var groupItem = new ToolStripMenuItem(EscapeMenuMnemonics(groupLabel));
 
             // Use the first window's icon for the group header
             if (appWindows[0].AppIcon is { } groupIcon)
@@ -149,7 +150,7 @@ public class TrayApplicationContext : ApplicationContext
             {
                 string displayTitle = string.IsNullOrEmpty(window.Title) ? Strings.MenuUntitled : window.Title;
                 string truncatedTitle = TruncateToFit(displayTitle, menuFont, maxMenuWidth);
-                var windowItem = new ToolStripMenuItem(truncatedTitle);
+                var windowItem = new ToolStripMenuItem(EscapeMenuMnemonics(truncatedTitle));
                 BuildSizeSubmenu(windowItem, window);
                 groupItem.DropDownItems.Add(windowItem);
             }
@@ -169,7 +170,7 @@ public class TrayApplicationContext : ApplicationContext
         string displayTitle = string.IsNullOrEmpty(window.Title) ? Strings.MenuUntitled : window.Title;
         string truncatedTitle = TruncateToFit(displayTitle, menuFont, maxMenuWidth);
 
-        var item = new ToolStripMenuItem(truncatedTitle);
+        var item = new ToolStripMenuItem(EscapeMenuMnemonics(truncatedTitle));
 
         // Display the application's icon beside the menu item
         if (window.AppIcon != null)
@@ -284,6 +285,12 @@ public class TrayApplicationContext : ApplicationContext
     }
 
     // ── Utility ──────────────────────────────────────────────────────────
+
+    // Menu items read "&" as a mnemonic prefix: it disappears and the next
+    // character gains an underline. Doubling it renders a literal ampersand.
+    // Apply this after measuring text, since the doubled character is not
+    // drawn and would otherwise skew the width.
+    private static string EscapeMenuMnemonics(string text) => text.Replace("&", "&&");
 
     // Shorten text with an ellipsis so its rendered width stays within
     // maxWidth pixels. Preserves at least 10 characters before giving up.

@@ -32,7 +32,7 @@
   <resheader name="version"><value>2.0</value></resheader>
   <data name="MenuResize" xml:space="preserve"><value>크기 조절</value></data>
   <data name="MenuSettings" xml:space="preserve"><value>설정...</value></data>
-  <data name="MenuQuit" xml:space="preserve"><value>Window Resize 종료</value></data>
+  <data name="MenuQuit" xml:space="preserve"><value>Window Resize &amp; Capture 종료</value></data>
   <data name="MenuLoading" xml:space="preserve"><value>로드 중...</value></data>
   <data name="MenuNoWindows" xml:space="preserve"><value>(윈도우를 찾을 수 없음)</value></data>
   <data name="MenuUntitled" xml:space="preserve"><value>(제목 없음)</value></data>
@@ -49,7 +49,7 @@
   <data name="SettingsAdd" xml:space="preserve"><value>추가</value></data>
   <data name="SettingsRemove" xml:space="preserve"><value>제거</value></data>
   <data name="SettingsLaunchAtLogin" xml:space="preserve"><value>로그인 시 실행</value></data>
-  <data name="AlreadyRunningBody" xml:space="preserve"><value>Window Resize가 이미 실행 중입니다.</value></data>
+  <data name="AlreadyRunningBody" xml:space="preserve"><value>Window Resize &amp; Capture가 이미 실행 중입니다.</value></data>
   <data name="SettingsScreenshot" xml:space="preserve"><value>스크린샷</value></data>
   <data name="SettingsScreenshotEnabled" xml:space="preserve"><value>크기 조절 후 스크린샷 찍기</value></data>
   <data name="SettingsScreenshotSaveToFile" xml:space="preserve"><value>파일로 저장</value></data>

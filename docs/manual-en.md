@@ -23,7 +23,7 @@
 
 ### Step-by-Step
 
-1. Click the **Window Resize icon** in the system tray.
+1. Click the **Window Resize & Capture icon** in the system tray.
 2. Hover over **"Resize"** to open the window list.
 3. All currently open windows are listed with their **application icon** and name as **[App Name] Window Title**. Long titles are automatically truncated to keep the menu readable.
 4. Hover over a window to see the available preset sizes.
@@ -48,7 +48,7 @@ If a preset size is larger than the display where the window is located, that si
 
 ## Settings
 
-Click the Window Resize tray icon, then select **"Settings..."** to open the settings window.
+Click the Window Resize & Capture tray icon, then select **"Settings..."** to open the settings window.
 
 ### Built-in Sizes
 
@@ -83,7 +83,7 @@ To remove a custom size, click the **"Remove"** button next to it.
 
 ### Launch at Login
 
-Toggle **"Launch at Login"** to have Window Resize start automatically when you log in to Windows.
+Toggle **"Launch at Login"** to have Window Resize & Capture start automatically when you log in to Windows.
 
 ### Screenshot
 
@@ -114,7 +114,7 @@ The resize menu only shows windows that are:
 
 - Currently visible on screen
 - Have a title bar
-- Not the Window Resize app's own windows
+- Not the Window Resize & Capture app's own windows
 
 Minimized windows will not appear in the list.
 

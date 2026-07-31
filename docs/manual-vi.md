@@ -23,7 +23,7 @@
 
 ### Các bước thực hiện
 
-1. Nhấp vào **biểu tượng Window Resize** trong khay hệ thống.
+1. Nhấp vào **biểu tượng Window Resize & Capture** trong khay hệ thống.
 2. Di chuột qua **"Thay đổi kích thước"** để mở danh sách cửa sổ.
 3. Tất cả cửa sổ đang mở sẽ hiển thị với **biểu tượng ứng dụng** và tên theo định dạng **[Tên ứng dụng] Tiêu đề cửa sổ**. Tiêu đề dài sẽ tự động được cắt ngắn.
 4. Di chuột qua một cửa sổ để xem các kích thước đặt trước có sẵn.
@@ -48,7 +48,7 @@ Nếu kích thước đặt trước lớn hơn độ phân giải của màn h�
 
 ## Cài đặt
 
-Nhấp vào biểu tượng Window Resize trong khay, sau đó chọn **"Cài đặt..."** để mở cửa sổ cài đặt.
+Nhấp vào biểu tượng Window Resize & Capture trong khay, sau đó chọn **"Cài đặt..."** để mở cửa sổ cài đặt.
 
 ### Kích thước tích hợp
 
@@ -83,7 +83,7 @@ Bạn có thể thêm kích thước của riêng mình:
 
 ### Khởi động khi đăng nhập
 
-Bật **"Khởi động khi đăng nhập"** để Window Resize tự động khởi động khi bạn đăng nhập vào Windows.
+Bật **"Khởi động khi đăng nhập"** để Window Resize & Capture tự động khởi động khi bạn đăng nhập vào Windows.
 
 ### Ảnh chụp màn hình
 
@@ -114,7 +114,7 @@ Menu thay đổi kích thước chỉ hiển thị các cửa sổ:
 
 - Hiện đang hiển thị trên màn hình
 - Có thanh tiêu đề
-- Không phải cửa sổ của ứng dụng Window Resize
+- Không phải cửa sổ của ứng dụng Window Resize & Capture
 
 Cửa sổ đã thu nhỏ sẽ không xuất hiện trong danh sách.
 

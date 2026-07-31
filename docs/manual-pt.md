@@ -23,7 +23,7 @@
 
 ### Passo a passo
 
-1. Clique no **ícone do Window Resize** na bandeja do sistema.
+1. Clique no **ícone do Window Resize & Capture** na bandeja do sistema.
 2. Passe o mouse sobre **"Redimensionar"** para abrir a lista de janelas.
 3. Todas as janelas abertas são exibidas com seu **ícone do aplicativo** e nome no formato **[Nome do app] Título da janela**. Títulos longos são truncados automaticamente.
 4. Passe o mouse sobre uma janela para ver os tamanhos predefinidos disponíveis.
@@ -48,7 +48,7 @@ Se um tamanho predefinido for maior que a resolução da tela onde a janela est�
 
 ## Configurações
 
-Clique no ícone do Window Resize na bandeja e selecione **"Configurações..."** para abrir a janela de configurações.
+Clique no ícone do Window Resize & Capture na bandeja e selecione **"Configurações..."** para abrir a janela de configurações.
 
 ### Tamanhos integrados
 
@@ -83,7 +83,7 @@ Para remover um tamanho personalizado, clique no botão **"Remover"** ao lado de
 
 ### Iniciar ao fazer login
 
-Ative **"Iniciar ao fazer login"** para que o Window Resize inicie automaticamente quando você fizer login no Windows.
+Ative **"Iniciar ao fazer login"** para que o Window Resize & Capture inicie automaticamente quando você fizer login no Windows.
 
 ### Captura de tela
 
@@ -114,7 +114,7 @@ O menu de redimensionamento mostra apenas janelas que:
 
 - Estão atualmente visíveis na tela
 - Possuem uma barra de título
-- Não são janelas do próprio aplicativo Window Resize
+- Não são janelas do próprio aplicativo Window Resize & Capture
 
 Janelas minimizadas não aparecerão na lista.
 

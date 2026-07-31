@@ -32,7 +32,7 @@
   <resheader name="version"><value>2.0</value></resheader>
   <data name="MenuResize" xml:space="preserve"><value>تغيير الحجم</value></data>
   <data name="MenuSettings" xml:space="preserve"><value>الإعدادات...</value></data>
-  <data name="MenuQuit" xml:space="preserve"><value>إنهاء Window Resize</value></data>
+  <data name="MenuQuit" xml:space="preserve"><value>إنهاء Window Resize &amp; Capture</value></data>
   <data name="MenuLoading" xml:space="preserve"><value>جارٍ التحميل...</value></data>
   <data name="MenuNoWindows" xml:space="preserve"><value>(لم يتم العثور على نوافذ)</value></data>
   <data name="MenuUntitled" xml:space="preserve"><value>(بدون عنوان)</value></data>
@@ -49,7 +49,7 @@
   <data name="SettingsAdd" xml:space="preserve"><value>إضافة</value></data>
   <data name="SettingsRemove" xml:space="preserve"><value>إزالة</value></data>
   <data name="SettingsLaunchAtLogin" xml:space="preserve"><value>التشغيل عند تسجيل الدخول</value></data>
-  <data name="AlreadyRunningBody" xml:space="preserve"><value>Window Resize قيد التشغيل بالفعل.</value></data>
+  <data name="AlreadyRunningBody" xml:space="preserve"><value>Window Resize &amp; Capture قيد التشغيل بالفعل.</value></data>
   <data name="SettingsScreenshot" xml:space="preserve"><value>لقطة الشاشة</value></data>
   <data name="SettingsScreenshotEnabled" xml:space="preserve"><value>التقاط لقطة شاشة بعد تغيير الحجم</value></data>
   <data name="SettingsScreenshotSaveToFile" xml:space="preserve"><value>حفظ كملف</value></data>

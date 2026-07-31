@@ -48,7 +48,7 @@
     <value>Settings...</value>
   </data>
   <data name="MenuQuit" xml:space="preserve">
-    <value>Quit Window Resize</value>
+    <value>Quit Window Resize &amp; Capture</value>
   </data>
   <data name="MenuLoading" xml:space="preserve">
     <value>Loading...</value>
@@ -102,7 +102,7 @@
   </data>
   <!-- Already running -->
   <data name="AlreadyRunningBody" xml:space="preserve">
-    <value>Window Resize is already running.</value>
+    <value>Window Resize &amp; Capture is already running.</value>
   </data>
   <!-- Screenshot settings -->
   <data name="SettingsScreenshot" xml:space="preserve">

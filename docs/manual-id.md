@@ -23,7 +23,7 @@
 
 ### Langkah-langkah
 
-1. Klik **ikon Window Resize** di system tray.
+1. Klik **ikon Window Resize & Capture** di system tray.
 2. Arahkan kursor ke **"Ubah Ukuran"** untuk membuka daftar jendela.
 3. Semua jendela yang terbuka ditampilkan dengan **ikon aplikasi** dan nama dalam format **[Nama Aplikasi] Judul Jendela**. Judul yang panjang akan dipotong secara otomatis.
 4. Arahkan kursor ke jendela untuk melihat ukuran preset yang tersedia.
@@ -48,7 +48,7 @@ Jika ukuran preset lebih besar dari resolusi layar tempat jendela berada, ukuran
 
 ## Pengaturan
 
-Klik ikon Window Resize di tray, lalu pilih **"Pengaturan..."** untuk membuka jendela pengaturan.
+Klik ikon Window Resize & Capture di tray, lalu pilih **"Pengaturan..."** untuk membuka jendela pengaturan.
 
 ### Ukuran Bawaan
 
@@ -83,7 +83,7 @@ Untuk menghapus ukuran kustom, klik tombol **"Hapus"** di sampingnya.
 
 ### Mulai saat Login
 
-Aktifkan **"Mulai saat Login"** agar Window Resize otomatis berjalan saat Anda login ke Windows.
+Aktifkan **"Mulai saat Login"** agar Window Resize & Capture otomatis berjalan saat Anda login ke Windows.
 
 ### Tangkapan Layar
 
@@ -114,7 +114,7 @@ Menu ubah ukuran hanya menampilkan jendela yang:
 
 - Saat ini terlihat di layar
 - Memiliki bilah judul
-- Bukan jendela milik aplikasi Window Resize sendiri
+- Bukan jendela milik aplikasi Window Resize & Capture sendiri
 
 Jendela yang diminimalkan tidak akan muncul di daftar.
 

@@ -32,7 +32,7 @@
   <resheader name="version"><value>2.0</value></resheader>
   <data name="MenuResize" xml:space="preserve"><value>आकार बदलें</value></data>
   <data name="MenuSettings" xml:space="preserve"><value>सेटिंग्स...</value></data>
-  <data name="MenuQuit" xml:space="preserve"><value>Window Resize बंद करें</value></data>
+  <data name="MenuQuit" xml:space="preserve"><value>Window Resize &amp; Capture बंद करें</value></data>
   <data name="MenuLoading" xml:space="preserve"><value>लोड हो रहा है...</value></data>
   <data name="MenuNoWindows" xml:space="preserve"><value>(कोई विंडो नहीं मिली)</value></data>
   <data name="MenuUntitled" xml:space="preserve"><value>(बिना शीर्षक)</value></data>
@@ -49,7 +49,7 @@
   <data name="SettingsAdd" xml:space="preserve"><value>जोड़ें</value></data>
   <data name="SettingsRemove" xml:space="preserve"><value>हटाएँ</value></data>
   <data name="SettingsLaunchAtLogin" xml:space="preserve"><value>लॉगिन पर शुरू करें</value></data>
-  <data name="AlreadyRunningBody" xml:space="preserve"><value>Window Resize पहले से चल रहा है।</value></data>
+  <data name="AlreadyRunningBody" xml:space="preserve"><value>Window Resize &amp; Capture पहले से चल रहा है।</value></data>
   <data name="SettingsScreenshot" xml:space="preserve"><value>स्क्रीनशॉट</value></data>
   <data name="SettingsScreenshotEnabled" xml:space="preserve"><value>आकार बदलने के बाद स्क्रीनशॉट लें</value></data>
   <data name="SettingsScreenshotSaveToFile" xml:space="preserve"><value>फ़ाइल में सहेजें</value></data>

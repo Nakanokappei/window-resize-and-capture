@@ -23,7 +23,7 @@
 
 ### Schritt für Schritt
 
-1. Klicken Sie auf das **Window Resize-Symbol** im Infobereich.
+1. Klicken Sie auf das **Window Resize & Capture-Symbol** im Infobereich.
 2. Bewegen Sie den Mauszeiger über **„Größe ändern"**, um die Fensterliste zu öffnen.
 3. Alle derzeit geöffneten Fenster werden mit ihrem **App-Symbol** und Namen im Format **[App-Name] Fenstertitel** angezeigt. Lange Titel werden automatisch gekürzt.
 4. Bewegen Sie den Mauszeiger über ein Fenster, um die verfügbaren Voreinstellungen zu sehen.
@@ -48,7 +48,7 @@ Wenn eine Voreinstellung größer als die Auflösung des Bildschirms ist, auf de
 
 ## Einstellungen
 
-Klicken Sie auf das Window Resize-Infobereich-Symbol und wählen Sie **„Einstellungen..."**, um das Einstellungsfenster zu öffnen.
+Klicken Sie auf das Window Resize & Capture-Infobereich-Symbol und wählen Sie **„Einstellungen..."**, um das Einstellungsfenster zu öffnen.
 
 ### Integrierte Größen
 
@@ -83,7 +83,7 @@ Um eine benutzerdefinierte Größe zu entfernen, klicken Sie auf die Schaltfläc
 
 ### Bei Anmeldung starten
 
-Aktivieren Sie **„Bei Anmeldung starten"**, damit Window Resize automatisch startet, wenn Sie sich bei Windows anmelden.
+Aktivieren Sie **„Bei Anmeldung starten"**, damit Window Resize & Capture automatisch startet, wenn Sie sich bei Windows anmelden.
 
 ### Screenshot
 
@@ -114,7 +114,7 @@ Das Größenänderungsmenü zeigt nur Fenster, die:
 
 - Derzeit auf dem Bildschirm sichtbar sind
 - Eine Titelleiste haben
-- Nicht die eigenen Fenster der Window Resize-App sind
+- Nicht die eigenen Fenster der Window Resize & Capture-App sind
 
 Minimierte Fenster werden nicht in der Liste angezeigt.
 

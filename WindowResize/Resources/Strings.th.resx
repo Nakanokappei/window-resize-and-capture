@@ -32,7 +32,7 @@
   <resheader name="version"><value>2.0</value></resheader>
   <data name="MenuResize" xml:space="preserve"><value>ปรับขนาด</value></data>
   <data name="MenuSettings" xml:space="preserve"><value>การตั้งค่า...</value></data>
-  <data name="MenuQuit" xml:space="preserve"><value>ออกจาก Window Resize</value></data>
+  <data name="MenuQuit" xml:space="preserve"><value>ออกจาก Window Resize &amp; Capture</value></data>
   <data name="MenuLoading" xml:space="preserve"><value>กำลังโหลด...</value></data>
   <data name="MenuNoWindows" xml:space="preserve"><value>(ไม่พบหน้าต่าง)</value></data>
   <data name="MenuUntitled" xml:space="preserve"><value>(ไม่มีชื่อ)</value></data>
@@ -49,7 +49,7 @@
   <data name="SettingsAdd" xml:space="preserve"><value>เพิ่ม</value></data>
   <data name="SettingsRemove" xml:space="preserve"><value>ลบ</value></data>
   <data name="SettingsLaunchAtLogin" xml:space="preserve"><value>เปิดเมื่อเข้าสู่ระบบ</value></data>
-  <data name="AlreadyRunningBody" xml:space="preserve"><value>Window Resize กำลังทำงานอยู่แล้ว</value></data>
+  <data name="AlreadyRunningBody" xml:space="preserve"><value>Window Resize &amp; Capture กำลังทำงานอยู่แล้ว</value></data>
   <data name="SettingsScreenshot" xml:space="preserve"><value>ภาพหน้าจอ</value></data>
   <data name="SettingsScreenshotEnabled" xml:space="preserve"><value>ถ่ายภาพหน้าจอหลังปรับขนาด</value></data>
   <data name="SettingsScreenshotSaveToFile" xml:space="preserve"><value>บันทึกเป็นไฟล์</value></data>
