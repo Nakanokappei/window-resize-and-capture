@@ -236,7 +236,7 @@ public class TrayApplicationContext : ApplicationContext
     // ── Actions ──────────────────────────────────────────────────────────
 
     // Execute the resize with all configured behaviour options, then
-    // capture a screenshot if successful, or show an error dialog.
+    // capture the window if successful, or show an error dialog.
     private void PerformResize(WindowInfo window, PresetSize size)
     {
         var outcome = WindowManager.ResizeWindow(
@@ -246,12 +246,12 @@ public class TrayApplicationContext : ApplicationContext
             moveToMainScreen: _store.MoveToMainScreen,
             clientArea: _store.ResizeClientArea);
 
-        // On success capture a screenshot; on failure explain the cause so
+        // On success capture the window; on failure explain the cause so
         // the user doesn't mistake a Windows restriction for an app bug.
         switch (outcome)
         {
             case ResizeOutcome.Success:
-                ScreenshotHelper.CaptureAfterResize(window, size);
+                CaptureHelper.CaptureAfterResize(window, size);
                 break;
 
             case ResizeOutcome.NeedsElevation:

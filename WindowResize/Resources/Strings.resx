@@ -104,23 +104,23 @@
   <data name="AlreadyRunningBody" xml:space="preserve">
     <value>Window Resize &amp; Capture is already running.</value>
   </data>
-  <!-- Screenshot settings -->
-  <data name="SettingsScreenshot" xml:space="preserve">
-    <value>Screenshot</value>
+  <!-- Capture settings -->
+  <data name="SettingsCapture" xml:space="preserve">
+    <value>Capture</value>
   </data>
-  <data name="SettingsScreenshotEnabled" xml:space="preserve">
-    <value>Take screenshot after resize</value>
+  <data name="SettingsCaptureEnabled" xml:space="preserve">
+    <value>Capture after resize</value>
   </data>
-  <data name="SettingsScreenshotSaveToFile" xml:space="preserve">
+  <data name="SettingsCaptureSaveToFile" xml:space="preserve">
     <value>Save to file</value>
   </data>
-  <data name="SettingsScreenshotChooseFolder" xml:space="preserve">
+  <data name="SettingsCaptureChooseFolder" xml:space="preserve">
     <value>Choose Folder...</value>
   </data>
-  <data name="SettingsScreenshotCopyToClipboard" xml:space="preserve">
+  <data name="SettingsCaptureCopyToClipboard" xml:space="preserve">
     <value>Copy to clipboard</value>
   </data>
-  <data name="SettingsScreenshotNoFolderSelected" xml:space="preserve">
+  <data name="SettingsCaptureNoFolderSelected" xml:space="preserve">
     <value>No folder selected</value>
   </data>
   <!-- Behaviour settings -->

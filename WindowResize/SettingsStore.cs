@@ -49,56 +49,56 @@ public partial class SettingsStore
     public bool IsPositioningActive =>
         BringToFront || Position != null || MoveToMainScreen;
 
-    // Screenshot destination settings with smart auto-toggle logic:
-    //  - Enabling screenshots with no destination auto-enables clipboard.
+    // Capture destination settings with smart auto-toggle logic:
+    //  - Enabling captures with no destination auto-enables clipboard.
     //  - Disabling all destinations auto-disables the master toggle.
 
-    private bool _screenshotEnabled;
-    public bool ScreenshotEnabled
+    private bool _captureEnabled;
+    public bool CaptureEnabled
     {
-        get => _screenshotEnabled;
+        get => _captureEnabled;
         set
         {
-            _screenshotEnabled = value;
+            _captureEnabled = value;
 
             // If enabling with no output selected, default to clipboard
-            if (value && !ScreenshotSaveToFile && !ScreenshotCopyToClipboard)
-                ScreenshotCopyToClipboard = true;
+            if (value && !CaptureSaveToFile && !CaptureCopyToClipboard)
+                CaptureCopyToClipboard = true;
         }
     }
 
-    private bool _screenshotSaveToFile = true;
-    public bool ScreenshotSaveToFile
+    private bool _captureSaveToFile = true;
+    public bool CaptureSaveToFile
     {
-        get => _screenshotSaveToFile;
+        get => _captureSaveToFile;
         set
         {
-            _screenshotSaveToFile = value;
+            _captureSaveToFile = value;
 
             // Turn off the master toggle when no destination remains
-            if (!value && !ScreenshotCopyToClipboard)
-                _screenshotEnabled = false;
+            if (!value && !CaptureCopyToClipboard)
+                _captureEnabled = false;
         }
     }
 
-    public string ScreenshotSaveFolderPath { get; set; } = "";
+    public string CaptureSaveFolderPath { get; set; } = "";
 
-    private bool _screenshotCopyToClipboard;
-    public bool ScreenshotCopyToClipboard
+    private bool _captureCopyToClipboard;
+    public bool CaptureCopyToClipboard
     {
-        get => _screenshotCopyToClipboard;
+        get => _captureCopyToClipboard;
         set
         {
-            _screenshotCopyToClipboard = value;
+            _captureCopyToClipboard = value;
 
             // Turn off the master toggle when no destination remains
-            if (!value && !ScreenshotSaveToFile)
-                _screenshotEnabled = false;
+            if (!value && !CaptureSaveToFile)
+                _captureEnabled = false;
         }
     }
 
-    // When true, the screenshot captures only the window's client area
-    // (content), excluding the title bar and frame.
+    // When true, only the window's client area (content) is captured,
+    // excluding the title bar and frame.
     public bool CaptureClientArea { get; set; }
 
     // Launch-at-login property that dispatches to the registry or
@@ -237,7 +237,7 @@ public partial class SettingsStore
     }
 
     // Read settings from the JSON file into this instance's properties.
-    // Uses backing fields for screenshot booleans to avoid triggering the
+    // Uses backing fields for capture booleans to avoid triggering the
     // auto-enable/disable logic during deserialization.
     private void Load()
     {
@@ -258,11 +258,15 @@ public partial class SettingsStore
             MoveToMainScreen = data?.MoveToMainScreen ?? false;
             ResizeClientArea = data?.ResizeClientArea ?? false;
 
-            // Screenshot settings (bypass property setters to avoid auto-logic)
-            _screenshotEnabled = data?.ScreenshotEnabled ?? false;
-            _screenshotSaveToFile = data?.ScreenshotSaveToFile ?? true;
-            ScreenshotSaveFolderPath = data?.ScreenshotSaveFolderPath ?? "";
-            _screenshotCopyToClipboard = data?.ScreenshotCopyToClipboard ?? false;
+            // Capture settings (bypass property setters to avoid auto-logic).
+            // Each falls back to the pre-rename key so that upgrading from
+            // v1.8.1 or earlier preserves the user's choices.
+            _captureEnabled = data?.CaptureEnabled ?? data?.LegacyCaptureEnabled ?? false;
+            _captureSaveToFile = data?.CaptureSaveToFile ?? data?.LegacyCaptureSaveToFile ?? true;
+            CaptureSaveFolderPath =
+                data?.CaptureSaveFolderPath ?? data?.LegacyCaptureSaveFolderPath ?? "";
+            _captureCopyToClipboard =
+                data?.CaptureCopyToClipboard ?? data?.LegacyCaptureCopyToClipboard ?? false;
             CaptureClientArea = data?.CaptureClientArea ?? false;
         }
         catch { }
@@ -280,10 +284,10 @@ public partial class SettingsStore
                 Position = Position,
                 MoveToMainScreen = MoveToMainScreen,
                 ResizeClientArea = ResizeClientArea,
-                ScreenshotEnabled = ScreenshotEnabled,
-                ScreenshotSaveToFile = ScreenshotSaveToFile,
-                ScreenshotSaveFolderPath = ScreenshotSaveFolderPath,
-                ScreenshotCopyToClipboard = ScreenshotCopyToClipboard,
+                CaptureEnabled = CaptureEnabled,
+                CaptureSaveToFile = CaptureSaveToFile,
+                CaptureSaveFolderPath = CaptureSaveFolderPath,
+                CaptureCopyToClipboard = CaptureCopyToClipboard,
                 CaptureClientArea = CaptureClientArea
             };
             string json = JsonSerializer.Serialize(data, SettingsJsonContext.Default.SettingsData);
@@ -307,7 +311,9 @@ public partial class SettingsStore
         return false;
     }
 
-    // JSON-serializable DTO mirroring all persisted fields.
+    // JSON-serializable DTO mirroring all persisted fields. The capture
+    // fields are nullable so that "key absent" is distinguishable from a
+    // stored false, which is what lets the pre-rename keys below take over.
     private class SettingsData
     {
         public List<PresetSize>? CustomSizes { get; set; }
@@ -315,11 +321,31 @@ public partial class SettingsStore
         public WindowPosition? Position { get; set; }
         public bool MoveToMainScreen { get; set; }
         public bool ResizeClientArea { get; set; }
-        public bool ScreenshotEnabled { get; set; }
-        public bool ScreenshotSaveToFile { get; set; } = true;
-        public string ScreenshotSaveFolderPath { get; set; } = "";
-        public bool ScreenshotCopyToClipboard { get; set; }
+        public bool? CaptureEnabled { get; set; }
+        public bool? CaptureSaveToFile { get; set; }
+        public string? CaptureSaveFolderPath { get; set; }
+        public bool? CaptureCopyToClipboard { get; set; }
         public bool CaptureClientArea { get; set; }
+
+        // Key names written by v1.8.1 and earlier, when the feature was
+        // called "screenshot". They are read so that an existing install
+        // keeps its preferences, and never written, so the file converts to
+        // the current names the first time a setting changes.
+        [JsonPropertyName("ScreenshotEnabled")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? LegacyCaptureEnabled { get; set; }
+
+        [JsonPropertyName("ScreenshotSaveToFile")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? LegacyCaptureSaveToFile { get; set; }
+
+        [JsonPropertyName("ScreenshotSaveFolderPath")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? LegacyCaptureSaveFolderPath { get; set; }
+
+        [JsonPropertyName("ScreenshotCopyToClipboard")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public bool? LegacyCaptureCopyToClipboard { get; set; }
     }
 
     // Source-generated JSON serializer context for trim-safe serialization.

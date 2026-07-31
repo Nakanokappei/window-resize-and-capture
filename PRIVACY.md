@@ -21,9 +21,9 @@ Window Resize & Capture is a system tray utility that resizes application window
 
 The app stores the following data **only on your local device**:
 
-- **User preferences** — custom window sizes, launch-at-login setting, and screenshot options are saved in a JSON file located at `%APPDATA%\WindowsResizeCapture\settings.json`
+- **User preferences** — custom window sizes, launch-at-login setting, and capture options are saved in a JSON file located at `%APPDATA%\WindowsResizeCapture\settings.json`
 - **Launch at login** — if enabled, a registry entry is created under `HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
-- **Screenshots** — if the screenshot feature is enabled by the user, captured images are saved to a folder chosen by the user and/or copied to the system clipboard. Screenshots are never uploaded or transmitted.
+- **Captures** — if the capture feature is enabled by the user, captured images are saved to a folder chosen by the user and/or copied to the system clipboard. Captures are never uploaded or transmitted.
 
 None of this data is sent to any server, third party, or external service.
 

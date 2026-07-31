@@ -50,12 +50,12 @@
   <data name="SettingsRemove" xml:space="preserve"><value>Supprimer</value></data>
   <data name="SettingsLaunchAtLogin" xml:space="preserve"><value>Lancer au démarrage</value></data>
   <data name="AlreadyRunningBody" xml:space="preserve"><value>Window Resize &amp; Capture est déjà en cours d'exécution.</value></data>
-  <data name="SettingsScreenshot" xml:space="preserve"><value>Capture d'écran</value></data>
-  <data name="SettingsScreenshotEnabled" xml:space="preserve"><value>Prendre une capture après le redimensionnement</value></data>
-  <data name="SettingsScreenshotSaveToFile" xml:space="preserve"><value>Enregistrer dans un fichier</value></data>
-  <data name="SettingsScreenshotChooseFolder" xml:space="preserve"><value>Choisir un dossier...</value></data>
-  <data name="SettingsScreenshotCopyToClipboard" xml:space="preserve"><value>Copier dans le presse-papiers</value></data>
-  <data name="SettingsScreenshotNoFolderSelected" xml:space="preserve"><value>Aucun dossier sélectionné</value></data>
+  <data name="SettingsCapture" xml:space="preserve"><value>Capture d'écran</value></data>
+  <data name="SettingsCaptureEnabled" xml:space="preserve"><value>Prendre une capture après le redimensionnement</value></data>
+  <data name="SettingsCaptureSaveToFile" xml:space="preserve"><value>Enregistrer dans un fichier</value></data>
+  <data name="SettingsCaptureChooseFolder" xml:space="preserve"><value>Choisir un dossier...</value></data>
+  <data name="SettingsCaptureCopyToClipboard" xml:space="preserve"><value>Copier dans le presse-papiers</value></data>
+  <data name="SettingsCaptureNoFolderSelected" xml:space="preserve"><value>Aucun dossier sélectionné</value></data>
   <data name="SettingsBehaviour" xml:space="preserve"><value>Comportement</value></data>
   <data name="SettingsBringToFront" xml:space="preserve"><value>Mettre la fenêtre au premier plan après le redimensionnement</value></data>
   <data name="SettingsWindowPosition" xml:space="preserve"><value>Position après redimensionnement</value></data>

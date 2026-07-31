@@ -50,12 +50,12 @@
   <data name="SettingsRemove" xml:space="preserve"><value>ลบ</value></data>
   <data name="SettingsLaunchAtLogin" xml:space="preserve"><value>เปิดเมื่อเข้าสู่ระบบ</value></data>
   <data name="AlreadyRunningBody" xml:space="preserve"><value>Window Resize &amp; Capture กำลังทำงานอยู่แล้ว</value></data>
-  <data name="SettingsScreenshot" xml:space="preserve"><value>ภาพหน้าจอ</value></data>
-  <data name="SettingsScreenshotEnabled" xml:space="preserve"><value>ถ่ายภาพหน้าจอหลังปรับขนาด</value></data>
-  <data name="SettingsScreenshotSaveToFile" xml:space="preserve"><value>บันทึกเป็นไฟล์</value></data>
-  <data name="SettingsScreenshotChooseFolder" xml:space="preserve"><value>เลือกโฟลเดอร์...</value></data>
-  <data name="SettingsScreenshotCopyToClipboard" xml:space="preserve"><value>คัดลอกไปยังคลิปบอร์ด</value></data>
-  <data name="SettingsScreenshotNoFolderSelected" xml:space="preserve"><value>ยังไม่ได้เลือกโฟลเดอร์</value></data>
+  <data name="SettingsCapture" xml:space="preserve"><value>ภาพหน้าจอ</value></data>
+  <data name="SettingsCaptureEnabled" xml:space="preserve"><value>ถ่ายภาพหน้าจอหลังปรับขนาด</value></data>
+  <data name="SettingsCaptureSaveToFile" xml:space="preserve"><value>บันทึกเป็นไฟล์</value></data>
+  <data name="SettingsCaptureChooseFolder" xml:space="preserve"><value>เลือกโฟลเดอร์...</value></data>
+  <data name="SettingsCaptureCopyToClipboard" xml:space="preserve"><value>คัดลอกไปยังคลิปบอร์ด</value></data>
+  <data name="SettingsCaptureNoFolderSelected" xml:space="preserve"><value>ยังไม่ได้เลือกโฟลเดอร์</value></data>
   <data name="SettingsBehaviour" xml:space="preserve"><value>พฤติกรรม</value></data>
   <data name="SettingsBringToFront" xml:space="preserve"><value>นำหน้าต่างมาด้านหน้าหลังปรับขนาด</value></data>
   <data name="SettingsWindowPosition" xml:space="preserve"><value>ตำแหน่งหลังปรับขนาด</value></data>

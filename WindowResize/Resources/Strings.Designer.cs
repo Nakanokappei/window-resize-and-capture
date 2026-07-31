@@ -234,33 +234,33 @@ namespace WindowsResizeCapture {
             }
         }
 
-        internal static string SettingsScreenshot {
+        internal static string SettingsCapture {
             get {
-                return ResourceManager.GetString("SettingsScreenshot", resourceCulture) ?? "Screenshot";
+                return ResourceManager.GetString("SettingsCapture", resourceCulture) ?? "Capture";
             }
         }
 
-        internal static string SettingsScreenshotEnabled {
+        internal static string SettingsCaptureEnabled {
             get {
-                return ResourceManager.GetString("SettingsScreenshotEnabled", resourceCulture) ?? "Take screenshot after resize";
+                return ResourceManager.GetString("SettingsCaptureEnabled", resourceCulture) ?? "Capture after resize";
             }
         }
 
-        internal static string SettingsScreenshotSaveToFile {
+        internal static string SettingsCaptureSaveToFile {
             get {
-                return ResourceManager.GetString("SettingsScreenshotSaveToFile", resourceCulture) ?? "Save to file";
+                return ResourceManager.GetString("SettingsCaptureSaveToFile", resourceCulture) ?? "Save to file";
             }
         }
 
-        internal static string SettingsScreenshotChooseFolder {
+        internal static string SettingsCaptureChooseFolder {
             get {
-                return ResourceManager.GetString("SettingsScreenshotChooseFolder", resourceCulture) ?? "Choose Folder...";
+                return ResourceManager.GetString("SettingsCaptureChooseFolder", resourceCulture) ?? "Choose Folder...";
             }
         }
 
-        internal static string SettingsScreenshotCopyToClipboard {
+        internal static string SettingsCaptureCopyToClipboard {
             get {
-                return ResourceManager.GetString("SettingsScreenshotCopyToClipboard", resourceCulture) ?? "Copy to clipboard";
+                return ResourceManager.GetString("SettingsCaptureCopyToClipboard", resourceCulture) ?? "Copy to clipboard";
             }
         }
 
@@ -276,9 +276,9 @@ namespace WindowsResizeCapture {
             }
         }
 
-        internal static string SettingsScreenshotNoFolderSelected {
+        internal static string SettingsCaptureNoFolderSelected {
             get {
-                return ResourceManager.GetString("SettingsScreenshotNoFolderSelected", resourceCulture) ?? "No folder selected";
+                return ResourceManager.GetString("SettingsCaptureNoFolderSelected", resourceCulture) ?? "No folder selected";
             }
         }
 

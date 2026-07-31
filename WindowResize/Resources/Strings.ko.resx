@@ -50,12 +50,12 @@
   <data name="SettingsRemove" xml:space="preserve"><value>제거</value></data>
   <data name="SettingsLaunchAtLogin" xml:space="preserve"><value>로그인 시 실행</value></data>
   <data name="AlreadyRunningBody" xml:space="preserve"><value>Window Resize &amp; Capture가 이미 실행 중입니다.</value></data>
-  <data name="SettingsScreenshot" xml:space="preserve"><value>스크린샷</value></data>
-  <data name="SettingsScreenshotEnabled" xml:space="preserve"><value>크기 조절 후 스크린샷 찍기</value></data>
-  <data name="SettingsScreenshotSaveToFile" xml:space="preserve"><value>파일로 저장</value></data>
-  <data name="SettingsScreenshotChooseFolder" xml:space="preserve"><value>폴더 선택...</value></data>
-  <data name="SettingsScreenshotCopyToClipboard" xml:space="preserve"><value>클립보드에 복사</value></data>
-  <data name="SettingsScreenshotNoFolderSelected" xml:space="preserve"><value>폴더가 선택되지 않음</value></data>
+  <data name="SettingsCapture" xml:space="preserve"><value>스크린샷</value></data>
+  <data name="SettingsCaptureEnabled" xml:space="preserve"><value>크기 조절 후 스크린샷 찍기</value></data>
+  <data name="SettingsCaptureSaveToFile" xml:space="preserve"><value>파일로 저장</value></data>
+  <data name="SettingsCaptureChooseFolder" xml:space="preserve"><value>폴더 선택...</value></data>
+  <data name="SettingsCaptureCopyToClipboard" xml:space="preserve"><value>클립보드에 복사</value></data>
+  <data name="SettingsCaptureNoFolderSelected" xml:space="preserve"><value>폴더가 선택되지 않음</value></data>
   <data name="SettingsBehaviour" xml:space="preserve"><value>동작</value></data>
   <data name="SettingsBringToFront" xml:space="preserve"><value>크기 조절 후 창을 맨 앞으로</value></data>
   <data name="SettingsWindowPosition" xml:space="preserve"><value>크기 조절 후 위치</value></data>

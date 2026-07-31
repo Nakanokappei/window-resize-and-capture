@@ -50,12 +50,12 @@
   <data name="SettingsRemove" xml:space="preserve"><value>Hapus</value></data>
   <data name="SettingsLaunchAtLogin" xml:space="preserve"><value>Jalankan Saat Login</value></data>
   <data name="AlreadyRunningBody" xml:space="preserve"><value>Window Resize &amp; Capture sudah berjalan.</value></data>
-  <data name="SettingsScreenshot" xml:space="preserve"><value>Tangkapan Layar</value></data>
-  <data name="SettingsScreenshotEnabled" xml:space="preserve"><value>Ambil tangkapan layar setelah ubah ukuran</value></data>
-  <data name="SettingsScreenshotSaveToFile" xml:space="preserve"><value>Simpan ke file</value></data>
-  <data name="SettingsScreenshotChooseFolder" xml:space="preserve"><value>Pilih Folder...</value></data>
-  <data name="SettingsScreenshotCopyToClipboard" xml:space="preserve"><value>Salin ke papan klip</value></data>
-  <data name="SettingsScreenshotNoFolderSelected" xml:space="preserve"><value>Belum ada folder dipilih</value></data>
+  <data name="SettingsCapture" xml:space="preserve"><value>Tangkapan Layar</value></data>
+  <data name="SettingsCaptureEnabled" xml:space="preserve"><value>Ambil tangkapan layar setelah ubah ukuran</value></data>
+  <data name="SettingsCaptureSaveToFile" xml:space="preserve"><value>Simpan ke file</value></data>
+  <data name="SettingsCaptureChooseFolder" xml:space="preserve"><value>Pilih Folder...</value></data>
+  <data name="SettingsCaptureCopyToClipboard" xml:space="preserve"><value>Salin ke papan klip</value></data>
+  <data name="SettingsCaptureNoFolderSelected" xml:space="preserve"><value>Belum ada folder dipilih</value></data>
   <data name="SettingsBehaviour" xml:space="preserve"><value>Perilaku</value></data>
   <data name="SettingsBringToFront" xml:space="preserve"><value>Bawa jendela ke depan setelah mengubah ukuran</value></data>
   <data name="SettingsWindowPosition" xml:space="preserve"><value>Posisi setelah mengubah ukuran</value></data>

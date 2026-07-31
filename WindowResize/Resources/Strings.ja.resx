@@ -50,12 +50,12 @@
   <data name="SettingsRemove" xml:space="preserve"><value>削除</value></data>
   <data name="SettingsLaunchAtLogin" xml:space="preserve"><value>ログイン時に起動</value></data>
   <data name="AlreadyRunningBody" xml:space="preserve"><value>Window Resize &amp; Capture は既に実行中です。</value></data>
-  <data name="SettingsScreenshot" xml:space="preserve"><value>スクリーンショット</value></data>
-  <data name="SettingsScreenshotEnabled" xml:space="preserve"><value>リサイズ後にスクリーンショットを撮る</value></data>
-  <data name="SettingsScreenshotSaveToFile" xml:space="preserve"><value>ファイルに保存</value></data>
-  <data name="SettingsScreenshotChooseFolder" xml:space="preserve"><value>フォルダを選択...</value></data>
-  <data name="SettingsScreenshotCopyToClipboard" xml:space="preserve"><value>クリップボードにコピー</value></data>
-  <data name="SettingsScreenshotNoFolderSelected" xml:space="preserve"><value>フォルダが選択されていません</value></data>
+  <data name="SettingsCapture" xml:space="preserve"><value>キャプチャ</value></data>
+  <data name="SettingsCaptureEnabled" xml:space="preserve"><value>リサイズ後にキャプチャする</value></data>
+  <data name="SettingsCaptureSaveToFile" xml:space="preserve"><value>ファイルに保存</value></data>
+  <data name="SettingsCaptureChooseFolder" xml:space="preserve"><value>フォルダを選択...</value></data>
+  <data name="SettingsCaptureCopyToClipboard" xml:space="preserve"><value>クリップボードにコピー</value></data>
+  <data name="SettingsCaptureNoFolderSelected" xml:space="preserve"><value>フォルダが選択されていません</value></data>
   <data name="SettingsBehaviour" xml:space="preserve"><value>動作</value></data>
   <data name="SettingsBringToFront" xml:space="preserve"><value>リサイズ後にウインドウを最前面に移動</value></data>
   <data name="SettingsWindowPosition" xml:space="preserve"><value>リサイズ後の配置</value></data>

@@ -85,15 +85,15 @@ Per rimuovere una dimensione personalizzata, fai clic sul pulsante **"Rimuovi"**
 
 Attiva **"Avvio all'accesso"** per far avviare automaticamente Window Resize & Capture quando accedi a Windows.
 
-### Screenshot
+### Cattura
 
-Attiva **"Cattura screenshot dopo il ridimensionamento"** per catturare automaticamente la finestra dopo il ridimensionamento.
+Attiva **"Cattura schermata dopo il ridimensionamento"** per catturare automaticamente la finestra dopo il ridimensionamento.
 
 Quando attivato, sono disponibili le seguenti opzioni:
 
-- **Salva su file** — Salva lo screenshot come file PNG nella cartella scelta.
+- **Salva su file** — Salva la cattura come file PNG nella cartella scelta.
   > **Formato nome file:** `MMddHHmmss_NomeApp_TitoloFinestra.png` (es.: `0227193012_chrome_Google.png`). I simboli vengono rimossi.
-- **Copia negli appunti** — Copia lo screenshot negli appunti per incollarlo in altre app.
+- **Copia negli appunti** — Copia la cattura negli appunti per incollarla in altre app.
 
 Entrambe le opzioni possono essere attivate in modo indipendente.
 
@@ -118,9 +118,9 @@ Il menu di ridimensionamento mostra solo le finestre che:
 
 Le finestre ridotte a icona non appariranno nell'elenco.
 
-### Lo screenshot non funziona
+### La cattura non funziona
 
-Se gli screenshot non vengono catturati:
+Se le catture non vengono prodotte:
 
 - Assicurati che almeno **"Salva su file"** o **"Copia negli appunti"** sia attivato nelle Impostazioni.
 - Se salvi su file, verifica che la cartella di destinazione esista e sia scrivibile.

@@ -9,7 +9,7 @@ Windows port of [Window Resize (macOS)](https://github.com/Nakanokappei/window-r
 - **System tray resident** — left-click or right-click the tray icon to open the menu
 - **12 built-in preset sizes** — common Windows display resolutions
 - **Custom sizes** — add your own width x height presets
-- **Screenshot capture** — automatically capture a screenshot after resizing (save to file and/or clipboard)
+- **Window capture** — automatically capture the window after resizing (save to file and/or clipboard)
 - **Window icons** — app icons displayed in the menu for easy identification
 - **Launch at login** — optional auto-start via Windows Registry
 - **Single instance** — prevents duplicate processes
@@ -28,7 +28,7 @@ No .NET runtime installation required — the exe is self-contained.
 2. A splash screen appears briefly, then the app sits in the system tray
 3. Click the tray icon to open the menu
 4. Select **Resize** → choose a window → select a preset size
-5. Open **Settings** to add custom sizes, enable launch at login, or configure screenshot capture
+5. Open **Settings** to add custom sizes, enable launch at login, or configure capture
 
 ## System Requirements
 

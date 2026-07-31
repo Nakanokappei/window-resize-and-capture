@@ -50,12 +50,12 @@
   <data name="SettingsRemove" xml:space="preserve"><value>Xóa</value></data>
   <data name="SettingsLaunchAtLogin" xml:space="preserve"><value>Khởi chạy khi đăng nhập</value></data>
   <data name="AlreadyRunningBody" xml:space="preserve"><value>Window Resize &amp; Capture đã đang chạy.</value></data>
-  <data name="SettingsScreenshot" xml:space="preserve"><value>Ảnh chụp màn hình</value></data>
-  <data name="SettingsScreenshotEnabled" xml:space="preserve"><value>Chụp ảnh sau khi đổi kích thước</value></data>
-  <data name="SettingsScreenshotSaveToFile" xml:space="preserve"><value>Lưu vào tệp</value></data>
-  <data name="SettingsScreenshotChooseFolder" xml:space="preserve"><value>Chọn thư mục...</value></data>
-  <data name="SettingsScreenshotCopyToClipboard" xml:space="preserve"><value>Sao chép vào bảng tạm</value></data>
-  <data name="SettingsScreenshotNoFolderSelected" xml:space="preserve"><value>Chưa chọn thư mục</value></data>
+  <data name="SettingsCapture" xml:space="preserve"><value>Ảnh chụp màn hình</value></data>
+  <data name="SettingsCaptureEnabled" xml:space="preserve"><value>Chụp ảnh sau khi đổi kích thước</value></data>
+  <data name="SettingsCaptureSaveToFile" xml:space="preserve"><value>Lưu vào tệp</value></data>
+  <data name="SettingsCaptureChooseFolder" xml:space="preserve"><value>Chọn thư mục...</value></data>
+  <data name="SettingsCaptureCopyToClipboard" xml:space="preserve"><value>Sao chép vào bảng tạm</value></data>
+  <data name="SettingsCaptureNoFolderSelected" xml:space="preserve"><value>Chưa chọn thư mục</value></data>
   <data name="SettingsBehaviour" xml:space="preserve"><value>Hành vi</value></data>
   <data name="SettingsBringToFront" xml:space="preserve"><value>Đưa cửa sổ lên trước sau khi thay đổi kích thước</value></data>
   <data name="SettingsWindowPosition" xml:space="preserve"><value>Vị trí sau khi thay đổi kích thước</value></data>

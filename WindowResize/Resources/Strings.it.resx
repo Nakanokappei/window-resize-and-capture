@@ -50,12 +50,12 @@
   <data name="SettingsRemove" xml:space="preserve"><value>Rimuovi</value></data>
   <data name="SettingsLaunchAtLogin" xml:space="preserve"><value>Avvia al login</value></data>
   <data name="AlreadyRunningBody" xml:space="preserve"><value>Window Resize &amp; Capture è già in esecuzione.</value></data>
-  <data name="SettingsScreenshot" xml:space="preserve"><value>Screenshot</value></data>
-  <data name="SettingsScreenshotEnabled" xml:space="preserve"><value>Cattura schermata dopo il ridimensionamento</value></data>
-  <data name="SettingsScreenshotSaveToFile" xml:space="preserve"><value>Salva su file</value></data>
-  <data name="SettingsScreenshotChooseFolder" xml:space="preserve"><value>Scegli cartella...</value></data>
-  <data name="SettingsScreenshotCopyToClipboard" xml:space="preserve"><value>Copia negli appunti</value></data>
-  <data name="SettingsScreenshotNoFolderSelected" xml:space="preserve"><value>Nessuna cartella selezionata</value></data>
+  <data name="SettingsCapture" xml:space="preserve"><value>Cattura</value></data>
+  <data name="SettingsCaptureEnabled" xml:space="preserve"><value>Cattura schermata dopo il ridimensionamento</value></data>
+  <data name="SettingsCaptureSaveToFile" xml:space="preserve"><value>Salva su file</value></data>
+  <data name="SettingsCaptureChooseFolder" xml:space="preserve"><value>Scegli cartella...</value></data>
+  <data name="SettingsCaptureCopyToClipboard" xml:space="preserve"><value>Copia negli appunti</value></data>
+  <data name="SettingsCaptureNoFolderSelected" xml:space="preserve"><value>Nessuna cartella selezionata</value></data>
   <data name="SettingsBehaviour" xml:space="preserve"><value>Comportamento</value></data>
   <data name="SettingsBringToFront" xml:space="preserve"><value>Porta la finestra in primo piano dopo il ridimensionamento</value></data>
   <data name="SettingsWindowPosition" xml:space="preserve"><value>Posizione dopo il ridimensionamento</value></data>

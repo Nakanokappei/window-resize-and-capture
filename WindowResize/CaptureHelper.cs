@@ -10,11 +10,11 @@ using System.Windows.Forms;
 
 namespace WindowsResizeCapture;
 
-// Captures a screenshot of a window after it has been resized, then saves
+// Captures the contents of a window after it has been resized, then saves
 // it to a file and/or copies it to the clipboard depending on user settings.
 // Uses the native PrintWindow API with Per-Monitor DPI awareness to produce
 // correct captures even under DPI virtualisation (e.g. Parallels + Retina).
-public static class ScreenshotHelper
+public static class CaptureHelper
 {
     // ── Win32 API declarations ───────────────────────────────────────────
 
@@ -82,8 +82,8 @@ public static class ScreenshotHelper
     {
         var store = SettingsStore.Shared;
 
-        // Bail out early if screenshots are disabled
-        if (!store.ScreenshotEnabled)
+        // Bail out early if capture is disabled
+        if (!store.CaptureEnabled)
             return;
 
         // Remember the UI thread's synchronization context: the capture runs
@@ -131,12 +131,12 @@ public static class ScreenshotHelper
             }
 
             // Dispatch to configured destinations
-            if (store.ScreenshotSaveToFile && !string.IsNullOrEmpty(store.ScreenshotSaveFolderPath))
-                SaveScreenshotToFile(scaled, window, store.ScreenshotSaveFolderPath);
+            if (store.CaptureSaveToFile && !string.IsNullOrEmpty(store.CaptureSaveFolderPath))
+                SaveCaptureToFile(scaled, window, store.CaptureSaveFolderPath);
 
             // Send (not Post) so the bitmap stays alive until the UI thread
             // has finished handing it to the clipboard.
-            if (store.ScreenshotCopyToClipboard)
+            if (store.CaptureCopyToClipboard)
                 uiContext?.Send(_ => Clipboard.SetImage(scaled), null);
         }
         catch { }
@@ -224,7 +224,7 @@ public static class ScreenshotHelper
     // Persist the bitmap as a PNG file using the naming convention
     // MMddHHmmss_ProcessName_WindowTitle.png, truncating overly long
     // titles to avoid filesystem path-length issues.
-    private static void SaveScreenshotToFile(Bitmap bitmap, WindowInfo window, string folderPath)
+    private static void SaveCaptureToFile(Bitmap bitmap, WindowInfo window, string folderPath)
     {
         if (!Directory.Exists(folderPath))
             return;

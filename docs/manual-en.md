@@ -85,15 +85,15 @@ To remove a custom size, click the **"Remove"** button next to it.
 
 Toggle **"Launch at Login"** to have Window Resize & Capture start automatically when you log in to Windows.
 
-### Screenshot
+### Capture
 
-Toggle **"Take screenshot after resize"** to automatically capture the window after resizing.
+Toggle **"Capture after resize"** to automatically capture the window after resizing.
 
 When enabled, the following options are available:
 
-- **Save to file** — Save the screenshot as a PNG file to your chosen folder.
+- **Save to file** — Save the capture as a PNG file to your chosen folder.
   > **Filename format:** `MMddHHmmss_AppName_WindowTitle.png` (e.g. `0227193012_chrome_Google.png`). Symbols are removed; only letters, digits, and underscores are used.
-- **Copy to clipboard** — Copy the screenshot to the clipboard for pasting into other apps.
+- **Copy to clipboard** — Copy the capture to the clipboard for pasting into other apps.
 
 Both options can be enabled independently.
 
@@ -118,9 +118,9 @@ The resize menu only shows windows that are:
 
 Minimized windows will not appear in the list.
 
-### Screenshot Not Working
+### Capture Not Working
 
-If screenshots are not being captured:
+If captures are not being produced:
 
 - Ensure at least one of **"Save to file"** or **"Copy to clipboard"** is enabled in Settings.
 - If saving to file, verify the save folder exists and is writable.

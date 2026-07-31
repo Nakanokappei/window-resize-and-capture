@@ -50,12 +50,12 @@
   <data name="SettingsRemove" xml:space="preserve"><value>Remover</value></data>
   <data name="SettingsLaunchAtLogin" xml:space="preserve"><value>Iniciar ao Fazer Login</value></data>
   <data name="AlreadyRunningBody" xml:space="preserve"><value>Window Resize &amp; Capture já está em execução.</value></data>
-  <data name="SettingsScreenshot" xml:space="preserve"><value>Captura de Tela</value></data>
-  <data name="SettingsScreenshotEnabled" xml:space="preserve"><value>Capturar tela após redimensionar</value></data>
-  <data name="SettingsScreenshotSaveToFile" xml:space="preserve"><value>Salvar em arquivo</value></data>
-  <data name="SettingsScreenshotChooseFolder" xml:space="preserve"><value>Escolher Pasta...</value></data>
-  <data name="SettingsScreenshotCopyToClipboard" xml:space="preserve"><value>Copiar para área de transferência</value></data>
-  <data name="SettingsScreenshotNoFolderSelected" xml:space="preserve"><value>Nenhuma pasta selecionada</value></data>
+  <data name="SettingsCapture" xml:space="preserve"><value>Captura de Tela</value></data>
+  <data name="SettingsCaptureEnabled" xml:space="preserve"><value>Capturar tela após redimensionar</value></data>
+  <data name="SettingsCaptureSaveToFile" xml:space="preserve"><value>Salvar em arquivo</value></data>
+  <data name="SettingsCaptureChooseFolder" xml:space="preserve"><value>Escolher Pasta...</value></data>
+  <data name="SettingsCaptureCopyToClipboard" xml:space="preserve"><value>Copiar para área de transferência</value></data>
+  <data name="SettingsCaptureNoFolderSelected" xml:space="preserve"><value>Nenhuma pasta selecionada</value></data>
   <data name="SettingsBehaviour" xml:space="preserve"><value>Comportamento</value></data>
   <data name="SettingsBringToFront" xml:space="preserve"><value>Trazer janela para frente após redimensionar</value></data>
   <data name="SettingsWindowPosition" xml:space="preserve"><value>Posição após redimensionar</value></data>

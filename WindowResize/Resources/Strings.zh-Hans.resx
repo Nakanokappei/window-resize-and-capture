@@ -50,12 +50,12 @@
   <data name="SettingsRemove" xml:space="preserve"><value>移除</value></data>
   <data name="SettingsLaunchAtLogin" xml:space="preserve"><value>登录时启动</value></data>
   <data name="AlreadyRunningBody" xml:space="preserve"><value>Window Resize &amp; Capture 已在运行。</value></data>
-  <data name="SettingsScreenshot" xml:space="preserve"><value>截图</value></data>
-  <data name="SettingsScreenshotEnabled" xml:space="preserve"><value>调整大小后截图</value></data>
-  <data name="SettingsScreenshotSaveToFile" xml:space="preserve"><value>保存到文件</value></data>
-  <data name="SettingsScreenshotChooseFolder" xml:space="preserve"><value>选择文件夹...</value></data>
-  <data name="SettingsScreenshotCopyToClipboard" xml:space="preserve"><value>复制到剪贴板</value></data>
-  <data name="SettingsScreenshotNoFolderSelected" xml:space="preserve"><value>未选择文件夹</value></data>
+  <data name="SettingsCapture" xml:space="preserve"><value>截图</value></data>
+  <data name="SettingsCaptureEnabled" xml:space="preserve"><value>调整大小后截图</value></data>
+  <data name="SettingsCaptureSaveToFile" xml:space="preserve"><value>保存到文件</value></data>
+  <data name="SettingsCaptureChooseFolder" xml:space="preserve"><value>选择文件夹...</value></data>
+  <data name="SettingsCaptureCopyToClipboard" xml:space="preserve"><value>复制到剪贴板</value></data>
+  <data name="SettingsCaptureNoFolderSelected" xml:space="preserve"><value>未选择文件夹</value></data>
   <data name="SettingsBehaviour" xml:space="preserve"><value>行为</value></data>
   <data name="SettingsBringToFront" xml:space="preserve"><value>调整后将窗口置于最前</value></data>
   <data name="SettingsWindowPosition" xml:space="preserve"><value>调整后的位置</value></data>

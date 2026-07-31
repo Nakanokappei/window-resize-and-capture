@@ -5,7 +5,7 @@ using System.Windows.Forms;
 namespace WindowsResizeCapture;
 
 // The Settings window. Built entirely in code (no designer). A three-tab
-// layout: General (preset sizes, launch at login), Screenshot (capture
+// layout: General (preset sizes, launch at login), Capture (capture
 // destinations), and Behaviour (post-resize window handling). Hides
 // instead of closing so it can be reused without reconstruction.
 public class SettingsForm : Form
@@ -23,11 +23,11 @@ public class SettingsForm : Form
     private CheckBox _resizeClientAreaCheck = null!;
     private CheckBox _launchAtLoginCheck = null!;
 
-    // Screenshot tab controls
-    private CheckBox _screenshotEnabledCheck = null!;
-    private Panel _screenshotOptionsPanel = null!;
-    private CheckBox _screenshotSaveToFileCheck = null!;
-    private CheckBox _screenshotCopyToClipboardCheck = null!;
+    // Capture tab controls
+    private CheckBox _captureEnabledCheck = null!;
+    private Panel _captureOptionsPanel = null!;
+    private CheckBox _captureSaveToFileCheck = null!;
+    private CheckBox _captureCopyToClipboardCheck = null!;
     private CheckBox _captureClientAreaCheck = null!;
     private Button _chooseFolderButton = null!;
     private Label _folderPathLabel = null!;
@@ -83,7 +83,7 @@ public class SettingsForm : Form
         };
 
         tabs.TabPages.Add(BuildGeneralTab());
-        tabs.TabPages.Add(BuildScreenshotTab());
+        tabs.TabPages.Add(BuildCaptureTab());
         tabs.TabPages.Add(BuildBehaviourTab());
         Controls.Add(tabs);
     }
@@ -238,67 +238,67 @@ public class SettingsForm : Form
         return tab;
     }
 
-    // Screenshot tab: master toggle plus a panel of destination options
-    // that hides while screenshots are disabled.
-    private TabPage BuildScreenshotTab()
+    // Capture tab: master toggle plus a panel of destination options
+    // that hides while captures are disabled.
+    private TabPage BuildCaptureTab()
     {
-        var tab = new TabPage(Strings.SettingsScreenshot);
+        var tab = new TabPage(Strings.SettingsCapture);
 
-        // Master screenshot toggle
-        _screenshotEnabledCheck = new CheckBox
+        // Master capture toggle
+        _captureEnabledCheck = new CheckBox
         {
-            Text = Strings.SettingsScreenshotEnabled,
+            Text = Strings.SettingsCaptureEnabled,
             Location = new Point(12, 12),
             AutoSize = true,
-            Checked = _store.ScreenshotEnabled
+            Checked = _store.CaptureEnabled
         };
-        _screenshotEnabledCheck.CheckedChanged += (_, _) =>
+        _captureEnabledCheck.CheckedChanged += (_, _) =>
         {
-            _store.ScreenshotEnabled = _screenshotEnabledCheck.Checked;
+            _store.CaptureEnabled = _captureEnabledCheck.Checked;
             _store.SaveAndNotify();
-            SynchronizeScreenshotControls();
-            _screenshotOptionsPanel.Visible = _store.ScreenshotEnabled;
+            SynchronizeCaptureControls();
+            _captureOptionsPanel.Visible = _store.CaptureEnabled;
         };
-        tab.Controls.Add(_screenshotEnabledCheck);
+        tab.Controls.Add(_captureEnabledCheck);
 
-        // Panel for screenshot destination options, hidden when disabled
-        _screenshotOptionsPanel = new Panel
+        // Panel for capture destination options, hidden when disabled
+        _captureOptionsPanel = new Panel
         {
             Location = new Point(0, 40),
             Size = new Size(396, 112),
-            Visible = _store.ScreenshotEnabled
+            Visible = _store.CaptureEnabled
         };
 
         int panelY = 0;
 
         // Save-to-file checkbox
-        _screenshotSaveToFileCheck = new CheckBox
+        _captureSaveToFileCheck = new CheckBox
         {
-            Text = Strings.SettingsScreenshotSaveToFile,
+            Text = Strings.SettingsCaptureSaveToFile,
             Location = new Point(28, panelY),
             AutoSize = true,
-            Checked = _store.ScreenshotSaveToFile
+            Checked = _store.CaptureSaveToFile
         };
-        _screenshotSaveToFileCheck.CheckedChanged += (_, _) =>
+        _captureSaveToFileCheck.CheckedChanged += (_, _) =>
         {
-            _store.ScreenshotSaveToFile = _screenshotSaveToFileCheck.Checked;
+            _store.CaptureSaveToFile = _captureSaveToFileCheck.Checked;
             _store.SaveAndNotify();
-            _chooseFolderButton.Enabled = _store.ScreenshotSaveToFile;
-            SynchronizeScreenshotControls();
+            _chooseFolderButton.Enabled = _store.CaptureSaveToFile;
+            SynchronizeCaptureControls();
         };
-        _screenshotOptionsPanel.Controls.Add(_screenshotSaveToFileCheck);
+        _captureOptionsPanel.Controls.Add(_captureSaveToFileCheck);
         panelY += 26;
 
         // Folder chooser button and path label
         _chooseFolderButton = new Button
         {
-            Text = Strings.SettingsScreenshotChooseFolder,
+            Text = Strings.SettingsCaptureChooseFolder,
             Location = new Point(44, panelY),
             AutoSize = true,
-            Enabled = _store.ScreenshotSaveToFile
+            Enabled = _store.CaptureSaveToFile
         };
-        _chooseFolderButton.Click += OnChooseScreenshotFolder;
-        _screenshotOptionsPanel.Controls.Add(_chooseFolderButton);
+        _chooseFolderButton.Click += OnChooseCaptureFolder;
+        _captureOptionsPanel.Controls.Add(_chooseFolderButton);
 
         // GrayText keeps at least AA contrast in the default theme and
         // adapts to high-contrast themes, unlike a hard-coded gray
@@ -310,24 +310,24 @@ public class SettingsForm : Form
             ForeColor = SystemColors.GrayText,
             AutoEllipsis = true
         };
-        _screenshotOptionsPanel.Controls.Add(_folderPathLabel);
+        _captureOptionsPanel.Controls.Add(_folderPathLabel);
         panelY += 30;
 
         // Copy-to-clipboard checkbox
-        _screenshotCopyToClipboardCheck = new CheckBox
+        _captureCopyToClipboardCheck = new CheckBox
         {
-            Text = Strings.SettingsScreenshotCopyToClipboard,
+            Text = Strings.SettingsCaptureCopyToClipboard,
             Location = new Point(28, panelY),
             AutoSize = true,
-            Checked = _store.ScreenshotCopyToClipboard
+            Checked = _store.CaptureCopyToClipboard
         };
-        _screenshotCopyToClipboardCheck.CheckedChanged += (_, _) =>
+        _captureCopyToClipboardCheck.CheckedChanged += (_, _) =>
         {
-            _store.ScreenshotCopyToClipboard = _screenshotCopyToClipboardCheck.Checked;
+            _store.CaptureCopyToClipboard = _captureCopyToClipboardCheck.Checked;
             _store.SaveAndNotify();
-            SynchronizeScreenshotControls();
+            SynchronizeCaptureControls();
         };
-        _screenshotOptionsPanel.Controls.Add(_screenshotCopyToClipboardCheck);
+        _captureOptionsPanel.Controls.Add(_captureCopyToClipboardCheck);
         panelY += 26;
 
         // Capture client area only
@@ -343,8 +343,8 @@ public class SettingsForm : Form
             _store.CaptureClientArea = _captureClientAreaCheck.Checked;
             _store.SaveAndNotify();
         };
-        _screenshotOptionsPanel.Controls.Add(_captureClientAreaCheck);
-        tab.Controls.Add(_screenshotOptionsPanel);
+        _captureOptionsPanel.Controls.Add(_captureClientAreaCheck);
+        tab.Controls.Add(_captureOptionsPanel);
 
         return tab;
     }
@@ -525,16 +525,16 @@ public class SettingsForm : Form
         RefreshPositionButtonHighlights();
     }
 
-    // Open a folder browser to choose the screenshot save location.
-    private void OnChooseScreenshotFolder(object? sender, EventArgs e)
+    // Open a folder browser to choose the capture save location.
+    private void OnChooseCaptureFolder(object? sender, EventArgs e)
     {
         using var dialog = new FolderBrowserDialog();
-        if (!string.IsNullOrEmpty(_store.ScreenshotSaveFolderPath))
-            dialog.SelectedPath = _store.ScreenshotSaveFolderPath;
+        if (!string.IsNullOrEmpty(_store.CaptureSaveFolderPath))
+            dialog.SelectedPath = _store.CaptureSaveFolderPath;
 
         if (dialog.ShowDialog() == DialogResult.OK)
         {
-            _store.ScreenshotSaveFolderPath = dialog.SelectedPath;
+            _store.CaptureSaveFolderPath = dialog.SelectedPath;
             _store.SaveAndNotify();
             _folderPathLabel.Text = FormatFolderPath();
         }
@@ -544,14 +544,14 @@ public class SettingsForm : Form
 
     // After the store's auto-enable/disable logic fires, push the
     // canonical state back into the checkboxes without re-triggering events.
-    private void SynchronizeScreenshotControls()
+    private void SynchronizeCaptureControls()
     {
-        if (_screenshotEnabledCheck.Checked != _store.ScreenshotEnabled)
-            _screenshotEnabledCheck.Checked = _store.ScreenshotEnabled;
-        if (_screenshotSaveToFileCheck.Checked != _store.ScreenshotSaveToFile)
-            _screenshotSaveToFileCheck.Checked = _store.ScreenshotSaveToFile;
-        if (_screenshotCopyToClipboardCheck.Checked != _store.ScreenshotCopyToClipboard)
-            _screenshotCopyToClipboardCheck.Checked = _store.ScreenshotCopyToClipboard;
+        if (_captureEnabledCheck.Checked != _store.CaptureEnabled)
+            _captureEnabledCheck.Checked = _store.CaptureEnabled;
+        if (_captureSaveToFileCheck.Checked != _store.CaptureSaveToFile)
+            _captureSaveToFileCheck.Checked = _store.CaptureSaveToFile;
+        if (_captureCopyToClipboardCheck.Checked != _store.CaptureCopyToClipboard)
+            _captureCopyToClipboardCheck.Checked = _store.CaptureCopyToClipboard;
     }
 
     // Highlight the currently selected position tile and reset the rest.
@@ -571,9 +571,9 @@ public class SettingsForm : Form
     // Return the folder path for display, or a placeholder if none is set.
     private string FormatFolderPath()
     {
-        return string.IsNullOrEmpty(_store.ScreenshotSaveFolderPath)
-            ? Strings.SettingsScreenshotNoFolderSelected
-            : _store.ScreenshotSaveFolderPath;
+        return string.IsNullOrEmpty(_store.CaptureSaveFolderPath)
+            ? Strings.SettingsCaptureNoFolderSelected
+            : _store.CaptureSaveFolderPath;
     }
 
     // Hide instead of closing so the form can be reused without rebuilding.

@@ -50,12 +50,12 @@
   <data name="SettingsRemove" xml:space="preserve"><value>Удалить</value></data>
   <data name="SettingsLaunchAtLogin" xml:space="preserve"><value>Запускать при входе</value></data>
   <data name="AlreadyRunningBody" xml:space="preserve"><value>Window Resize &amp; Capture уже запущен.</value></data>
-  <data name="SettingsScreenshot" xml:space="preserve"><value>Снимок экрана</value></data>
-  <data name="SettingsScreenshotEnabled" xml:space="preserve"><value>Сделать снимок после изменения размера</value></data>
-  <data name="SettingsScreenshotSaveToFile" xml:space="preserve"><value>Сохранить в файл</value></data>
-  <data name="SettingsScreenshotChooseFolder" xml:space="preserve"><value>Выбрать папку...</value></data>
-  <data name="SettingsScreenshotCopyToClipboard" xml:space="preserve"><value>Копировать в буфер обмена</value></data>
-  <data name="SettingsScreenshotNoFolderSelected" xml:space="preserve"><value>Папка не выбрана</value></data>
+  <data name="SettingsCapture" xml:space="preserve"><value>Снимок экрана</value></data>
+  <data name="SettingsCaptureEnabled" xml:space="preserve"><value>Сделать снимок после изменения размера</value></data>
+  <data name="SettingsCaptureSaveToFile" xml:space="preserve"><value>Сохранить в файл</value></data>
+  <data name="SettingsCaptureChooseFolder" xml:space="preserve"><value>Выбрать папку...</value></data>
+  <data name="SettingsCaptureCopyToClipboard" xml:space="preserve"><value>Копировать в буфер обмена</value></data>
+  <data name="SettingsCaptureNoFolderSelected" xml:space="preserve"><value>Папка не выбрана</value></data>
   <data name="SettingsBehaviour" xml:space="preserve"><value>Поведение</value></data>
   <data name="SettingsBringToFront" xml:space="preserve"><value>Вывести окно на передний план после изменения размера</value></data>
   <data name="SettingsWindowPosition" xml:space="preserve"><value>Положение после изменения размера</value></data>
