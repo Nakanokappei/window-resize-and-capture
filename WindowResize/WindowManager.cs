@@ -134,8 +134,10 @@ public static class WindowManager
 
     // SendMessageTimeout: abort immediately if the target window is hung,
     // and cap the wait for a merely-busy window at this many milliseconds.
+    // Kept short because the cap applies per message and we try three icon
+    // sizes per window, so the worst case accumulates across the whole list.
     private const uint SMTO_ABORTIFHUNG = 0x0002;
-    private const uint IconMessageTimeoutMs = 200;
+    private const uint IconMessageTimeoutMs = 50;
 
     private const int GWL_STYLE = -16;
     private const int GWL_EXSTYLE = -20;

@@ -4,6 +4,8 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace WindowsResizeCapture;
@@ -84,6 +86,11 @@ public static class ScreenshotHelper
         if (!store.ScreenshotEnabled)
             return;
 
+        // Remember the UI thread's synchronization context: the capture runs
+        // on a thread-pool thread, but Clipboard.SetImage requires an STA
+        // thread and must be marshalled back here.
+        var uiContext = SynchronizationContext.Current;
+
         // Use a one-shot timer to let the window repaint before capturing
         var timer = new System.Windows.Forms.Timer { Interval = delayMs };
         timer.Tick += (_, _) =>
@@ -91,33 +98,49 @@ public static class ScreenshotHelper
             timer.Stop();
             timer.Dispose();
 
-            try
-            {
-                using var rawCapture = CaptureWindowBitmap(window.Handle, store.CaptureClientArea);
-                if (rawCapture == null)
-                    return;
-
-                // Scale from physical pixels down to the user-specified target size
-                using var scaled = new Bitmap(targetSize.Width, targetSize.Height);
-                using (var g = Graphics.FromImage(scaled))
-                {
-                    g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                    g.DrawImage(rawCapture, 0, 0, targetSize.Width, targetSize.Height);
-                }
-
-                // Dispatch to configured destinations
-                if (store.ScreenshotSaveToFile && !string.IsNullOrEmpty(store.ScreenshotSaveFolderPath))
-                    SaveScreenshotToFile(scaled, window, store.ScreenshotSaveFolderPath);
-
-                if (store.ScreenshotCopyToClipboard)
-                    Clipboard.SetImage(scaled);
-            }
-            catch { }
+            // Run the capture off the UI thread. PrintWindow sends WM_PRINT
+            // synchronously to the target window and offers no timeout, so a
+            // busy or unresponsive target would otherwise stall our message
+            // pump — the shape of hang that WER reports as HANG_QUIESCE.
+            Task.Run(() => CaptureAndDispatch(window, targetSize, store, uiContext));
         };
         timer.Start();
     }
 
     // ── Private helpers ──────────────────────────────────────────────────
+
+    // Capture the window, scale it to the target size and deliver it to the
+    // configured destinations. Runs entirely on a thread-pool thread so that
+    // a slow PrintWindow cannot block the UI; only the clipboard write is
+    // posted back to the UI thread.
+    private static void CaptureAndDispatch(
+        WindowInfo window, PresetSize targetSize, SettingsStore store, SynchronizationContext? uiContext)
+    {
+        try
+        {
+            using var rawCapture = CaptureWindowBitmap(window.Handle, store.CaptureClientArea);
+            if (rawCapture == null)
+                return;
+
+            // Scale from physical pixels down to the user-specified target size
+            using var scaled = new Bitmap(targetSize.Width, targetSize.Height);
+            using (var g = Graphics.FromImage(scaled))
+            {
+                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                g.DrawImage(rawCapture, 0, 0, targetSize.Width, targetSize.Height);
+            }
+
+            // Dispatch to configured destinations
+            if (store.ScreenshotSaveToFile && !string.IsNullOrEmpty(store.ScreenshotSaveFolderPath))
+                SaveScreenshotToFile(scaled, window, store.ScreenshotSaveFolderPath);
+
+            // Send (not Post) so the bitmap stays alive until the UI thread
+            // has finished handing it to the clipboard.
+            if (store.ScreenshotCopyToClipboard)
+                uiContext?.Send(_ => Clipboard.SetImage(scaled), null);
+        }
+        catch { }
+    }
 
     // Capture the window's visual content into a Bitmap using native GDI.
     // Temporarily switches the thread to Per-Monitor V2 DPI awareness so
