@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Text;
 
-namespace WindowsResizeCapture;
+namespace WindowResizeCapture;
 
 // Result of a resize attempt, so the UI can explain a failure the user did
 // not cause (rather than looking like a bug in this app).

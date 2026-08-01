@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace WindowsResizeCapture;
+namespace WindowResizeCapture;
 
 // The core application context: hosts the system-tray NotifyIcon and builds
 // the context menu that lets users pick a window and resize it to a preset.
@@ -324,7 +324,7 @@ public class TrayApplicationContext : ApplicationContext
     private static Icon LoadTrayIcon()
     {
         var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-        var stream = assembly.GetManifestResourceStream("WindowsResizeCapture.Resources.app.ico");
+        var stream = assembly.GetManifestResourceStream("WindowResizeCapture.Resources.app.ico");
 
         if (stream != null)
             return new Icon(stream);

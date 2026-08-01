@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace WindowsResizeCapture;
+namespace WindowResizeCapture;
 
 // Captures the contents of a window after it has been resized, then saves
 // it to a file and/or copies it to the clipboard depending on user settings.

@@ -35,9 +35,13 @@
   </Resources>
 
   <Applications>
+    <!-- Id keeps the misspelled "Windows" of the original executable name.
+         It forms part of the AUMID, so changing it would break taskbar and
+         Start pins and reset the user's auto-start choice. Only the
+         Executable file name is corrected. -->
     <Application
       Id="WindowsResizeCapture"
-      Executable="WindowsResizeCapture.exe"
+      Executable="WindowResizeCapture.exe"
       EntryPoint="Windows.FullTrustApplication">
 
       <uap:VisualElements
@@ -53,7 +57,9 @@
       </uap:VisualElements>
 
       <Extensions>
-        <!-- Auto-start at login (replaces Registry Run key for packaged apps) -->
+        <!-- Auto-start at login (replaces Registry Run key for packaged apps).
+             TaskId must match SettingsStore.StartupTaskId and, like it, keeps
+             the original spelling so an existing choice survives the upgrade. -->
         <desktop:Extension Category="windows.startupTask">
           <desktop:StartupTask
             TaskId="WindowsResizeCaptureStartup"

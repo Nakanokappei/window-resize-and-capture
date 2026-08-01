@@ -8,7 +8,7 @@ using Microsoft.Win32;
 using Windows.ApplicationModel;
 #endif
 
-namespace WindowsResizeCapture;
+namespace WindowResizeCapture;
 
 // Nine-position snap anchor for placing a window after resize.
 [JsonConverter(typeof(JsonStringEnumConverter<WindowPosition>))]
@@ -30,8 +30,17 @@ public partial class SettingsStore
 
     private readonly string _settingsPath;
     private const string RegistryRunKey = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run";
+
+    // These three keep the misspelled "Windows" of the original executable
+    // name on purpose. They address state that already exists on a user's
+    // machine: the registry value that registers auto-start, the StartupTask
+    // declared in the package manifest, and the settings directory. Renaming
+    // any of them would silently discard the user's preferences or leave an
+    // orphaned auto-start entry pointing at an executable that no longer
+    // exists. Nothing here is ever shown in the UI.
     private const string AppName = "WindowsResizeCapture";
     private const string StartupTaskId = "WindowsResizeCaptureStartup";
+    private const string SettingsDirectoryName = "WindowsResizeCapture";
 
     public List<PresetSize> CustomSizes { get; private set; } = new();
 
@@ -208,7 +217,7 @@ public partial class SettingsStore
     private SettingsStore()
     {
         string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        string appDir = Path.Combine(appData, "WindowsResizeCapture");
+        string appDir = Path.Combine(appData, SettingsDirectoryName);
         Directory.CreateDirectory(appDir);
         _settingsPath = Path.Combine(appDir, "settings.json");
         Load();

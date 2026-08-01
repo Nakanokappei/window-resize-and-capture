@@ -2,7 +2,7 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace WindowsResizeCapture;
+namespace WindowResizeCapture;
 
 // The Settings window. Built entirely in code (no designer). A three-tab
 // layout: General (preset sizes, launch at login), Capture (capture

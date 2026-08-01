@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
-namespace WindowsResizeCapture;
+namespace WindowResizeCapture;
 
 // A borderless, always-on-top splash screen that shows the app icon,
 // name, version, and copyright. After a configurable display period
@@ -77,7 +77,7 @@ public class SplashForm : Form
 
         // Draw the app icon from the embedded resource
         var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-        using var stream = assembly.GetManifestResourceStream("WindowsResizeCapture.Resources.splash.png");
+        using var stream = assembly.GetManifestResourceStream("WindowResizeCapture.Resources.splash.png");
         if (stream != null)
         {
             using var icon = Image.FromStream(stream);

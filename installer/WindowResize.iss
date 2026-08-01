@@ -5,7 +5,7 @@
 #define MyAppVersion "1.8.1"
 #define MyAppPublisher "Kappei Nakano"
 #define MyAppURL "https://github.com/Nakanokappei/window-resize-and-capture"
-#define MyAppExeName "WindowsResizeCapture.exe"
+#define MyAppExeName "WindowResizeCapture.exe"
 
 [Setup]
 AppId={{B7A3F2E1-9C4D-4E5F-8A6B-1D2E3F4A5B6C}
@@ -19,7 +19,7 @@ DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 LicenseFile=..\LICENSE
 OutputDir=..\dist
-OutputBaseFilename=WindowsResizeCapture-Setup-v{#MyAppVersion}
+OutputBaseFilename=WindowResizeCapture-Setup-v{#MyAppVersion}
 SetupIconFile=..\WindowResize\Resources\app.ico
 Compression=lzma2/ultra64
 SolidCompression=yes
@@ -71,8 +71,14 @@ Name: "manual\zh_hant"; Description: "繁體中文 (Traditional Chinese)"; Types
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 Name: "launchatlogin"; Description: "Start with Windows"; GroupDescription: "Other:"
 
+[InstallDelete]
+; The executable was renamed in 1.8.2 (WindowsResizeCapture -> WindowResizeCapture).
+; Setup only overwrites files it installs, so the old one would otherwise be
+; left behind in the install directory alongside the new one.
+Type: files; Name: "{app}\WindowsResizeCapture.exe"
+
 [Files]
-Source: "..\WindowResize\bin\Release\net8.0-windows10.0.17763.0\win-x64\publish\WindowsResizeCapture.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\WindowResize\bin\Release\net8.0-windows10.0.17763.0\win-x64\publish\WindowResizeCapture.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\README.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 ; User manuals
@@ -99,6 +105,9 @@ Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Registry]
+; ValueName keeps the misspelled "Windows" of the original executable name so
+; that it matches SettingsStore.AppName; the app reads this value to decide
+; whether launch-at-login is on. Renaming it would strand existing entries.
 Root: HKCU; Subkey: "SOFTWARE\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "WindowsResizeCapture"; ValueData: """{app}\{#MyAppExeName}"""; Flags: uninsdeletevalue; Tasks: launchatlogin
 
 [Run]

@@ -1,8 +1,12 @@
-# Window Resize - Windows Tray App
+# Window Resize & Capture - Windows Tray App
 
 ## Overview
-Windows で動作中のアプリウィンドウを既定サイズにリサイズするタスクトレイ常駐アプリ。
-macOS 版 (Window Resize) の Windows 移植。
+Windows で動作中のアプリウィンドウを既定サイズにリサイズし、キャプチャするタスクトレイ常駐アプリ。
+出自は macOS 版 (Window Resize) の移植だが、現在は機能も実装も別物になっている。
+
+実行ファイルは `WindowResizeCapture.exe`。1.8.2 で `WindowsResizeCapture.exe` から改名した
+（"Windows" は移植当時の名残）。ただし**設定フォルダー名・レジストリ Run 値名・MSIX の
+Application Id / TaskId・Mutex 名は旧綴りのまま**据え置いている（既存ユーザーの状態を壊さないため）。
 
 ## Tech Stack
 - **Language:** C# (.NET 8, WinForms)
@@ -21,7 +25,7 @@ DOTNET=/opt/homebrew/Cellar/dotnet@8/8.0.123/libexec/dotnet
 $DOTNET publish WindowResize.csproj -c Release -r win-x64 --self-contained -p:PublishSingleFile=true
 
 # 出力先
-# WindowResize/bin/Release/net8.0-windows10.0.17763.0/win-x64/publish/WindowsResizeCapture.exe
+# WindowResize/bin/Release/net8.0-windows10.0.17763.0/win-x64/publish/WindowResizeCapture.exe
 ```
 
 ## Project Structure
@@ -76,7 +80,7 @@ Window Resize and Capture/       # リポジトリルート (W:\01_Active\Window
 - `SetWindowPos` でリサイズ実行（`SWP_NOMOVE | SWP_NOZORDER`）
 
 ### 設定永続化
-- JSON ファイル: `%APPDATA%/WindowsResizeCapture/settings.json`
+- JSON ファイル: `%APPDATA%/WindowsResizeCapture/settings.json`（**フォルダー名は旧綴りのまま**。改名すると既存ユーザーの設定が失われるため据え置き）
 - 自動起動: `HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
 
 ### 多言語対応 (i18n)
@@ -157,7 +161,7 @@ dotnet publish WindowResize/WindowResize.csproj -c Release -r win-x64 --self-con
 
 # 2. Prepare layout (copy publish → msix_layout, move Package/* to root)
 # 3. MakeAppx
-makeappx.exe pack /d msix_layout /p WindowsResizeCapture.msix /o
+makeappx.exe pack /d msix_layout /p WindowResizeCapture.msix /o
 
 # Store 提出時は Microsoft が署名するため自己署名不要
 # ローカルテスト時は自己署名 + 開発者モード有効化が必要
@@ -178,14 +182,14 @@ makeappx.exe pack /d msix_layout /p WindowsResizeCapture.msix /o
 ## 配布方法
 
 ### 1. ZIP (ポータブル)
-`dist/WindowsResizeCapture-Windows-v{VERSION}.zip` — EXE + README.md + LICENSE を同梱
+`dist/WindowResizeCapture-Windows-v{VERSION}.zip` — EXE + README.md + LICENSE を同梱
 ```bash
 dotnet publish WindowResize/WindowResize.csproj -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
-# ZIP に WindowsResizeCapture.exe, README.md, LICENSE を含める
+# ZIP に WindowResizeCapture.exe, README.md, LICENSE を含める
 ```
 
 ### 2. インストーラ (Inno Setup)
-`dist/WindowsResizeCapture-Setup-v{VERSION}.exe` — 9言語選択ダイアログ付き
+`dist/WindowResizeCapture-Setup-v{VERSION}.exe` — 9言語選択ダイアログ付き
 ```bash
 # Inno Setup パス: C:\Users\nakanokappei\AppData\Local\Programs\Inno Setup 6\ISCC.exe
 ISCC.exe installer/WindowResize.iss
