@@ -1,216 +1,189 @@
-# Window Resize & Capture - Windows Tray App
+# Window Resize & Capture — Windows tray app
 
-## Overview
-Windows で動作中のアプリウィンドウを既定サイズにリサイズし、キャプチャするタスクトレイ常駐アプリ。
-出自は macOS 版 (Window Resize) の移植だが、現在は機能も実装も別物になっている。
+Resizes and captures the windows of other applications from the notification
+area. It began as a port of the macOS app Window Resize; the two have since
+diverged in both features and implementation.
 
-実行ファイルは `WindowResizeCapture.exe`。1.8.2 で `WindowsResizeCapture.exe` から改名した
-（"Windows" は移植当時の名残）。ただし**設定フォルダー名・レジストリ Run 値名・MSIX の
-Application Id / TaskId・Mutex 名は旧綴りのまま**据え置いている（既存ユーザーの状態を壊さないため）。
+C# on .NET 8 with WinForms, shipped as a self-contained single file so that no
+.NET runtime is required. All window work goes through Win32 P/Invoke.
 
-## Tech Stack
-- **Language:** C# (.NET 8, WinForms)
-- **Build:** `dotnet publish` でMac上からクロスコンパイル
-- **配布:** 自己完結型の単一exe（.NETランタイム不要）
-- **ウィンドウ操作:** Win32 API (P/Invoke) — `EnumWindows`, `SetWindowPos`
+## Build
 
-## Build & Run
 ```bash
-# Windows上でのビルド
+# Build and run from a checkout
 dotnet build WindowResize/WindowResize.csproj
-dotnet publish WindowResize/WindowResize.csproj -c Release -r win-x64 --self-contained -p:PublishSingleFile=true
 
-# macOS上でのクロスコンパイル
-DOTNET=/opt/homebrew/Cellar/dotnet@8/8.0.123/libexec/dotnet
-$DOTNET publish WindowResize.csproj -c Release -r win-x64 --self-contained -p:PublishSingleFile=true
-
-# 出力先
-# WindowResize/bin/Release/net8.0-windows10.0.17763.0/win-x64/publish/WindowResizeCapture.exe
+# The artifact that ships: self-contained, single file, compressed
+dotnet publish WindowResize/WindowResize.csproj -c Release -r win-x64 \
+  --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+# -> WindowResize/bin/Release/net8.0-windows10.0.17763.0/win-x64/publish/WindowResizeCapture.exe
 ```
 
-## Project Structure
-```
-Window Resize and Capture/       # リポジトリルート (W:\01_Active\Window Resize and Capture)
-├── README.md                    # GitHub用README
-├── LICENSE                      # MIT License
-├── .gitignore
-├── .github/workflows/msix.yml  # MSIX自動ビルド (v* タグ)
-├── installer/
-│   └── WindowResize.iss         # Inno Setup インストーラスクリプト
-├── dist/                        # ビルド成果物 (.gitignore対象)
-└── WindowResize/                # ソースコード
-    ├── CLAUDE.md                # このファイル
-    ├── WindowResize.csproj      # プロジェクト設定 (TFM: net8.0-windows10.0.17763.0)
-    ├── Program.cs               # エントリポイント
-    ├── TrayApplicationContext.cs # NotifyIcon・メニュー構築・リサイズ実行
-    ├── WindowManager.cs         # Win32 P/Invoke（ウィンドウ列挙・リサイズ）
-    ├── PresetSize.cs            # サイズモデル
-    ├── SettingsStore.cs         # JSON永続化・自動起動 (Registry/StartupTask)
-    ├── SettingsForm.cs          # WinForms設定画面
-    ├── SplashForm.cs            # スプラッシュ画面 (バージョン表示)
-    ├── CaptureHelper.cs         # ウィンドウキャプチャ (PrintWindow API)
-    ├── Package/
-    │   ├── AppxManifest.xml     # MSIX マニフェスト
-    │   └── Assets/*.png         # Store 用アセット (10ファイル)
-    └── Resources/
-        ├── Strings.resx         # 英語（デフォルト）+ 15言語の .resx
-        ├── app.ico              # アプリアイコン
-        └── splash.png           # スプラッシュ画像
-```
+The MSIX build is the same publish with `-p:PublishSingleFile=false`, because
+the package layout needs the loose files.
 
-## Key Architecture Decisions
+**Never add `PublishTrimmed`.** WinForms reaches COM interop and UI Automation
+types the trimmer cannot see, and the app dies with `TypeLoadException` at run
+time (`UiaCore`, `ComponentManager`).
 
-### macOS版との差異
-| 項目 | macOS | Windows |
-|------|-------|---------|
-| トレイ | NSStatusItem | NotifyIcon |
-| メニュー | NSMenu | ContextMenuStrip |
-| ウィンドウ列挙 | CGWindowListCopyWindowInfo | EnumWindows (P/Invoke) |
-| リサイズ | AXUIElement | SetWindowPos (P/Invoke) |
-| 権限 | Accessibility権限必要 | 不要 |
-| 設定保存 | UserDefaults | JSON in AppData |
-| 自動起動 | SMAppService | Registry Run key |
-| キャプチャ | SCScreenshotManager / CGWindowListCreateImage | PrintWindow (P/Invoke) |
-| 多言語 | .lproj/Localizable.strings | .resx リソース |
+### Cross-compiling from macOS
 
-### ウィンドウ列挙・リサイズ
-- `EnumWindows` で全ウィンドウ列挙
-- `DWMWA_CLOAKED` フィルタリングでUWP隠しウィンドウ除外
-- `WS_CAPTION` + `WS_EX_TOOLWINDOW` でスタイルフィルタリング
-- `SetWindowPos` でリサイズ実行（`SWP_NOMOVE | SWP_NOZORDER`）
+`UseWindowsForms` needs the Windows Desktop SDK, which does not exist on macOS.
+The project works around this with `EnableWindowsTargeting=true` plus a direct
+`FrameworkReference`, so `dotnet publish -r win-x64` works from either OS.
 
-### 設定永続化
-- JSON ファイル: `%APPDATA%/WindowsResizeCapture/settings.json`（**フォルダー名は旧綴りのまま**。改名すると既存ユーザーの設定が失われるため据え置き）
-- 自動起動: `HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
+## Source layout
 
-### 多言語対応 (i18n)
-- .NET .resx リソースファイル方式
-- `Strings.PropertyName` で呼び出し（強く型付けされたリソース）
-- プリセットサイズ名（"Full HD", "XGA" 等）は翻訳しない
+| File | Responsibility |
+|---|---|
+| `Program.cs` | Entry point, single-instance mutex |
+| `TrayApplicationContext.cs` | Tray icon, menu construction, resize + capture flow |
+| `WindowManager.cs` | Win32 P/Invoke: enumeration, resize, positioning, foreground |
+| `CaptureHelper.cs` | Window capture via `PrintWindow`, scaling, delivery |
+| `SettingsStore.cs` | JSON persistence, launch-at-login, built-in preset list |
+| `SettingsForm.cs` | Settings window (tabs: General, Capture, Behaviour) |
+| `SplashForm.cs` | Startup splash, and the place the version string is drawn |
+| `PresetSize.cs` | Size model |
+| `Package/` | MSIX manifest and Store assets |
+| `Resources/` | `Strings.resx` (English) plus 15 translations, icon, splash |
 
-### メニュー構造
-- NotifyIcon + ContextMenuStrip
-- 左クリック・右クリックどちらでもメニュー表示
-- DropDownOpening イベントで遅延ウィンドウ一覧取得
+The built-in preset sizes live in `SettingsStore.BuiltInSizes`. They are not
+duplicated here on purpose: an earlier copy of that table in this file drifted
+out of date and started contradicting the code.
 
-### プリセットサイズ
-| サイズ | ラベル |
-|--------|--------|
-| 3840 x 2160 | 4K UHD |
-| 2560 x 1440 | QHD |
-| 1920 x 1080 | Full HD |
-| 1680 x 1050 | WSXGA+ |
-| 1366 x 768 | HD+ |
-| 1280 x 720 | HD |
-| 1024 x 768 | XGA |
-| 800 x 600 | SVGA |
+## Things that will bite you
 
-### キャプチャ
-UI 上の呼称は "Capture"（日本語 UI は「キャプチャ」）。識別子・設定キーもこれに揃える。
-- `PrintWindow` API (P/Invoke) で対象ウィンドウをキャプチャ
-- `PW_RENDERFULLCONTENT` フラグでDWM合成ウィンドウ対応
-- リサイズ成功後500ms待機してからキャプチャ（Mac版と同じ）
-- `PrintWindow` はタイムアウトを持たないため、キャプチャはスレッドプールで実行する（v1.8.1 のハング修正）
-- ファイル名形式: `MMddHHmmss_AppName_WindowTitle.png`
-- 設定項目:
-  - `CaptureEnabled` — マスタートグル
-  - `CaptureSaveToFile` — ファイル保存
-  - `CaptureSaveFolderPath` — 保存先フォルダ（FolderBrowserDialogで選択）
-  - `CaptureCopyToClipboard` — クリップボードコピー
-  - `CaptureClientArea` — クライアント領域のみ切り出す
-- v1.8.1 以前の設定ファイルは `Screenshot*` キーで保存されている。`SettingsData` の
-  `Legacy*` プロパティが読み取り専用で受け、保存時に新しいキー名へ移行する
+### Identifiers that deliberately keep a misspelling
 
-#### DPIスケーリング対応
-- **問題:** DPI仮想化環境（Parallels+Retina Mac等、200%スケーリング）で左上1/4しかキャプチャされない
-- **原因:** GDI+ `Graphics.FromImage()` 経由のHDCがDPIスケーリングの影響を受け、`GetWindowRect`も論理ピクセルを返す
-- **対策:**
-  1. `SetThreadDpiAwarenessContext(PER_MONITOR_AWARE_V2)` で物理ピクセルサイズを取得
-  2. ネイティブGDI (`CreateCompatibleDC` + `CreateCompatibleBitmap`) でウィンドウDCと互換なメモリDCを作成し `PrintWindow` に渡す
-  3. キャプチャ後、ユーザー指定の `PresetSize` (800x600等) に `HighQualityBicubic` でリサイズ
-- **注意:** `SetResolution(96, 96)` はGDI+メタデータのみでGDI HDCには影響しないため効果なし
+The executable was `WindowsResizeCapture.exe` until 1.8.2 — plural "Windows",
+a leftover from the macOS port. The file was renamed, but four identifiers
+were **deliberately left with the old spelling**, because each names state that
+already exists on a user's machine:
 
-### クロスコンパイル注意事項
-- macOS上では `UseWindowsForms` SDK が利用不可
-- `EnableWindowsTargeting=true` + `FrameworkReference` で代替
-- `dotnet publish -r win-x64` でクロスビルド可能
+| Identifier | Renaming it would |
+|---|---|
+| `%APPDATA%\WindowsResizeCapture\` | discard every saved preference |
+| Registry `Run` value `WindowsResizeCapture` | lose launch-at-login and strand a dead entry |
+| MSIX `Application Id` / `StartupTask` TaskId | break taskbar and Start pins, reset auto-start |
+| `Global\WindowsResizeCapture_SingleInstance_F7A3B2` | let an old and a new instance run at once |
 
-## Microsoft Store 公開
+The registry value name must stay in step with `installer/WindowResize.iss`,
+and the TaskId with `Package/AppxManifest.xml`. None of them is ever shown in
+the UI.
 
-### 公開方式
-Desktop Bridge (MSIX + `runFullTrust`)。Win32 P/Invoke を多用するため `runFullTrust` が必須。
+### Capture must not run on the UI thread
 
-### Publisher 情報
-- **アプリ名:** Window Resize & Capture
-- **Identity Name:** `KappeiNakano.WindowResizeforWindows`（Store 予約時の名前。改名後も変わらない）
-- **Publisher ID:** `CN=CBBEB0B6-F2F8-4A20-93BF-7BB185208944`
+`PrintWindow` sends `WM_PRINT` synchronously to the target window and has **no
+timeout parameter**. Capturing a busy or unresponsive window used to stall the
+message pump until the system hang timeout, which Partner Center reported as
+`MOAPPLICATION_HANG ... HANG_QUIESCE`. Since 1.8.1 the capture runs on a
+thread-pool thread; only the clipboard write is marshalled back, because
+`Clipboard.SetImage` requires an STA thread.
 
-### 実装状況
-- [x] Partner Center 登録 & アプリ名予約
-- [x] AppxManifest.xml 作成 — `WindowResize/Package/AppxManifest.xml`
-- [x] Store 用アセット作成 — `WindowResize/Package/Assets/` (10 PNGs)
-- [x] SettingsStore.cs 修正 — `IsPackaged()` で自動起動方式を分岐
-- [x] csproj 修正 — TFM を `net8.0-windows10.0.17763.0` に変更
-- [x] GitHub Actions — `.github/workflows/msix.yml` (タグ `v*` でトリガー)
-- [x] Store 提出 — v1.8.0.0 公開済み、v1.8.1.0 を提出して認定待ち
+The same applies to icon extraction: `WM_GETICON` goes out through
+`SendMessageTimeout` with `SMTO_ABORTIFHUNG` and a short cap, because the cap
+applies per message across three icon sizes for every window in the list.
 
-### MSIX ビルド方法
-```bash
-# 1. Publish
-dotnet publish WindowResize/WindowResize.csproj -c Release -r win-x64 --self-contained -p:PublishSingleFile=false
+### Capture under DPI virtualisation
 
-# 2. Prepare layout (copy publish → msix_layout, move Package/* to root)
-# 3. MakeAppx
-makeappx.exe pack /d msix_layout /p WindowResizeCapture.msix /o
+Symptom: on a 200 %-scaled display (Parallels on a Retina Mac, for instance)
+only the top-left quarter of the window is captured.
 
-# Store 提出時は Microsoft が署名するため自己署名不要
-# ローカルテスト時は自己署名 + 開発者モード有効化が必要
-```
+Cause: a HDC obtained through GDI+ `Graphics.FromImage()` is subject to DPI
+scaling, and `GetWindowRect` returns logical pixels.
 
-### デュアル配布アーキテクチャ
-同一コードベースで EXE 直接配布と Store MSIX 配布の両方に対応:
-- `SettingsStore.IsPackaged()` で実行環境を判定
-- **パッケージ環境 (MSIX):** `Windows.ApplicationModel.StartupTask` API で自動起動
-- **非パッケージ環境 (EXE):** Registry Run key で自動起動
+Fix, in this order:
+1. `SetThreadDpiAwarenessContext(PER_MONITOR_AWARE_V2)` so `GetWindowRect`
+   reports physical pixels.
+2. Build the memory DC with native GDI (`CreateCompatibleDC` +
+   `CreateCompatibleBitmap`) from the window's own DC and hand that to
+   `PrintWindow`.
+3. Scale the result down to the chosen `PresetSize` with `HighQualityBicubic`.
 
-### 注意事項
-- MSIX 環境では Registry Run key が使えない → StartupTask で代替
-- Global Mutex はパッケージ環境でも動作する（ただし名前空間が分離される可能性あり）
-- Store 提出時は Microsoft が署名するため自己署名不要
-- `runFullTrust` 申請理由: ウィンドウ列挙・リサイズ・スクリーンショットのための Win32 API アクセス
+`SetResolution(96, 96)` does nothing here — it only touches GDI+ metadata, not
+the GDI HDC.
 
-## 配布方法
+### Settings written before the capture rename
 
-### 1. ZIP (ポータブル)
-`dist/WindowResizeCapture-Windows-v{VERSION}.zip` — EXE + README.md + LICENSE を同梱
-```bash
-dotnet publish WindowResize/WindowResize.csproj -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
-# ZIP に WindowResizeCapture.exe, README.md, LICENSE を含める
-```
+Files written by 1.8.1 and earlier use `Screenshot*` keys. `SettingsData`
+declares nullable `Capture*` properties plus read-only `Legacy*` properties
+bound to the old names, so an absent key is distinguishable from a stored
+`false`. The file converts to the new names the first time a setting changes.
 
-### 2. インストーラ (Inno Setup)
-`dist/WindowResizeCapture-Setup-v{VERSION}.exe` — 9言語選択ダイアログ付き
-```bash
-# Inno Setup パス: C:\Users\nakanokappei\AppData\Local\Programs\Inno Setup 6\ISCC.exe
-ISCC.exe installer/WindowResize.iss
-```
-- インストーラにも README.md, LICENSE を同梱
-- `ShowLanguageDialog=yes` で言語選択
+### Packaged and unpackaged builds behave differently
 
-### 3. MSIX (Microsoft Store)
-Store 提出時は Microsoft が署名。ローカルテストは自己署名 + 開発者モード必要。
+One codebase serves both the direct EXE and the Store MSIX.
+`SettingsStore.IsPackaged()` decides which path to take:
 
-### リリース手順
-1. バージョン更新（**4 か所**）: `WindowResize.csproj` の `<Version>`, `SplashForm.cs`, `AppxManifest.xml`, `WindowResize.iss`
-   - csproj の `<Version>` は EXE のファイルバージョンになる。抜けると `1.0.0.0` と表示される
-2. ビルド: `dotnet publish` → ZIP作成 → `ISCC.exe` でインストーラ
-3. コミット & タグ: `git tag v{VERSION}`
-4. GitHub Release: `gh release create v{VERSION} dist/*.zip dist/*.exe`
-   - gh.exe パス: `C:\Program Files\GitHub CLI\gh.exe`
+- **MSIX**: auto-start through the `Windows.ApplicationModel.StartupTask` API,
+  because a registry `Run` key has no effect for a packaged app.
+- **Plain EXE**: auto-start through the registry `Run` key.
+
+A global mutex does work inside a package, though the namespace may be
+isolated — do not assume cross-boundary exclusion.
+
+### Window enumeration filters
+
+`EnumWindows` returns far more than application windows. The list is narrowed
+by `DWMWA_CLOAKED` (drops hidden UWP containers and virtual-desktop ghosts),
+`WS_CAPTION`, and `WS_EX_TOOLWINDOW` unless `WS_EX_APPWINDOW` is also set.
+
+## Microsoft Store
+
+Published as a Desktop Bridge package: MSIX with `runFullTrust`, which is
+required because the app is built on Win32 P/Invoke. Justify it in the
+submission as access needed for window enumeration, resizing and capture.
+
+| | |
+|---|---|
+| App name | Window Resize & Capture |
+| Identity Name | `KappeiNakano.WindowResizeforWindows` (assigned at reservation; unchanged by renames) |
+| Publisher ID | `CN=CBBEB0B6-F2F8-4A20-93BF-7BB185208944` |
+
+Microsoft signs the package at submission, so no signing is needed here.
+Testing an MSIX locally does need a self-signed certificate and developer mode.
+
+`.github/workflows/msix.yml` builds the package on any `v*` tag and attaches it
+to the GitHub release. It verifies that the manifest version matches the tag
+and fails the build otherwise, so bump the manifest before tagging.
+
+## Release procedure
+
+1. Update the version in **four** places:
+   `WindowResize.csproj` `<Version>`, `SplashForm.cs`, `Package/AppxManifest.xml`,
+   `installer/WindowResize.iss`.
+   Omitting the csproj one makes the executable report `1.0.0.0` in its file
+   properties and in the installed-programs list.
+2. Publish, then build the two local artifacts:
+   - `dist/WindowResizeCapture-Windows-v{VERSION}.zip` — exe + README + LICENSE
+   - `dist/WindowResizeCapture-Setup-v{VERSION}.exe` — `ISCC.exe installer/WindowResize.iss`
+3. Commit, tag `v{VERSION}`, push. The workflow builds and publishes the MSIX.
+4. Upload the ZIP and installer to the same release.
+5. For a Store release, submit the MSIX from that release in Partner Center.
+
+Tool paths on the current machine:
+`C:\Users\nakanokappei\AppData\Local\Programs\Inno Setup 6\ISCC.exe`
+(installable with `winget install JRSoftware.InnoSetup`), and
+`C:\Program Files\GitHub CLI\gh.exe`.
+
+Upgrading over an older install is the risky part of a release: the executable
+rename means the installer carries an `[InstallDelete]` entry for the old file,
+and the settings-key migration has only been exercised in isolation. Verify a
+real upgrade before submitting to the Store.
 
 ## Conventions
-- リソースキーは PascalCase: `MenuResize`, `SettingsWidth`, `AlertResizeFailedTitle`
-- SettingsForm は閉じるとき Hide（破棄しない）
-- メニューは SettingsChanged イベントで再構築
-- メニュータグの右寄せは `ShortcutKeyDisplayString` プロパティで実現
-- メニュータイトルは画面幅の1/4に制限 (`TruncateToFit`)
+
+- Name things after the UI. The capture feature is "Capture" everywhere —
+  label, resource key, property, JSON key — because someone who reads the UI
+  should be able to grep for it.
+- Resource keys are PascalCase and mirror the UI wording: `MenuResize`,
+  `SettingsWidth`, `AlertResizeFailedTitle`.
+- Menu item text passes through `EscapeMenuMnemonics`: WinForms treats `&` as a
+  mnemonic prefix, and both the app name and arbitrary window titles contain
+  one. Escape after measuring text, never before.
+- Preset size labels ("Full HD", "XGA") are not translated.
+- `SettingsForm` hides on close rather than disposing.
+- The menu is rebuilt from the `SettingsChanged` event.
+- The window list is populated lazily on `DropDownOpening`.
+- Right-aligned menu tags are drawn via `ShortcutKeyDisplayString`.
+- Menu titles are truncated to a quarter of the screen width (`TruncateToFit`).
