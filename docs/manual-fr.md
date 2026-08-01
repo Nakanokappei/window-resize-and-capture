@@ -83,11 +83,11 @@ Pour supprimer une taille personnalisée, cliquez sur le bouton **« Supprimer �
 
 ### Lancer à la connexion
 
-Activez **« Lancer à la connexion »** pour que Window Resize & Capture démarre automatiquement lorsque vous vous connectez à Windows.
+Activez **« Lancer au démarrage »** pour que Window Resize & Capture démarre automatiquement lorsque vous vous connectez à Windows.
 
 ### Capture d'écran
 
-Activez **« Capturer l'écran après le redimensionnement »** pour capturer automatiquement la fenêtre après le redimensionnement.
+Activez **« Prendre une capture après le redimensionnement »** pour capturer automatiquement la fenêtre après le redimensionnement.
 
 Lorsque cette option est activée, les options suivantes sont disponibles :
 

@@ -83,7 +83,7 @@ Per rimuovere una dimensione personalizzata, fai clic sul pulsante **"Rimuovi"**
 
 ### Avvio all'accesso
 
-Attiva **"Avvio all'accesso"** per far avviare automaticamente Window Resize & Capture quando accedi a Windows.
+Attiva **"Avvia al login"** per far avviare automaticamente Window Resize & Capture quando accedi a Windows.
 
 ### Cattura
 

@@ -24,7 +24,7 @@
 ### Các bước thực hiện
 
 1. Nhấp vào **biểu tượng Window Resize & Capture** trong khay hệ thống.
-2. Di chuột qua **"Thay đổi kích thước"** để mở danh sách cửa sổ.
+2. Di chuột qua **"Đổi kích thước"** để mở danh sách cửa sổ.
 3. Tất cả cửa sổ đang mở sẽ hiển thị với **biểu tượng ứng dụng** và tên theo định dạng **[Tên ứng dụng] Tiêu đề cửa sổ**. Tiêu đề dài sẽ tự động được cắt ngắn.
 4. Di chuột qua một cửa sổ để xem các kích thước đặt trước có sẵn.
 5. Nhấp vào một kích thước để thay đổi kích thước cửa sổ ngay lập tức.
@@ -75,7 +75,7 @@ Kích thước tích hợp không thể xóa hoặc chỉnh sửa.
 
 Bạn có thể thêm kích thước của riêng mình:
 
-1. Nhập **Chiều rộng** và **Chiều cao** bằng pixel.
+1. Nhập **Rộng** và **Cao** bằng pixel.
 2. Nhấp **"Thêm"**.
 3. Kích thước mới sẽ được thêm vào danh sách và có sẵn ngay trong menu thay đổi kích thước.
 
@@ -83,17 +83,17 @@ Bạn có thể thêm kích thước của riêng mình:
 
 ### Khởi động khi đăng nhập
 
-Bật **"Khởi động khi đăng nhập"** để Window Resize & Capture tự động khởi động khi bạn đăng nhập vào Windows.
+Bật **"Khởi chạy khi đăng nhập"** để Window Resize & Capture tự động khởi động khi bạn đăng nhập vào Windows.
 
 ### Ảnh chụp màn hình
 
-Bật **"Chụp ảnh màn hình sau khi thay đổi kích thước"** để tự động chụp cửa sổ sau khi thay đổi kích thước.
+Bật **"Chụp ảnh sau khi đổi kích thước"** để tự động chụp cửa sổ sau khi thay đổi kích thước.
 
 Khi bật, các tùy chọn sau khả dụng:
 
 - **Lưu vào tệp** — Lưu ảnh chụp màn hình dưới dạng tệp PNG vào thư mục bạn chọn.
   > **Định dạng tên tệp:** `MMddHHmmss_TênỨngDụng_TiêuĐềCửaSổ.png` (ví dụ: `0227193012_chrome_Google.png`). Ký hiệu sẽ bị loại bỏ; chỉ sử dụng chữ cái, chữ số và dấu gạch dưới.
-- **Sao chép vào bộ nhớ tạm** — Sao chép ảnh chụp màn hình vào bộ nhớ tạm để dán vào ứng dụng khác.
+- **Sao chép vào bảng tạm** — Sao chép ảnh chụp màn hình vào bộ nhớ tạm để dán vào ứng dụng khác.
 
 Cả hai tùy chọn có thể được bật độc lập.
 
@@ -122,5 +122,5 @@ Cửa sổ đã thu nhỏ sẽ không xuất hiện trong danh sách.
 
 Nếu ảnh chụp màn hình không được chụp:
 
-- Đảm bảo đã bật ít nhất một trong hai tùy chọn **"Lưu vào tệp"** hoặc **"Sao chép vào bộ nhớ tạm"** trong Cài đặt.
+- Đảm bảo đã bật ít nhất một trong hai tùy chọn **"Lưu vào tệp"** hoặc **"Sao chép vào bảng tạm"** trong Cài đặt.
 - Nếu lưu vào tệp, hãy xác nhận thư mục lưu tồn tại và có thể ghi được.

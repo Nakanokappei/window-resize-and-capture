@@ -83,7 +83,7 @@ Untuk menghapus ukuran kustom, klik tombol **"Hapus"** di sampingnya.
 
 ### Mulai saat Login
 
-Aktifkan **"Mulai saat Login"** agar Window Resize & Capture otomatis berjalan saat Anda login ke Windows.
+Aktifkan **"Jalankan Saat Login"** agar Window Resize & Capture otomatis berjalan saat Anda login ke Windows.
 
 ### Tangkapan Layar
 
@@ -93,7 +93,7 @@ Saat diaktifkan, opsi berikut tersedia:
 
 - **Simpan ke file** — Simpan tangkapan layar sebagai file PNG ke folder yang Anda pilih.
   > **Format nama file:** `MMddHHmmss_NamaAplikasi_JudulJendela.png` (contoh: `0227193012_chrome_Google.png`). Simbol akan dihapus; hanya huruf, angka, dan garis bawah yang digunakan.
-- **Salin ke clipboard** — Salin tangkapan layar ke clipboard untuk ditempel di aplikasi lain.
+- **Salin ke papan klip** — Salin tangkapan layar ke clipboard untuk ditempel di aplikasi lain.
 
 Kedua opsi dapat diaktifkan secara independen.
 
@@ -122,5 +122,5 @@ Jendela yang diminimalkan tidak akan muncul di daftar.
 
 Jika tangkapan layar tidak diambil:
 
-- Pastikan setidaknya salah satu dari **"Simpan ke file"** atau **"Salin ke clipboard"** diaktifkan di Pengaturan.
+- Pastikan setidaknya salah satu dari **"Simpan ke file"** atau **"Salin ke papan klip"** diaktifkan di Pengaturan.
 - Jika menyimpan ke file, pastikan folder penyimpanan ada dan dapat ditulis.

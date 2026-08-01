@@ -48,7 +48,7 @@ Si un tamaño preestablecido es mayor que la resolución de la pantalla donde se
 
 ## Configuración
 
-Haga clic en el icono de Window Resize & Capture en la bandeja y seleccione **"Configuración..."** para abrir la ventana de configuración.
+Haga clic en el icono de Window Resize & Capture en la bandeja y seleccione **"Ajustes..."** para abrir la ventana de configuración.
 
 ### Tamaños integrados
 
@@ -75,19 +75,19 @@ Los tamaños integrados no se pueden eliminar ni editar.
 
 Puede agregar sus propios tamaños:
 
-1. Ingrese el **Ancho** y la **Altura** en píxeles.
-2. Haga clic en **"Agregar"**.
+1. Ingrese el **Ancho** y la **Alto** en píxeles.
+2. Haga clic en **"Añadir"**.
 3. El nuevo tamaño se agrega a la lista y está disponible inmediatamente en el menú de redimensionamiento.
 
 Para eliminar un tamaño personalizado, haga clic en el botón **"Eliminar"** junto a él.
 
 ### Iniciar al iniciar sesión
 
-Active **"Iniciar al iniciar sesión"** para que Window Resize & Capture se inicie automáticamente al iniciar sesión en Windows.
+Active **"Iniciar sesión automáticamente"** para que Window Resize & Capture se inicie automáticamente al iniciar sesión en Windows.
 
 ### Captura de pantalla
 
-Active **"Capturar pantalla después de redimensionar"** para capturar automáticamente la ventana después del redimensionamiento.
+Active **"Capturar pantalla tras redimensionar"** para capturar automáticamente la ventana después del redimensionamiento.
 
 Cuando está activado, las siguientes opciones están disponibles:
 

@@ -83,17 +83,17 @@ Um eine benutzerdefinierte Größe zu entfernen, klicken Sie auf die Schaltfläc
 
 ### Bei Anmeldung starten
 
-Aktivieren Sie **„Bei Anmeldung starten"**, damit Window Resize & Capture automatisch startet, wenn Sie sich bei Windows anmelden.
+Aktivieren Sie **„Beim Anmelden starten"**, damit Window Resize & Capture automatisch startet, wenn Sie sich bei Windows anmelden.
 
 ### Screenshot
 
-Aktivieren Sie **„Screenshot nach Größenänderung aufnehmen"**, um das Fenster nach der Größenänderung automatisch aufzunehmen.
+Aktivieren Sie **„Nach Größenänderung Bildschirmfoto aufnehmen"**, um das Fenster nach der Größenänderung automatisch aufzunehmen.
 
 Bei Aktivierung stehen folgende Optionen zur Verfügung:
 
-- **In Datei speichern** — Screenshot als PNG-Datei im gewählten Ordner speichern.
+- **Als Datei speichern** — Screenshot als PNG-Datei im gewählten Ordner speichern.
   > **Dateinamenformat:** `MMddHHmmss_AppName_Fenstertitel.png` (z.B. `0227193012_chrome_Google.png`). Sonderzeichen werden entfernt.
-- **In Zwischenablage kopieren** — Screenshot in die Zwischenablage kopieren, um ihn in andere Apps einzufügen.
+- **In die Zwischenablage kopieren** — Screenshot in die Zwischenablage kopieren, um ihn in andere Apps einzufügen.
 
 Beide Optionen können unabhängig aktiviert werden.
 
@@ -122,5 +122,5 @@ Minimierte Fenster werden nicht in der Liste angezeigt.
 
 Wenn keine Screenshots aufgenommen werden:
 
-- Stellen Sie sicher, dass mindestens **„In Datei speichern"** oder **„In Zwischenablage kopieren"** in den Einstellungen aktiviert ist.
+- Stellen Sie sicher, dass mindestens **„Als Datei speichern"** oder **„In die Zwischenablage kopieren"** in den Einstellungen aktiviert ist.
 - Überprüfen Sie bei Dateispeicherung, ob der Speicherordner existiert und beschreibbar ist.

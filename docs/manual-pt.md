@@ -83,7 +83,7 @@ Para remover um tamanho personalizado, clique no botão **"Remover"** ao lado de
 
 ### Iniciar ao fazer login
 
-Ative **"Iniciar ao fazer login"** para que o Window Resize & Capture inicie automaticamente quando você fizer login no Windows.
+Ative **"Iniciar ao Fazer Login"** para que o Window Resize & Capture inicie automaticamente quando você fizer login no Windows.
 
 ### Captura de tela
 
@@ -93,7 +93,7 @@ Quando ativado, as seguintes opções estão disponíveis:
 
 - **Salvar em arquivo** — Salvar a captura como arquivo PNG na pasta escolhida.
   > **Formato do nome:** `MMddHHmmss_NomeApp_TítuloJanela.png` (ex.: `0227193012_chrome_Google.png`). Símbolos são removidos.
-- **Copiar para a área de transferência** — Copiar a captura para a área de transferência para colar em outros aplicativos.
+- **Copiar para área de transferência** — Copiar a captura para a área de transferência para colar em outros aplicativos.
 
 Ambas as opções podem ser ativadas de forma independente.
 
@@ -122,5 +122,5 @@ Janelas minimizadas não aparecerão na lista.
 
 Se as capturas não estão sendo realizadas:
 
-- Certifique-se de que pelo menos **"Salvar em arquivo"** ou **"Copiar para a área de transferência"** esteja ativado nas Configurações.
+- Certifique-se de que pelo menos **"Salvar em arquivo"** ou **"Copiar para área de transferência"** esteja ativado nas Configurações.
 - Se salvando em arquivo, verifique se a pasta de destino existe e é gravável.
