@@ -7,6 +7,15 @@
     <Nullable>enable</Nullable>
     <AssemblyName>WindowResizeCapture</AssemblyName>
     <RootNamespace>WindowResizeCapture</RootNamespace>
+    <!-- Without these the binary reports version 1.0.0.0 and the assembly name
+         as its description, which is what Windows shows in the file properties,
+         Task Manager and the installed-programs list. Keep the version in step
+         with SplashForm.cs, Package/AppxManifest.xml and installer/WindowResize.iss. -->
+    <Version>1.8.2</Version>
+    <AssemblyTitle>Window Resize &amp; Capture</AssemblyTitle>
+    <Product>Window Resize &amp; Capture</Product>
+    <Company>Kappei Nakano</Company>
+    <Copyright>Copyright © 2026 Kappei Nakano</Copyright>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <ApplicationIcon>Resources\app.ico</ApplicationIcon>
     <!-- Suppress platform compatibility warnings for WinRT APIs guarded by IsPackaged() -->

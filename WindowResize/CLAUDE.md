@@ -201,7 +201,8 @@ ISCC.exe installer/WindowResize.iss
 Store 提出時は Microsoft が署名。ローカルテストは自己署名 + 開発者モード必要。
 
 ### リリース手順
-1. バージョン更新: `SplashForm.cs`, `AppxManifest.xml`, `WindowResize.iss`
+1. バージョン更新（**4 か所**）: `WindowResize.csproj` の `<Version>`, `SplashForm.cs`, `AppxManifest.xml`, `WindowResize.iss`
+   - csproj の `<Version>` は EXE のファイルバージョンになる。抜けると `1.0.0.0` と表示される
 2. ビルド: `dotnet publish` → ZIP作成 → `ISCC.exe` でインストーラ
 3. コミット & タグ: `git tag v{VERSION}`
 4. GitHub Release: `gh release create v{VERSION} dist/*.zip dist/*.exe`
