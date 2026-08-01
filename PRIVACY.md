@@ -15,9 +15,24 @@ Window Resize & Capture is a system tray utility that resizes application window
 **We do not collect any personal data.** Specifically:
 
 - No usage analytics or telemetry
-- No crash reports sent externally
+- No crash reports sent by the app
 - No network connections made by the app
 - No user accounts or sign-in required
+
+### If you installed from the Microsoft Store
+
+The app itself still sends nothing. Windows, however, may report crashes and
+periods where the app stopped responding to Microsoft through Windows Error
+Reporting. That reporting is part of Windows rather than part of this app.
+Whether it happens is governed by your own Windows diagnostic data settings —
+under Settings > Privacy & security > Diagnostics & feedback — and by
+Microsoft's privacy statement, not by this app.
+
+Through Partner Center the developer receives reliability summaries for the
+app: how many crashes and unresponsive periods occurred, on which version of
+the app, and the technical failure information Windows attaches to them. These
+summaries describe the failure rather than the person who hit it, and are used
+only to fix defects.
 
 ## Data Stored Locally
 
@@ -62,9 +77,15 @@ Window Resize & Capture は、アプリケーションのウィンドウを既�
 **個人データは一切収集しません。** 具体的には以下のとおりです。
 
 - 利用状況の分析やテレメトリの収集を行いません
-- クラッシュレポートを外部に送信しません
+- アプリがクラッシュレポートを送信することはありません
 - アプリからネットワーク接続を行いません
 - ユーザーアカウントやサインインは不要です
+
+### Microsoft Store 版をご利用の場合
+
+アプリ自身が何かを送信しない点は変わりません。ただし、アプリのクラッシュや応答停止については、Windows が Windows エラー報告 (Windows Error Reporting) を通じて Microsoft に報告することがあります。これは本アプリの機能ではなく Windows の機能です。報告が行われるかどうかは、お使いの Windows の診断データ設定（[設定] > [プライバシーとセキュリティ] > [診断とフィードバック]）と Microsoft のプライバシーステートメントによって決まり、本アプリが制御するものではありません。
+
+開発者は、パートナーセンターを通じて本アプリの信頼性に関する集計情報を受け取ります。具体的には、クラッシュや応答停止が何件発生したか、どのバージョンで発生したか、および Windows がそれに付随して記録する技術的な障害情報です。これらは発生した障害についての情報であって、利用者個人を特定するものではなく、不具合の修正のみに使用します。
 
 ## ローカルに保存されるデータ
 
