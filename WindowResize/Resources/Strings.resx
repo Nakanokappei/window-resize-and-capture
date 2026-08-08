@@ -123,9 +123,9 @@
   <data name="SettingsCaptureNoFolderSelected" xml:space="preserve">
     <value>No folder selected</value>
   </data>
-  <!-- Behaviour settings -->
-  <data name="SettingsBehaviour" xml:space="preserve">
-    <value>Behaviour</value>
+  <!-- Behavior settings -->
+  <data name="SettingsBehavior" xml:space="preserve">
+    <value>Behavior</value>
   </data>
   <data name="SettingsBringToFront" xml:space="preserve">
     <value>Bring window to front after resize</value>

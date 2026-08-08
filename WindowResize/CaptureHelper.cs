@@ -13,7 +13,7 @@ namespace WindowResizeCapture;
 // Captures the contents of a window after it has been resized, then saves
 // it to a file and/or copies it to the clipboard depending on user settings.
 // Uses the native PrintWindow API with Per-Monitor DPI awareness to produce
-// correct captures even under DPI virtualisation (e.g. Parallels + Retina).
+// correct captures even under DPI virtualization (e.g. Parallels + Retina).
 public static class CaptureHelper
 {
     // ── Win32 API declarations ───────────────────────────────────────────
@@ -145,7 +145,7 @@ public static class CaptureHelper
     // Capture the window's visual content into a Bitmap using native GDI.
     // Temporarily switches the thread to Per-Monitor V2 DPI awareness so
     // that GetWindowRect returns physical-pixel dimensions, avoiding the
-    // quarter-capture bug under DPI virtualisation.
+    // quarter-capture bug under DPI virtualization.
     // In client-only mode the full window is captured (the reliable
     // PW_RENDERFULLCONTENT path) and then cropped to the client area, because
     // PW_CLIENTONLY is ignored when PW_RENDERFULLCONTENT is set.

@@ -56,7 +56,7 @@
   <data name="SettingsCaptureChooseFolder" xml:space="preserve"><value>폴더 선택...</value></data>
   <data name="SettingsCaptureCopyToClipboard" xml:space="preserve"><value>클립보드에 복사</value></data>
   <data name="SettingsCaptureNoFolderSelected" xml:space="preserve"><value>폴더가 선택되지 않음</value></data>
-  <data name="SettingsBehaviour" xml:space="preserve"><value>동작</value></data>
+  <data name="SettingsBehavior" xml:space="preserve"><value>동작</value></data>
   <data name="SettingsBringToFront" xml:space="preserve"><value>크기 조절 후 창을 맨 앞으로</value></data>
   <data name="SettingsWindowPosition" xml:space="preserve"><value>크기 조절 후 위치</value></data>
   <data name="SettingsMoveToMainScreen" xml:space="preserve"><value>주 화면으로 이동</value></data>

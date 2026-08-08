@@ -16,7 +16,7 @@ public class TrayApplicationContext : ApplicationContext
     private readonly SettingsStore _store = SettingsStore.Shared;
     private SettingsForm? _settingsForm;
 
-    // Initialise the tray icon, build the menu, show the splash screen,
+    // Initialize the tray icon, build the menu, show the splash screen,
     // and subscribe to settings changes for live menu rebuilds.
     public TrayApplicationContext()
     {
@@ -235,7 +235,7 @@ public class TrayApplicationContext : ApplicationContext
 
     // ── Actions ──────────────────────────────────────────────────────────
 
-    // Execute the resize with all configured behaviour options, then
+    // Execute the resize with all configured behavior options, then
     // capture the window if successful, or show an error dialog.
     private void PerformResize(WindowInfo window, PresetSize size)
     {
@@ -310,13 +310,13 @@ public class TrayApplicationContext : ApplicationContext
     }
 
     // Return the pixel dimensions of the display that contains the
-    // centre point of the given window.
+    // center point of the given window.
     private static Size ScreenBoundsForWindow(WindowInfo window)
     {
-        var centre = new Point(
+        var center = new Point(
             window.Left + window.Width / 2,
             window.Top + window.Height / 2);
-        return Screen.FromPoint(centre).Bounds.Size;
+        return Screen.FromPoint(center).Bounds.Size;
     }
 
     // Load the tray icon from the embedded resource. If the resource is

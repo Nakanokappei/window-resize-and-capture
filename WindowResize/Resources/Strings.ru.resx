@@ -56,7 +56,7 @@
   <data name="SettingsCaptureChooseFolder" xml:space="preserve"><value>Выбрать папку...</value></data>
   <data name="SettingsCaptureCopyToClipboard" xml:space="preserve"><value>Копировать в буфер обмена</value></data>
   <data name="SettingsCaptureNoFolderSelected" xml:space="preserve"><value>Папка не выбрана</value></data>
-  <data name="SettingsBehaviour" xml:space="preserve"><value>Поведение</value></data>
+  <data name="SettingsBehavior" xml:space="preserve"><value>Поведение</value></data>
   <data name="SettingsBringToFront" xml:space="preserve"><value>Вывести окно на передний план после изменения размера</value></data>
   <data name="SettingsWindowPosition" xml:space="preserve"><value>Положение после изменения размера</value></data>
   <data name="SettingsMoveToMainScreen" xml:space="preserve"><value>Переместить на основной экран</value></data>

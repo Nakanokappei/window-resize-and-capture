@@ -56,7 +56,7 @@
   <data name="SettingsCaptureChooseFolder" xml:space="preserve"><value>اختيار مجلد...</value></data>
   <data name="SettingsCaptureCopyToClipboard" xml:space="preserve"><value>نسخ إلى الحافظة</value></data>
   <data name="SettingsCaptureNoFolderSelected" xml:space="preserve"><value>لم يتم اختيار مجلد</value></data>
-  <data name="SettingsBehaviour" xml:space="preserve"><value>السلوك</value></data>
+  <data name="SettingsBehavior" xml:space="preserve"><value>السلوك</value></data>
   <data name="SettingsBringToFront" xml:space="preserve"><value>إحضار النافذة للأمام بعد تغيير الحجم</value></data>
   <data name="SettingsWindowPosition" xml:space="preserve"><value>الموضع بعد تغيير الحجم</value></data>
   <data name="SettingsMoveToMainScreen" xml:space="preserve"><value>نقل إلى الشاشة الرئيسية</value></data>

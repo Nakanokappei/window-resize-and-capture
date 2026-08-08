@@ -56,7 +56,7 @@
   <data name="SettingsCaptureChooseFolder" xml:space="preserve"><value>เลือกโฟลเดอร์...</value></data>
   <data name="SettingsCaptureCopyToClipboard" xml:space="preserve"><value>คัดลอกไปยังคลิปบอร์ด</value></data>
   <data name="SettingsCaptureNoFolderSelected" xml:space="preserve"><value>ยังไม่ได้เลือกโฟลเดอร์</value></data>
-  <data name="SettingsBehaviour" xml:space="preserve"><value>พฤติกรรม</value></data>
+  <data name="SettingsBehavior" xml:space="preserve"><value>พฤติกรรม</value></data>
   <data name="SettingsBringToFront" xml:space="preserve"><value>นำหน้าต่างมาด้านหน้าหลังปรับขนาด</value></data>
   <data name="SettingsWindowPosition" xml:space="preserve"><value>ตำแหน่งหลังปรับขนาด</value></data>
   <data name="SettingsMoveToMainScreen" xml:space="preserve"><value>ย้ายไปหน้าจอหลัก</value></data>

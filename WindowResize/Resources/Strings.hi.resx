@@ -56,7 +56,7 @@
   <data name="SettingsCaptureChooseFolder" xml:space="preserve"><value>फ़ोल्डर चुनें...</value></data>
   <data name="SettingsCaptureCopyToClipboard" xml:space="preserve"><value>क्लिपबोर्ड पर कॉपी करें</value></data>
   <data name="SettingsCaptureNoFolderSelected" xml:space="preserve"><value>कोई फ़ोल्डर चयनित नहीं</value></data>
-  <data name="SettingsBehaviour" xml:space="preserve"><value>व्यवहार</value></data>
+  <data name="SettingsBehavior" xml:space="preserve"><value>व्यवहार</value></data>
   <data name="SettingsBringToFront" xml:space="preserve"><value>आकार बदलने के बाद विंडो को सामने लाएं</value></data>
   <data name="SettingsWindowPosition" xml:space="preserve"><value>आकार बदलने के बाद स्थिति</value></data>
   <data name="SettingsMoveToMainScreen" xml:space="preserve"><value>मुख्य स्क्रीन पर ले जाएं</value></data>

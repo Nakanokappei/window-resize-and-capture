@@ -56,7 +56,7 @@
   <data name="SettingsCaptureChooseFolder" xml:space="preserve"><value>Escolher Pasta...</value></data>
   <data name="SettingsCaptureCopyToClipboard" xml:space="preserve"><value>Copiar para área de transferência</value></data>
   <data name="SettingsCaptureNoFolderSelected" xml:space="preserve"><value>Nenhuma pasta selecionada</value></data>
-  <data name="SettingsBehaviour" xml:space="preserve"><value>Comportamento</value></data>
+  <data name="SettingsBehavior" xml:space="preserve"><value>Comportamento</value></data>
   <data name="SettingsBringToFront" xml:space="preserve"><value>Trazer janela para frente após redimensionar</value></data>
   <data name="SettingsWindowPosition" xml:space="preserve"><value>Posição após redimensionar</value></data>
   <data name="SettingsMoveToMainScreen" xml:space="preserve"><value>Mover para a tela principal</value></data>

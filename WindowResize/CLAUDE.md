@@ -41,7 +41,7 @@ The project works around this with `EnableWindowsTargeting=true` plus a direct
 | `WindowManager.cs` | Win32 P/Invoke: enumeration, resize, positioning, foreground |
 | `CaptureHelper.cs` | Window capture via `PrintWindow`, scaling, delivery |
 | `SettingsStore.cs` | JSON persistence, launch-at-login, built-in preset list |
-| `SettingsForm.cs` | Settings window (tabs: General, Capture, Behaviour) |
+| `SettingsForm.cs` | Settings window (tabs: General, Capture, Behavior) |
 | `SplashForm.cs` | Startup splash, and the place the version string is drawn |
 | `PresetSize.cs` | Size model |
 | `Package/` | MSIX manifest and Store assets |
@@ -84,7 +84,7 @@ The same applies to icon extraction: `WM_GETICON` goes out through
 `SendMessageTimeout` with `SMTO_ABORTIFHUNG` and a short cap, because the cap
 applies per message across three icon sizes for every window in the list.
 
-### Capture under DPI virtualisation
+### Capture under DPI virtualization
 
 Symptom: on a 200 %-scaled display (Parallels on a Retina Mac, for instance)
 only the top-left quarter of the window is captured.

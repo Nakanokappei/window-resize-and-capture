@@ -56,7 +56,7 @@
   <data name="SettingsCaptureChooseFolder" xml:space="preserve"><value>Pilih Folder...</value></data>
   <data name="SettingsCaptureCopyToClipboard" xml:space="preserve"><value>Salin ke papan klip</value></data>
   <data name="SettingsCaptureNoFolderSelected" xml:space="preserve"><value>Belum ada folder dipilih</value></data>
-  <data name="SettingsBehaviour" xml:space="preserve"><value>Perilaku</value></data>
+  <data name="SettingsBehavior" xml:space="preserve"><value>Perilaku</value></data>
   <data name="SettingsBringToFront" xml:space="preserve"><value>Bawa jendela ke depan setelah mengubah ukuran</value></data>
   <data name="SettingsWindowPosition" xml:space="preserve"><value>Posisi setelah mengubah ukuran</value></data>
   <data name="SettingsMoveToMainScreen" xml:space="preserve"><value>Pindahkan ke layar utama</value></data>

@@ -6,7 +6,7 @@ namespace WindowResizeCapture;
 
 // The Settings window. Built entirely in code (no designer). A three-tab
 // layout: General (preset sizes, launch at login), Capture (capture
-// destinations), and Behaviour (post-resize window handling). Hides
+// destinations), and Behavior (post-resize window handling). Hides
 // instead of closing so it can be reused without reconstruction.
 public class SettingsForm : Form
 {
@@ -32,7 +32,7 @@ public class SettingsForm : Form
     private Button _chooseFolderButton = null!;
     private Label _folderPathLabel = null!;
 
-    // Behaviour tab controls. The position tiles are checkbox-styled
+    // Behavior tab controls. The position tiles are checkbox-styled
     // buttons so UI Automation exposes their checked state to screen
     // readers (a plain Button has no toggle state).
     private CheckBox _bringToFrontCheck = null!;
@@ -41,7 +41,7 @@ public class SettingsForm : Form
 
     // Geometric glyphs for the 3x3 position grid (TL, T, TR, L, C, R, BL, B,
     // BR): filled triangles pointing/leaning toward each edge or corner, and
-    // a filled circle for centre. All render in a standard Windows font.
+    // a filled circle for center. All render in a standard Windows font.
     private static readonly string[] PositionGlyphs =
         { "◤", "▲", "◥", "◀", "●", "▶", "◣", "▼", "◢" };
 
@@ -84,7 +84,7 @@ public class SettingsForm : Form
 
         tabs.TabPages.Add(BuildGeneralTab());
         tabs.TabPages.Add(BuildCaptureTab());
-        tabs.TabPages.Add(BuildBehaviourTab());
+        tabs.TabPages.Add(BuildBehaviorTab());
         Controls.Add(tabs);
     }
 
@@ -349,10 +349,10 @@ public class SettingsForm : Form
         return tab;
     }
 
-    // Behaviour tab: post-resize options and the 3x3 snap-position grid.
-    private TabPage BuildBehaviourTab()
+    // Behavior tab: post-resize options and the 3x3 snap-position grid.
+    private TabPage BuildBehaviorTab()
     {
-        var tab = new TabPage(Strings.SettingsBehaviour);
+        var tab = new TabPage(Strings.SettingsBehavior);
 
         // Bring to front
         _bringToFrontCheck = new CheckBox

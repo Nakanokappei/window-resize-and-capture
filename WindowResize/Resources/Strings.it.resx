@@ -56,7 +56,7 @@
   <data name="SettingsCaptureChooseFolder" xml:space="preserve"><value>Scegli cartella...</value></data>
   <data name="SettingsCaptureCopyToClipboard" xml:space="preserve"><value>Copia negli appunti</value></data>
   <data name="SettingsCaptureNoFolderSelected" xml:space="preserve"><value>Nessuna cartella selezionata</value></data>
-  <data name="SettingsBehaviour" xml:space="preserve"><value>Comportamento</value></data>
+  <data name="SettingsBehavior" xml:space="preserve"><value>Comportamento</value></data>
   <data name="SettingsBringToFront" xml:space="preserve"><value>Porta la finestra in primo piano dopo il ridimensionamento</value></data>
   <data name="SettingsWindowPosition" xml:space="preserve"><value>Posizione dopo il ridimensionamento</value></data>
   <data name="SettingsMoveToMainScreen" xml:space="preserve"><value>Sposta sullo schermo principale</value></data>

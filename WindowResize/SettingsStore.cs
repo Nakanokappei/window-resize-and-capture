@@ -44,7 +44,7 @@ public partial class SettingsStore
 
     public List<PresetSize> CustomSizes { get; private set; } = new();
 
-    // Window behaviour settings
+    // Window behavior settings
     public bool BringToFront { get; set; } = true;
     public WindowPosition? Position { get; set; }
     public bool MoveToMainScreen { get; set; }
@@ -261,7 +261,7 @@ public partial class SettingsStore
             if (data?.CustomSizes != null)
                 CustomSizes = data.CustomSizes;
 
-            // Behaviour settings
+            // Behavior settings
             BringToFront = data?.BringToFront ?? true;
             Position = data?.Position;
             MoveToMainScreen = data?.MoveToMainScreen ?? false;

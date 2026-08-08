@@ -56,7 +56,7 @@
   <data name="SettingsCaptureChooseFolder" xml:space="preserve"><value>Chọn thư mục...</value></data>
   <data name="SettingsCaptureCopyToClipboard" xml:space="preserve"><value>Sao chép vào bảng tạm</value></data>
   <data name="SettingsCaptureNoFolderSelected" xml:space="preserve"><value>Chưa chọn thư mục</value></data>
-  <data name="SettingsBehaviour" xml:space="preserve"><value>Hành vi</value></data>
+  <data name="SettingsBehavior" xml:space="preserve"><value>Hành vi</value></data>
   <data name="SettingsBringToFront" xml:space="preserve"><value>Đưa cửa sổ lên trước sau khi thay đổi kích thước</value></data>
   <data name="SettingsWindowPosition" xml:space="preserve"><value>Vị trí sau khi thay đổi kích thước</value></data>
   <data name="SettingsMoveToMainScreen" xml:space="preserve"><value>Di chuyển đến màn hình chính</value></data>

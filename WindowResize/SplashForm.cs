@@ -13,7 +13,7 @@ public class SplashForm : Form
     private readonly System.Windows.Forms.Timer _fadeTimer;
     private float _opacity = 1.0f;
 
-    // Configure the form as a fixed-size, borderless overlay centred on screen.
+    // Configure the form as a fixed-size, borderless overlay centered on screen.
     public SplashForm()
     {
         // The content is owner-drawn, so give the form itself a name that
@@ -66,7 +66,7 @@ public class SplashForm : Form
         Opacity = _opacity;
     }
 
-    // Render the splash content: centred app icon, title, version, copyright,
+    // Render the splash content: centered app icon, title, version, copyright,
     // and a subtle border.
     protected override void OnPaint(PaintEventArgs e)
     {
@@ -85,8 +85,8 @@ public class SplashForm : Form
             g.DrawImage(icon, (Width - 64) / 2, 15, 64, 64);
         }
 
-        // Shared format for all centred text lines
-        var centred = new StringFormat
+        // Shared format for all centered text lines
+        var centered = new StringFormat
         {
             Alignment = StringAlignment.Center,
             LineAlignment = StringAlignment.Center
@@ -96,19 +96,19 @@ public class SplashForm : Form
         using var titleFont = new Font("Segoe UI", 18, FontStyle.Bold);
         using var titleBrush = new SolidBrush(Color.White);
         g.DrawString("Window Resize & Capture", titleFont, titleBrush,
-            new RectangleF(0, 85, Width, 35), centred);
+            new RectangleF(0, 85, Width, 35), centered);
 
         // Version string
         using var versionFont = new Font("Segoe UI", 10);
         using var versionBrush = new SolidBrush(Color.FromArgb(160, 160, 160));
         g.DrawString("v1.8.2", versionFont, versionBrush,
-            new RectangleF(0, 120, Width, 20), centred);
+            new RectangleF(0, 120, Width, 20), centered);
 
         // Copyright notice
         using var copyrightFont = new Font("Segoe UI", 8);
         using var copyrightBrush = new SolidBrush(Color.FromArgb(120, 120, 120));
         g.DrawString("\u00a9 2026 Window Resize", copyrightFont, copyrightBrush,
-            new RectangleF(0, 150, Width, 20), centred);
+            new RectangleF(0, 150, Width, 20), centered);
 
         // Thin border around the form edge
         using var borderPen = new Pen(Color.FromArgb(80, 80, 85), 1);

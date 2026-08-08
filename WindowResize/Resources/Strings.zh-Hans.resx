@@ -56,7 +56,7 @@
   <data name="SettingsCaptureChooseFolder" xml:space="preserve"><value>选择文件夹...</value></data>
   <data name="SettingsCaptureCopyToClipboard" xml:space="preserve"><value>复制到剪贴板</value></data>
   <data name="SettingsCaptureNoFolderSelected" xml:space="preserve"><value>未选择文件夹</value></data>
-  <data name="SettingsBehaviour" xml:space="preserve"><value>行为</value></data>
+  <data name="SettingsBehavior" xml:space="preserve"><value>行为</value></data>
   <data name="SettingsBringToFront" xml:space="preserve"><value>调整后将窗口置于最前</value></data>
   <data name="SettingsWindowPosition" xml:space="preserve"><value>调整后的位置</value></data>
   <data name="SettingsMoveToMainScreen" xml:space="preserve"><value>移至主屏幕</value></data>

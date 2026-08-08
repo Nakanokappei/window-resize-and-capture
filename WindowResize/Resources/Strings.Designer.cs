@@ -282,9 +282,9 @@ namespace WindowResizeCapture {
             }
         }
 
-        internal static string SettingsBehaviour {
+        internal static string SettingsBehavior {
             get {
-                return ResourceManager.GetString("SettingsBehaviour", resourceCulture) ?? "Behaviour";
+                return ResourceManager.GetString("SettingsBehavior", resourceCulture) ?? "Behavior";
             }
         }
 
