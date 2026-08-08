@@ -8,57 +8,50 @@ Last updated: August 1, 2026
 
 ## Overview
 
-Window Resize & Capture is a system tray utility that resizes application windows to preset sizes and captures them. This app is designed with privacy in mind and does not collect, transmit, or share any personal data.
+Window Resize & Capture is a system tray app. It resizes app windows to preset sizes and saves pictures of them. The app does not collect, send, or share any personal data.
 
-## Data Collection
+## What the app collects
 
-**We do not collect any personal data.** Specifically:
+**The app collects no personal data.** It does not:
 
-- No usage analytics or telemetry
-- No crash reports sent by the app
-- No network connections made by the app
-- No user accounts or sign-in required
+- Track how you use it
+- Send crash reports
+- Connect to the internet
+- Ask you to create an account or sign in
 
-### If you installed from the Microsoft Store
+### If you installed the app from the Microsoft Store
 
-The app itself still sends nothing. Windows, however, may report crashes and
-periods where the app stopped responding to Microsoft through Windows Error
-Reporting. That reporting is part of Windows rather than part of this app.
-Whether it happens is governed by your own Windows diagnostic data settings —
-under Settings > Privacy & security > Diagnostics & feedback — and by
-Microsoft's privacy statement, not by this app.
+The app still sends nothing on its own. But Windows can send a report to Microsoft when an app crashes or stops responding. This is a Windows feature called Windows Error Reporting. It is part of Windows, not part of this app.
 
-Through Partner Center the developer receives reliability summaries for the
-app: how many crashes and unresponsive periods occurred, on which version of
-the app, and the technical failure information Windows attaches to them. These
-summaries describe the failure rather than the person who hit it, and are used
-only to fix defects.
+You decide whether Windows sends these reports. To change the setting, open **Settings > Privacy & security > Diagnostics & feedback**. Microsoft's privacy statement explains how Microsoft handles the data.
 
-## Data Stored Locally
+Microsoft then shows the developer a summary in Partner Center: how many times the app crashed or stopped responding, which version it happened in, and technical details about the failure. The summary describes the failure, not you. The developer uses it only to fix problems.
 
-The app stores the following data **only on your local device**:
+## What the app saves on your PC
 
-- **User preferences** — custom window sizes, launch-at-login setting, and capture options are saved in a JSON file located at `%APPDATA%\WindowsResizeCapture\settings.json`
-- **Launch at login** — if enabled, a registry entry is created under `HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
-- **Captures** — if the capture feature is enabled by the user, captured images are saved to a folder chosen by the user and/or copied to the system clipboard. Captures are never uploaded or transmitted.
+The app saves this data **only on your PC**:
 
-None of this data is sent to any server, third party, or external service.
+- **Your settings** — custom sizes, the launch-at-login option, and the capture options. They are saved in a JSON file at `%APPDATA%\WindowsResizeCapture\settings.json`
+- **Launch at login** — if you turn this on, the app adds an entry under `HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
+- **Captures** — if you turn on capture, the app saves the picture to the folder you chose, copies it to the clipboard, or both. The app never uploads or sends these pictures.
 
-## Third-Party Services
+The app never sends this data to a server, to another company, or to any other service.
 
-This app does not use any third-party services, SDKs, or libraries that collect data.
+## Other companies' services
 
-## Children's Privacy
+The app does not use any service, SDK, or library from another company that collects data.
 
-This app does not collect any information from anyone, including children under the age of 13.
+## Children's privacy
 
-## Changes to This Policy
+The app collects no information from anyone. This includes children under 13.
 
-If this privacy policy is updated, the changes will be posted on this page with an updated date.
+## Changes to this policy
+
+If this policy changes, the new version appears on this page with a new date.
 
 ## Contact
 
-If you have any questions about this privacy policy, please open an issue on the [GitHub repository](https://github.com/Nakanokappei/window-resize-and-capture/issues).
+If you have questions about this policy, open an issue in the [GitHub repository](https://github.com/Nakanokappei/window-resize-and-capture/issues).
 
 ---
 
