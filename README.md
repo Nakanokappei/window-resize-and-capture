@@ -9,6 +9,7 @@ The app started as a port of [Window Resize for macOS](https://github.com/Nakano
 - **Lives in the system tray** — left-click or right-click the icon to open the menu
 - **12 built-in sizes** — common Windows display resolutions
 - **Custom sizes** — add your own width x height presets and give them names
+- **Position after resize** — move the window to any of nine spots on the screen, such as a corner or the center. You can also move it to your main display, or bring it to the front.
 - **Capture** — after a resize, save a picture of the window to a file, to the clipboard, or to both
 - **App icons** — every window in the menu shows its app icon, so the one you want is easy to spot
 - **Launch at login** — start the app automatically when you sign in to Windows
