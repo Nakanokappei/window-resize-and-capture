@@ -1,40 +1,40 @@
 # Window Resize & Capture
 
-A system tray application that resizes windows to preset sizes.
+A system tray app for Windows. It resizes any app window to a preset size, and it can save a picture of that window at the same time.
 
-Windows port of [Window Resize (macOS)](https://github.com/Nakanokappei/window-resize).
+The app started as a port of [Window Resize for macOS](https://github.com/Nakanokappei/window-resize). The two apps are now different in both features and code.
 
 ## Features
 
-- **System tray resident** — left-click or right-click the tray icon to open the menu
-- **12 built-in preset sizes** — common Windows display resolutions
-- **Custom sizes** — add your own width x height presets
-- **Window capture** — automatically capture the window after resizing (save to file and/or clipboard)
-- **Window icons** — app icons displayed in the menu for easy identification
-- **Launch at login** — optional auto-start via Windows Registry
-- **Single instance** — prevents duplicate processes
-- **High DPI support** — works correctly on 125% / 150% / 200% scaled displays
-- **16 languages** — English, Simplified Chinese, Spanish, Hindi, Arabic, Indonesian, Portuguese, French, Japanese, Russian, German, Vietnamese, Thai, Korean, Italian, Traditional Chinese
+- **Lives in the system tray** — left-click or right-click the icon to open the menu
+- **12 built-in sizes** — common Windows display resolutions
+- **Custom sizes** — add your own width x height presets and give them names
+- **Capture** — after a resize, save a picture of the window to a file, to the clipboard, or to both
+- **App icons** — every window in the menu shows its app icon, so the one you want is easy to spot
+- **Launch at login** — start the app automatically when you sign in to Windows
+- **One copy at a time** — starting the app again does not create a second copy
+- **High DPI** — looks correct on displays scaled to 125%, 150%, or 200%
+- **16 languages** — the app follows your Windows language: English, Simplified Chinese, Spanish, Hindi, Arabic, Indonesian, Portuguese, French, Japanese, Russian, German, Vietnamese, Thai, Korean, Italian, Traditional Chinese
 
 ## Download
 
-Download the latest release from [Releases](https://github.com/Nakanokappei/window-resize-and-capture/releases).
+Get the latest version from [Releases](https://github.com/Nakanokappei/window-resize-and-capture/releases).
 
-No .NET runtime installation required — the exe is self-contained.
+You do not need to install the .NET runtime. Everything the app needs is inside the .exe.
 
-## Usage
+## How to use
 
-1. Run `WindowResizeCapture.exe`
-2. A splash screen appears briefly, then the app sits in the system tray
-3. Click the tray icon to open the menu
-4. Select **Resize** → choose a window → select a preset size
-5. Open **Settings** to add custom sizes, enable launch at login, or configure capture
+1. Run `WindowResizeCapture.exe`.
+2. A splash screen appears for a moment. Then the app icon appears in the system tray.
+3. Click the icon to open the menu.
+4. Select **Resize**, choose a window, then choose a size.
+5. Open **Settings** to add your own sizes, turn on launch at login, or set up capture.
 
-## System Requirements
+## System requirements
 
-- Windows 10 / 11 (x64)
+- Windows 10 or Windows 11 (64-bit)
 
-## Preset Sizes
+## Built-in sizes
 
 | Size | Label |
 |------|-------|
@@ -51,28 +51,26 @@ No .NET runtime installation required — the exe is self-contained.
 | 1024 x 768 | XGA |
 | 800 x 600 | SVGA |
 
-## Build from Source
+## Build from source
 
-Requires [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0).
+You need the [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0).
 
 ```bash
 cd WindowResize
 dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true
 ```
 
-Output: `bin/Release/net8.0-windows/win-x64/publish/WindowResizeCapture.exe`
+The app is built here:
 
-### Cross-compile from macOS
-
-The project supports cross-compilation from macOS using `EnableWindowsTargeting`:
-
-```bash
-dotnet publish WindowResize.csproj -c Release -r win-x64 --self-contained -p:PublishSingleFile=true
+```
+bin/Release/net8.0-windows10.0.17763.0/win-x64/publish/WindowResizeCapture.exe
 ```
 
-## Privacy Policy
+You can run the same command on macOS. The project sets `EnableWindowsTargeting`, so the Windows build works there as well.
 
-[Privacy Policy](PRIVACY.md) — This app does not collect any personal data.
+## Privacy
+
+The app collects no personal data. See the [privacy policy](PRIVACY.md).
 
 ## License
 
