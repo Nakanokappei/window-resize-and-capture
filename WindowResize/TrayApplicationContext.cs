@@ -106,12 +106,18 @@ public class TrayApplicationContext : ApplicationContext
 
     // The menu the studio photographs. It is the menu above, with the actions
     // left inert: a picture is taken of it, never clicked.
-    internal static ContextMenuStrip BuildStudioMenu()
+    //
+    // A caller may supply the windows to list. The real enumeration returns
+    // whatever the operator has open, which makes a listing picture different
+    // every time it is taken; the studio hands in a written cast instead. The
+    // menu itself is built the same way either way.
+    internal static ContextMenuStrip BuildStudioMenu(
+        IReadOnlyList<WindowInfo>? windows = null)
     {
         var menu = new ContextMenuStrip { ShowImageMargin = true };
         AddTopLevelItems(
             menu,
-            populateWindows: PopulateWindowList,
+            populateWindows: parent => PopulateWindowList(parent, windows),
             onSettings: () => { },
             onQuit: () => { });
         return menu;
@@ -121,9 +127,13 @@ public class TrayApplicationContext : ApplicationContext
     // Enumerate visible windows and add each as a submenu item with its
     // app icon. When three or more windows belong to the same process,
     // group them under an app-level parent item.
-    private static void PopulateWindowList(ToolStripMenuItem parent)
+    private static void PopulateWindowList(ToolStripMenuItem parent) =>
+        PopulateWindowList(parent, null);
+
+    private static void PopulateWindowList(
+        ToolStripMenuItem parent, IReadOnlyList<WindowInfo>? staged)
     {
-        var windows = WindowManager.DiscoverWindows();
+        var windows = staged ?? WindowManager.DiscoverWindows();
 
         if (windows.Count == 0)
         {

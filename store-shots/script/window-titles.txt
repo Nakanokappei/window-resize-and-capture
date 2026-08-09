@@ -1,0 +1,215 @@
+# The cast of windows the studio pretends is open, per language.
+#
+# The real enumeration lists whatever the operator happens to have running, so
+# every language's picture would differ and their own documents would appear
+# in a store listing. This file stands in for it.
+#
+# Format: a [tag] line starts a language, then ten lines in order:
+#   five browser window titles, the Notepad title, the Paint title,
+#   then the three application names shown on the group headings:
+#   browser, notepad, paint.
+#
+# The application names are the everyday words for the programs, not the names
+# on their title bars. A listing picture is read by someone deciding whether
+# to install; "Browser" tells them more than a product name would, and it does
+# not put another company's brand in our picture.
+#
+# Lines starting with # are ignored. A language with no section falls back to
+# [en]. A section without exactly ten lines is dropped rather than used short.
+#
+# The titles are deliberately dull. A listing picture should not advertise
+# anybody else's site, and a title that draws the eye competes with the menu
+# the picture is about. These are provisional; replace them if better ones
+# come along.
+
+[en]
+Getting started
+Release notes
+Documentation
+Downloads
+New tab
+Notes
+Untitled
+Browser
+Notepad
+Paint
+
+[ja]
+はじめに
+リリースノート
+ドキュメント
+ダウンロード
+新しいタブ
+メモ
+無題
+ブラウザー
+メモ帳
+ペイント
+
+[de]
+Erste Schritte
+Versionshinweise
+Dokumentation
+Downloads
+Neuer Tab
+Notizen
+Unbenannt
+Browser
+Editor
+Paint
+
+[fr]
+Premiers pas
+Notes de version
+Documentation
+Téléchargements
+Nouvel onglet
+Notes
+Sans titre
+Navigateur
+Bloc-notes
+Paint
+
+[es]
+Primeros pasos
+Notas de la versión
+Documentación
+Descargas
+Nueva pestaña
+Notas
+Sin título
+Navegador
+Bloc de notas
+Paint
+
+[pt]
+Primeiros passos
+Notas da versão
+Documentação
+Downloads
+Nova guia
+Notas
+Sem título
+Navegador
+Bloco de Notas
+Paint
+
+[it]
+Guida introduttiva
+Note di rilascio
+Documentazione
+Download
+Nuova scheda
+Note
+Senza titolo
+Browser
+Blocco note
+Paint
+
+[ru]
+Начало работы
+Заметки о выпуске
+Документация
+Загрузки
+Новая вкладка
+Заметки
+Без имени
+Браузер
+Блокнот
+Paint
+
+[ko]
+시작하기
+릴리스 정보
+설명서
+다운로드
+새 탭
+메모
+제목 없음
+브라우저
+메모장
+그림판
+
+[zh-Hans]
+入门
+版本说明
+文档
+下载
+新标签页
+记事
+无标题
+浏览器
+记事本
+画图
+
+[zh-Hant]
+快速入門
+版本資訊
+文件
+下載
+新分頁
+記事
+未命名
+瀏覽器
+記事本
+小畫家
+
+[ar]
+البدء
+ملاحظات الإصدار
+الوثائق
+التنزيلات
+علامة تبويب جديدة
+ملاحظات
+بدون عنوان
+المستعرض
+المفكرة
+الرسام
+
+[hi]
+आरंभ करें
+रिलीज़ नोट्स
+दस्तावेज़
+डाउनलोड
+नया टैब
+नोट्स
+शीर्षकहीन
+ब्राउज़र
+नोटपैड
+पेंट
+
+[id]
+Memulai
+Catatan rilis
+Dokumentasi
+Unduhan
+Tab baru
+Catatan
+Tanpa judul
+Peramban
+Notepad
+Paint
+
+[th]
+เริ่มต้นใช้งาน
+บันทึกประจำรุ่น
+เอกสาร
+ดาวน์โหลด
+แท็บใหม่
+บันทึก
+ไม่มีชื่อ
+เบราว์เซอร์
+โน้ตแพด
+เพนต์
+
+[vi]
+Bắt đầu
+Ghi chú phát hành
+Tài liệu
+Tải xuống
+Tab mới
+Ghi chú
+Chưa đặt tên
+Trình duyệt
+Notepad
+Paint

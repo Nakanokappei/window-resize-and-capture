@@ -25,7 +25,8 @@ internal static class StudioViews
 
     internal static readonly IReadOnlyList<StudioView> All = new[]
     {
-        new StudioView("tray-menu", "The tray menu open over the desktop"),
+        new StudioView("choose-a-size",
+            "Picking a size for one of five browser windows, with Notepad and Paint also open"),
         new StudioView("settings-general", "Settings, General tab: preset sizes and launch at login"),
         new StudioView("settings-capture", "Settings, Capture tab: what to do after a resize"),
         new StudioView("settings-behavior", "Settings, Behavior tab: position and front-most options"),

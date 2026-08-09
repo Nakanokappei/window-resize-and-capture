@@ -47,6 +47,11 @@ internal sealed class StudioShell
     internal Color FillBottom { get; private init; } = Color.FromArgb(216, 216, 216);
     internal Icon[] PinnedIcons { get; private init; } = Array.Empty<Icon>();
 
+    // The monochrome cloud OneDrive shows in the notification area, taken from
+    // the program itself. Null when OneDrive is not installed, in which case
+    // the set falls back to the shell's own cloud glyph.
+    internal Icon? SyncIcon { get; private init; }
+
     internal static StudioShell Read()
     {
         var (height, band) = MeasureTaskbar();
@@ -59,7 +64,106 @@ internal sealed class StudioShell
             FillTop = band.fillTop,
             FillBottom = band.fillBottom,
             PinnedIcons = ReadPinnedIcons(),
+            SyncIcon = ReadSyncIcon(),
         };
+    }
+
+    [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
+    private static extern int ExtractIconEx(
+        string file, int index, IntPtr[]? large, IntPtr[]? small, int count);
+
+    // OneDrive ships dozens of icons in one executable: a colored one for the
+    // desktop and, among the rest, the flat monochrome cloud it puts in the
+    // tray. There is no name to ask for, so the one with the least color in it
+    // is the one wanted. Choosing by measurement rather than by index means a
+    // OneDrive update that reorders its resources does not silently produce a
+    // bright blue cloud in every listing picture.
+    private static Icon? ReadSyncIcon()
+    {
+        string path = OneDrivePath();
+        if (string.IsNullOrEmpty(path))
+            return null;
+
+        int available = ExtractIconEx(path, -1, null, null, 0);
+        if (available <= 0)
+            return null;
+
+        Icon? plainest = null;
+        double leastColor = double.MaxValue;
+
+        for (int index = 0; index < available; index++)
+        {
+            var handles = new IntPtr[1];
+            if (ExtractIconEx(path, index, handles, null, 1) <= 0 || handles[0] == IntPtr.Zero)
+                continue;
+
+            try
+            {
+                using var candidate = Icon.FromHandle(handles[0]);
+                double color = MeanSaturation(candidate);
+
+                if (color < leastColor)
+                {
+                    leastColor = color;
+                    plainest?.Dispose();
+                    plainest = (Icon)candidate.Clone();
+                }
+            }
+            catch (Exception)
+            {
+                // An icon that will not load is simply not a candidate.
+            }
+            finally
+            {
+                DestroyIcon(handles[0]);
+            }
+        }
+
+        // Every icon in the file was colorful, so none of them is the tray's.
+        return leastColor < 0.25 ? plainest : null;
+    }
+
+    private static double MeanSaturation(Icon icon)
+    {
+        using var image = icon.ToBitmap();
+        double total = 0;
+        int counted = 0;
+
+        for (int x = 0; x < image.Width; x += 2)
+        {
+            for (int y = 0; y < image.Height; y += 2)
+            {
+                var pixel = image.GetPixel(x, y);
+                if (pixel.A <= 40)
+                    continue;
+
+                total += pixel.GetSaturation();
+                counted++;
+            }
+        }
+
+        return counted == 0 ? double.MaxValue : total / counted;
+    }
+
+    private static string OneDrivePath()
+    {
+        foreach (var folder in new[]
+        {
+            Environment.SpecialFolder.ProgramFiles,
+            Environment.SpecialFolder.ProgramFilesX86,
+        })
+        {
+            string candidate = Path.Combine(
+                Environment.GetFolderPath(folder), "Microsoft OneDrive", "OneDrive.exe");
+            if (File.Exists(candidate))
+                return candidate;
+        }
+
+        string perUser = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "Microsoft", "OneDrive", "OneDrive.exe");
+
+        return File.Exists(perUser) ? perUser : "";
     }
 
     // Measure the real taskbar, and take its color from the theme rather than

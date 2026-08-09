@@ -34,7 +34,7 @@ internal sealed class StudioSetForm : Form
     private const int ClockMinute = 8;
 
     private readonly StudioShell _shell;
-    private readonly Bitmap? _wallpaper;
+    private Bitmap? _wallpaper;
     private readonly Icon? _trayIcon;
     private readonly StudioCopy _copy;
     private readonly CultureInfo _language;
@@ -44,13 +44,21 @@ internal sealed class StudioSetForm : Form
         _language = request.Language;
         _copy = StudioCopy.Load(request.Language);
         _shell = StudioShell.Read();
-        _wallpaper = LoadWallpaper();
         _trayIcon = LoadTrayIcon();
 
         FormBorderStyle = FormBorderStyle.None;
         StartPosition = FormStartPosition.Manual;
-        Location = new Point(0, 0);
         Size = request.Size;
+
+        // Sit in the screen's bottom right corner, where the real tray is.
+        // Menus open away from the edge they are near, so from here the tray
+        // menu unfolds up and to the left, into the picture. Staged in the top
+        // left corner instead, it unfolded outward and the camera, which only
+        // copies the set's own rectangle, cut it off.
+        var screen = Screen.PrimaryScreen?.Bounds ?? new Rectangle(0, 0, 1920, 1080);
+        Location = new Point(
+            screen.Right - request.Size.Width,
+            screen.Bottom - request.Size.Height);
         ShowInTaskbar = false;
         TopMost = true;
         DoubleBuffered = true;
@@ -100,7 +108,12 @@ internal sealed class StudioSetForm : Form
 
     private int ClockWidth => _clockWidth;
 
-    private Font ClockFont() => new("Segoe UI", BandHeight / 9f);
+    // Measured on a real taskbar: the digits stand 17 pixels tall in a band of
+    // 96, which for this face means an em of about a quarter of the band. The
+    // earlier ninth left the clock less than half the size it should be, and a
+    // notification glyph towered over it.
+    private Font ClockFont() =>
+        new("Segoe UI", BandHeight * 0.245f, GraphicsUnit.Pixel);
 
     private (string time, string date) ClockText()
     {
@@ -131,27 +144,10 @@ internal sealed class StudioSetForm : Form
     {
         var area = new Rectangle(0, 0, ClientSize.Width, ClientSize.Height - BandHeight);
 
-        if (_wallpaper == null)
-        {
-            using var wash = new LinearGradientBrush(
-                area, Color.FromArgb(23, 48, 87), Color.FromArgb(12, 24, 45), 60f);
-            canvas.FillRectangle(wash, area);
-            return;
-        }
-
-        // Cover the area without distorting the picture: scale by whichever
-        // edge needs the most, then center what spills over.
-        double scale = Math.Max(
-            area.Width / (double)_wallpaper.Width,
-            area.Height / (double)_wallpaper.Height);
-
-        int width = (int)Math.Ceiling(_wallpaper.Width * scale);
-        int height = (int)Math.Ceiling(_wallpaper.Height * scale);
-
-        canvas.DrawImage(_wallpaper, new Rectangle(
-            area.X - (width - area.Width) / 2,
-            area.Y - (height - area.Height) / 2,
-            width, height));
+        // Computed at exactly the size it is drawn at, so nothing is scaled
+        // and no image file has to travel with the project.
+        _wallpaper ??= StudioWallpaper.Render(area.Width, area.Height, _language);
+        canvas.DrawImageUnscaled(_wallpaper, area.Location);
     }
 
     // The band is drawn from three colors sampled off the real taskbar: the
@@ -187,11 +183,11 @@ internal sealed class StudioSetForm : Form
         int bandTop = ClientSize.Height - BandHeight;
         int y = bandTop + (BandHeight - size) / 2;
 
-        // Measured off a real taskbar: the ink of the placeholder text stands
-        // 40 pixels tall in a band of 96, so the em is a little over four
-        // tenths of the band. Given in pixels, because a size in points would
-        // then have to be converted twice.
-        using var searchFont = new Font("Segoe UI", BandHeight * 0.42f, GraphicsUnit.Pixel);
+        // The placeholder text is smaller than it first appeared: an earlier
+        // measurement of 0.42 had swept in the magnifier and the pill's own
+        // outline along with the letters. Given in pixels, because a size in
+        // points would then have to be converted twice.
+        using var searchFont = new Font("Segoe UI", BandHeight * 0.27f, GraphicsUnit.Pixel);
         string label = StudioSearchLabel.For(_language);
         int searchWidth = SearchBoxWidth(canvas, label, searchFont);
 
@@ -258,8 +254,10 @@ internal sealed class StudioSetForm : Form
             glyphLeft + glyph * 5 / 8, glyphTop + glyph * 5 / 8,
             glyphLeft + glyph, glyphTop + glyph);
 
-        // The real placeholder text measures about rgb(48,61,64) at its core.
-        using var text = new SolidBrush(Color.FromArgb(48, 61, 64));
+        // The commonest ink color inside the real search box is rgb(93,94,95).
+        // An earlier reading of rgb(48,61,64) came from taking the darkest
+        // pixel, which belongs to the magnifier rather than to the letters.
+        using var text = new SolidBrush(Color.FromArgb(93, 94, 95));
         var textArea = new RectangleF(
             glyphLeft + glyph * 2, box.Y, box.Right - glyphLeft - glyph * 2, box.Height);
         using var format = new StringFormat
@@ -312,8 +310,11 @@ internal sealed class StudioSetForm : Form
         // this app's own icon should not sit alone in a notification area no
         // real desktop ever has, but which cloud it is does not matter.
         right -= size + gap;
-        if (!DrawGlyph(canvas, GlyphCloud, solid, new Rectangle(right, top, size, size)))
-            DrawCloud(canvas, ink, new Rectangle(right, top, size, size));
+        var cloud = new Rectangle(right, top, size, size);
+        if (_shell.SyncIcon != null)
+            canvas.DrawIcon(_shell.SyncIcon, cloud);
+        else if (!DrawGlyph(canvas, GlyphCloud, solid, cloud))
+            DrawCloud(canvas, ink, cloud);
 
         // The chevron that opens the icons Windows keeps hidden.
         right -= size + gap;
@@ -462,7 +463,10 @@ internal sealed class StudioSetForm : Form
 
         int right = ClientSize.Width - ClockRightMargin;
         int middle = ClientSize.Height - BandHeight / 2;
-        int lineHeight = (int)Math.Ceiling(font.GetHeight(canvas));
+        // The two lines sit 0.27 of the band apart, measured rather than taken
+        // from the font, whose reported height carries leading the real clock
+        // does not use.
+        int lineHeight = (int)Math.Round(BandHeight * 0.27f);
 
         DrawRightAligned(canvas, time, font, ink, right, middle - lineHeight);
         DrawRightAligned(canvas, date, font, ink, right, middle);
@@ -487,6 +491,18 @@ internal sealed class StudioSetForm : Form
     // The marketing line is a translated string like any other. Burning it
     // into an image by hand would mean opening a graphics editor for every
     // new language.
+    // Keep the marketing line clear of whatever the pose put on the set. A
+    // menu four levels deep reaches a long way up and to the left, and text
+    // running underneath it is worse than text that had to wrap early.
+    internal void Reserve(Rectangle screenArea)
+    {
+        _reserved = RectangleToClient(screenArea);
+        Invalidate();
+        Update();
+    }
+
+    private Rectangle _reserved = Rectangle.Empty;
+
     private void PaintMarketingLine(Graphics canvas)
     {
         if (string.IsNullOrEmpty(_copy.Headline))
@@ -494,6 +510,15 @@ internal sealed class StudioSetForm : Form
 
         int margin = ClientSize.Width / 16;
         int wrapWidth = ClientSize.Width / 2;
+
+        // Only the part of the reserved area that reaches up into the text's
+        // own band matters; something low on the set is no obstacle.
+        if (!_reserved.IsEmpty && _reserved.Top < ClientSize.Height / 2)
+        {
+            int room = _reserved.Left - margin * 2;
+            if (room > margin)
+                wrapWidth = Math.Min(wrapWidth, room);
+        }
 
         using var headlineFont = new Font("Segoe UI", ClientSize.Height / 26f, FontStyle.Bold);
         using var bodyFont = new Font("Segoe UI", ClientSize.Height / 52f);
@@ -511,47 +536,23 @@ internal sealed class StudioSetForm : Form
     // Measured on a real taskbar: a pinned icon is 47 pixels in a band of 96.
     private int IconSize => Math.Max(BandHeight * 49 / 100, 16);
 
+    // A listing picture is never shown at its own size: the store scales it
+    // down to fit a card. Drawn true to life, the taskbar and the menu come
+    // out too small to read there, so the whole desktop is staged at twice
+    // scale, as though the screen were half as wide as it is.
+    internal const int Magnification = 2;
+
+    // The menu grows less than the desktop around it. At the full doubling it
+    // filled the frame and left no room for the marketing line, and a menu
+    // four levels deep already stands tall on its own.
+    internal const float MenuMagnification = 1.5f;
+
     // The real taskbar's height, scaled to this picture. The screen is wider
     // than the picture, so a band drawn at its measured pixel height would
-    // look far too thick: the picture has to shrink it by the same ratio it
-    // shrinks the desktop.
+    // look far too thick: the picture shrinks it by the same ratio it shrinks
+    // the desktop, then the magnification above brings it back up.
     private int BandHeight => Math.Max(
-        _shell.Height * ClientSize.Width / Math.Max(_shell.ScreenWidth, 1), 16);
-
-    // The backdrop, found by walking up from the running binary to the
-    // repository. It is a development input like the shot list, not something
-    // the product ships, so it is not embedded in the executable.
-    private static Bitmap? LoadWallpaper()
-    {
-        var directory = new System.IO.DirectoryInfo(AppContext.BaseDirectory);
-
-        while (directory != null)
-        {
-            string folder = System.IO.Path.Combine(
-                directory.FullName, "store-shots", "wallpaper");
-
-            if (System.IO.Directory.Exists(folder))
-            {
-                foreach (var file in System.IO.Directory.GetFiles(folder, "*.png"))
-                {
-                    try
-                    {
-                        using var stream = System.IO.File.OpenRead(file);
-                        using var loaded = Image.FromStream(stream);
-                        return new Bitmap(loaded);
-                    }
-                    catch (Exception)
-                    {
-                        // Try the next file rather than lose the shoot.
-                    }
-                }
-            }
-
-            directory = directory.Parent;
-        }
-
-        return null;
-    }
+        _shell.Height * ClientSize.Width * Magnification / Math.Max(_shell.ScreenWidth, 1), 16);
 
     private static Icon? LoadTrayIcon()
     {
@@ -567,6 +568,7 @@ internal sealed class StudioSetForm : Form
         {
             _wallpaper?.Dispose();
             _trayIcon?.Dispose();
+            _shell.SyncIcon?.Dispose();
             foreach (var icon in _shell.PinnedIcons)
                 icon.Dispose();
         }
