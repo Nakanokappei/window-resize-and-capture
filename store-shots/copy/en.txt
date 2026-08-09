@@ -1,0 +1,4 @@
+# The first line is the headline; the rest is the body. Lines starting with
+# a hash are ignored. This is placeholder copy - replace it with the final text.
+Every window, exactly the size you need.
+Two clicks from the tray. Resize the window, then capture it in the same step.
