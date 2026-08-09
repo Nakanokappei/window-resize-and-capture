@@ -69,6 +69,16 @@ public class SettingsForm : Form
     // built by its own helper so the sections stay readable.
     private void BuildLayout()
     {
+        // Every size and position below is written for a 96 DPI display, so
+        // tell WinForms that and let it scale the whole form when it is built
+        // on a higher-DPI one. Both lines are needed together: setting the
+        // mode alone grows the font and leaves the controls where they were,
+        // which is how an earlier attempt produced a window with clipped
+        // labels and a list two rows tall.
+        //
+        // This has no effect on the shipping app, which runs DPI unaware and
+        // is therefore always told its display is 96 DPI. It is what lets the
+        // studio photograph this window from a DPI-aware process.
         Text = Strings.SettingsTitle;
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
@@ -86,6 +96,17 @@ public class SettingsForm : Form
         tabs.TabPages.Add(BuildCaptureTab());
         tabs.TabPages.Add(BuildBehaviorTab());
         Controls.Add(tabs);
+
+        // Scale the finished layout explicitly rather than leaving it to
+        // AutoScaleMode. Auto-scaling runs on every Controls.Add and writes
+        // the current dimensions back over the design ones, so a form built
+        // in code compares 192 against 192 and scales by one. The system font
+        // already grows with the display, which is what left the text too big
+        // for its controls; only the bounds need this.
+        float scale = DeviceDpi / 96f;
+        if (scale > 1f)
+            Scale(new SizeF(scale, scale));
+
     }
 
     // General tab: built-in preset list, custom size editor, launch at login.
