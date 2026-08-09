@@ -36,6 +36,12 @@ internal sealed class StudioShell
     private const int FallbackHeight = 48;
 
     internal int Height { get; private init; } = FallbackHeight;
+
+    // The width of the display the taskbar spans, in the same physical pixels
+    // as Height. A picture narrower than the screen has to shrink the band by
+    // the same ratio, or a correct 96-pixel taskbar looks twice as thick as it
+    // should in a half-width picture.
+    internal int ScreenWidth { get; private init; } = 1920;
     internal Color TopLine { get; private init; } = Color.FromArgb(178, 178, 178);
     internal Color FillTop { get; private init; } = Color.FromArgb(220, 220, 220);
     internal Color FillBottom { get; private init; } = Color.FromArgb(216, 216, 216);
@@ -48,6 +54,7 @@ internal sealed class StudioShell
         return new StudioShell
         {
             Height = height,
+            ScreenWidth = ScreenWidthPixels(),
             TopLine = band.top,
             FillTop = band.fillTop,
             FillBottom = band.fillBottom,
@@ -55,32 +62,73 @@ internal sealed class StudioShell
         };
     }
 
-    // Measure the real taskbar and sample three of its colors: the light line
-    // along its top edge and the two ends of its vertical gradient. Sampling a
-    // color is not the same as keeping a picture: three numbers travel out of
-    // this method, and they are re-read on every machine that shoots.
+    // Measure the real taskbar, and take its color from the theme rather than
+    // from the screen.
+    //
+    // Sampling the pixels was wrong. The Windows 11 taskbar is translucent, so
+    // the wallpaper shows through it: on a machine with a sunset picture the
+    // sampled band came out warm pink, and every listing picture would have
+    // carried whatever wallpaper the operator happened to be using. The theme
+    // is what a reader recognizes as a taskbar.
+    // The studio runs DPI aware, so this is the display's real pixel width.
+    private static int ScreenWidthPixels() =>
+        System.Windows.Forms.Screen.PrimaryScreen?.Bounds.Width ?? 1920;
+
     private static (int height, (Color top, Color fillTop, Color fillBottom) band) MeasureTaskbar()
     {
         var taskbar = FindWindow(TaskbarClass, null);
-        if (taskbar == IntPtr.Zero || !GetWindowRect(taskbar, out RECT bounds))
-            return (FallbackHeight, (Color.FromArgb(178, 178, 178),
-                Color.FromArgb(220, 220, 220), Color.FromArgb(216, 216, 216)));
+        int height = taskbar != IntPtr.Zero && GetWindowRect(taskbar, out RECT bounds)
+            ? Math.Max(bounds.Bottom - bounds.Top, 1)
+            : FallbackHeight;
 
-        int height = Math.Max(bounds.Bottom - bounds.Top, 1);
+        return (height, ThemeColors());
+    }
 
-        // Read one column far from any icon, the same trick the plate used.
-        const int quietColumn = 4;
-        using var strip = new Bitmap(1, height);
-        using (var canvas = Graphics.FromImage(strip))
+    // The colors Windows 11 paints its taskbar in. When the user has asked for
+    // the accent color on the taskbar, that wins; otherwise it is the near
+    // neutral that belongs to the light or dark theme.
+    private static (Color top, Color fillTop, Color fillBottom) ThemeColors()
+    {
+        bool light = ReadDword(
+            @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize",
+            "SystemUsesLightTheme") == 1;
+
+        bool accentOnTaskbar = ReadDword(
+            @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize",
+            "ColorPrevalence") == 1;
+
+        if (accentOnTaskbar)
         {
-            canvas.CopyFromScreen(
-                bounds.Left + quietColumn, bounds.Top, 0, 0, new Size(1, height));
+            int? accent = ReadDword(@"Software\Microsoft\Windows\DWM", "AccentColor");
+            if (accent is int value)
+            {
+                // Stored as ABGR, not ARGB.
+                var color = Color.FromArgb(value & 0xFF, (value >> 8) & 0xFF, (value >> 16) & 0xFF);
+                return (Lighten(color, 0.12), color, color);
+            }
         }
 
-        return (height, (
-            strip.GetPixel(0, 0),
-            strip.GetPixel(0, Math.Min(1, height - 1)),
-            strip.GetPixel(0, height - 1)));
+        return light
+            ? (Color.FromArgb(229, 229, 229), Color.FromArgb(243, 243, 243), Color.FromArgb(243, 243, 243))
+            : (Color.FromArgb(46, 46, 46), Color.FromArgb(32, 32, 32), Color.FromArgb(32, 32, 32));
+    }
+
+    private static Color Lighten(Color color, double amount) => Color.FromArgb(
+        (int)Math.Min(255, color.R + 255 * amount),
+        (int)Math.Min(255, color.G + 255 * amount),
+        (int)Math.Min(255, color.B + 255 * amount));
+
+    private static int? ReadDword(string subKey, string name)
+    {
+        try
+        {
+            using var key = Registry.CurrentUser.OpenSubKey(subKey);
+            return key?.GetValue(name) as int?;
+        }
+        catch (Exception)
+        {
+            return null;
+        }
     }
 
     // The icons a Windows desktop normally shows, taken from the programs
@@ -90,26 +138,99 @@ internal sealed class StudioShell
     {
         var found = new System.Collections.Generic.List<Icon>();
 
-        foreach (var path in new[] { ExplorerPath(), EdgePath(), StorePath() })
-        {
-            if (string.IsNullOrEmpty(path) || !File.Exists(path))
-                continue;
+        AddFileIcon(found, ExplorerPath());
+        AddFileIcon(found, EdgePath());
 
-            try
-            {
-                var icon = Icon.ExtractAssociatedIcon(path);
-                if (icon != null)
-                    found.Add(icon);
-            }
-            catch (Exception)
-            {
-                // An icon that cannot be read leaves a gap rather than
-                // stopping the shoot.
-            }
-        }
+        // The Store is a packaged app: there is no executable to point at, so
+        // the icon comes from the shell's own list of applications.
+        AddShellIcon(found, @"shell:AppsFolder\Microsoft.WindowsStore_8wekyb3d8bbwe!App");
 
         return found.ToArray();
     }
+
+    private static void AddFileIcon(System.Collections.Generic.List<Icon> found, string path)
+    {
+        if (string.IsNullOrEmpty(path) || !File.Exists(path))
+            return;
+
+        try
+        {
+            var icon = Icon.ExtractAssociatedIcon(path);
+            if (icon != null)
+                found.Add(icon);
+        }
+        catch (Exception)
+        {
+            // An icon that cannot be read leaves a gap rather than stopping
+            // the shoot.
+        }
+    }
+
+    // Ask the shell for the icon behind one of its parsing names, which is the
+    // only way to reach a packaged app's icon without reading its manifest out
+    // of a protected folder.
+    private static void AddShellIcon(System.Collections.Generic.List<Icon> found, string parsingName)
+    {
+        IntPtr list = IntPtr.Zero;
+        try
+        {
+            if (SHParseDisplayName(parsingName, IntPtr.Zero, out list, 0, out _) != 0)
+                return;
+
+            var info = new SHFILEINFO();
+            IntPtr result = SHGetFileInfo(
+                list, 0, ref info, Marshal.SizeOf<SHFILEINFO>(),
+                SHGFI_PIDL | SHGFI_ICON | SHGFI_LARGEICON);
+
+            if (result == IntPtr.Zero || info.hIcon == IntPtr.Zero)
+                return;
+
+            try
+            {
+                // Clone, because the handle has to be freed either way.
+                found.Add((Icon)Icon.FromHandle(info.hIcon).Clone());
+            }
+            finally
+            {
+                DestroyIcon(info.hIcon);
+            }
+        }
+        catch (Exception)
+        {
+        }
+        finally
+        {
+            if (list != IntPtr.Zero)
+                Marshal.FreeCoTaskMem(list);
+        }
+    }
+
+    [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
+    private static extern int SHParseDisplayName(
+        string name, IntPtr bindContext, out IntPtr idList, uint attributes, out uint parsed);
+
+    [DllImport("shell32.dll")]
+    private static extern IntPtr SHGetFileInfo(
+        IntPtr idList, uint attributes, ref SHFILEINFO info, int size, uint flags);
+
+    [DllImport("user32.dll")]
+    private static extern bool DestroyIcon(IntPtr icon);
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    private struct SHFILEINFO
+    {
+        public IntPtr hIcon;
+        public int iIcon;
+        public uint dwAttributes;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
+        public string szDisplayName;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 80)]
+        public string szTypeName;
+    }
+
+    private const uint SHGFI_ICON = 0x000000100;
+    private const uint SHGFI_LARGEICON = 0x000000000;
+    private const uint SHGFI_PIDL = 0x000000008;
 
     private static string ExplorerPath() =>
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "explorer.exe");
