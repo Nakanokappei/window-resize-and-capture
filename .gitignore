@@ -30,6 +30,7 @@ Microsoft Store.jpg
 msix_layout/
 dist/
 nul
+store-shots/out/
 
 ## Temp screenshots
 WindowResize/0301*.png

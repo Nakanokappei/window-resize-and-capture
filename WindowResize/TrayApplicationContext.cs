@@ -13,7 +13,6 @@ public class TrayApplicationContext : ApplicationContext
 {
     private readonly NotifyIcon _notifyIcon;
     private readonly ContextMenuStrip _contextMenu;
-    private readonly SettingsStore _store = SettingsStore.Shared;
     private SettingsForm? _settingsForm;
 
     // Initialize the tray icon, build the menu, show the splash screen,
@@ -43,7 +42,7 @@ public class TrayApplicationContext : ApplicationContext
         };
 
         // Rebuild the menu whenever settings change (e.g. new preset added)
-        _store.SettingsChanged += () =>
+        SettingsStore.Shared.SettingsChanged += () =>
         {
             _contextMenu.Items.Clear();
             BuildMenu();
@@ -58,40 +57,71 @@ public class TrayApplicationContext : ApplicationContext
     // Build the top-level context menu: Resize submenu, Settings, Quit.
     private void BuildMenu()
     {
+        AddTopLevelItems(
+            _contextMenu,
+            populateWindows: PopulateWindowList,
+            onSettings: ShowSettingsForm,
+            onQuit: () =>
+            {
+                _notifyIcon.Visible = false;
+                Application.Exit();
+            });
+    }
+
+    // The three items every menu starts with. Kept in one place because the
+    // studio that takes the store pictures shows this same menu; a second
+    // copy built for photographs would drift away from the real one and the
+    // listing would advertise a menu the app does not have.
+    private static void AddTopLevelItems(
+        ContextMenuStrip menu,
+        Action<ToolStripMenuItem> populateWindows,
+        Action onSettings,
+        Action onQuit)
+    {
         // The Resize submenu lazily discovers windows when opened
         var resizeItem = new ToolStripMenuItem(Strings.MenuResize);
         resizeItem.DropDownOpening += (_, _) =>
         {
             resizeItem.DropDownItems.Clear();
-            PopulateWindowList(resizeItem);
+            populateWindows(resizeItem);
         };
 
         // Placeholder so WinForms renders the submenu arrow before first open
         resizeItem.DropDownItems.Add(new ToolStripMenuItem(Strings.MenuLoading) { Enabled = false });
-        _contextMenu.Items.Add(resizeItem);
-        _contextMenu.Items.Add(new ToolStripSeparator());
+        menu.Items.Add(resizeItem);
+        menu.Items.Add(new ToolStripSeparator());
 
         // Settings item
         var settingsItem = new ToolStripMenuItem(Strings.MenuSettings);
-        settingsItem.Click += (_, _) => ShowSettingsForm();
-        _contextMenu.Items.Add(settingsItem);
-        _contextMenu.Items.Add(new ToolStripSeparator());
+        settingsItem.Click += (_, _) => onSettings();
+        menu.Items.Add(settingsItem);
+        menu.Items.Add(new ToolStripSeparator());
 
         // Quit item. Its label carries the app name, whose ampersand a menu
         // item would otherwise consume as a mnemonic prefix.
         var quitItem = new ToolStripMenuItem(EscapeMenuMnemonics(Strings.MenuQuit));
-        quitItem.Click += (_, _) =>
-        {
-            _notifyIcon.Visible = false;
-            Application.Exit();
-        };
-        _contextMenu.Items.Add(quitItem);
+        quitItem.Click += (_, _) => onQuit();
+        menu.Items.Add(quitItem);
     }
+
+    // The menu the studio photographs. It is the menu above, with the actions
+    // left inert: a picture is taken of it, never clicked.
+    internal static ContextMenuStrip BuildStudioMenu()
+    {
+        var menu = new ContextMenuStrip { ShowImageMargin = true };
+        AddTopLevelItems(
+            menu,
+            populateWindows: PopulateWindowList,
+            onSettings: () => { },
+            onQuit: () => { });
+        return menu;
+    }
+
 
     // Enumerate visible windows and add each as a submenu item with its
     // app icon. When three or more windows belong to the same process,
     // group them under an app-level parent item.
-    private void PopulateWindowList(ToolStripMenuItem parent)
+    private static void PopulateWindowList(ToolStripMenuItem parent)
     {
         var windows = WindowManager.DiscoverWindows();
 
@@ -164,7 +194,7 @@ public class TrayApplicationContext : ApplicationContext
     // WinForms shows the submenu arrow instead of the tag while still
     // reserving the tag's column width, which padded the menu out to a
     // fixed, oversized width. The app icon already identifies the app.
-    private void AddFlatWindowItem(
+    private static void AddFlatWindowItem(
         ToolStripMenuItem parent, WindowInfo window, Font menuFont, float maxMenuWidth)
     {
         string displayTitle = string.IsNullOrEmpty(window.Title) ? Strings.MenuUntitled : window.Title;
@@ -191,7 +221,7 @@ public class TrayApplicationContext : ApplicationContext
     // exceed the window's current screen are shown but disabled.
     // When positioning features are active, a "Current Size" item is
     // prepended to allow repositioning without changing dimensions.
-    private void BuildSizeSubmenu(ToolStripMenuItem parent, WindowInfo window)
+    private static void BuildSizeSubmenu(ToolStripMenuItem parent, WindowInfo window)
     {
         // Determine the resolution of the display containing this window
         var screenBounds = ScreenBoundsForWindow(window);
@@ -201,10 +231,10 @@ public class TrayApplicationContext : ApplicationContext
         // client dimensions when client-area sizing is on, outer dimensions
         // otherwise. Passing the matching value keeps this a pure reposition —
         // in client mode ResizeWindow re-adds the border to preserve the frame.
-        if (_store.IsPositioningActive)
+        if (SettingsStore.Shared.IsPositioningActive)
         {
-            int currentWidth = _store.ResizeClientArea ? window.ClientWidth : window.Width;
-            int currentHeight = _store.ResizeClientArea ? window.ClientHeight : window.Height;
+            int currentWidth = SettingsStore.Shared.ResizeClientArea ? window.ClientWidth : window.Width;
+            int currentHeight = SettingsStore.Shared.ResizeClientArea ? window.ClientHeight : window.Height;
 
             var currentSize = new PresetSize(currentWidth, currentHeight, Strings.MenuCurrentSize);
             var currentItem = new ToolStripMenuItem($"{currentWidth} x {currentHeight}")
@@ -217,7 +247,7 @@ public class TrayApplicationContext : ApplicationContext
         }
 
         // Add every preset size, disabling those larger than the screen
-        foreach (var size in _store.AllSizes)
+        foreach (var size in SettingsStore.Shared.AllSizes)
         {
             bool exceedsScreen = size.Width > screenBounds.Width || size.Height > screenBounds.Height;
 
@@ -237,14 +267,14 @@ public class TrayApplicationContext : ApplicationContext
 
     // Execute the resize with all configured behavior options, then
     // capture the window if successful, or show an error dialog.
-    private void PerformResize(WindowInfo window, PresetSize size)
+    private static void PerformResize(WindowInfo window, PresetSize size)
     {
         var outcome = WindowManager.ResizeWindow(
             window, size,
-            bringToFront: _store.BringToFront,
-            position: _store.Position,
-            moveToMainScreen: _store.MoveToMainScreen,
-            clientArea: _store.ResizeClientArea);
+            bringToFront: SettingsStore.Shared.BringToFront,
+            position: SettingsStore.Shared.Position,
+            moveToMainScreen: SettingsStore.Shared.MoveToMainScreen,
+            clientArea: SettingsStore.Shared.ResizeClientArea);
 
         // On success capture the window; on failure explain the cause so
         // the user doesn't mistake a Windows restriction for an app bug.

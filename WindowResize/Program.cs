@@ -11,8 +11,30 @@ static class Program
     private static Mutex? _mutex;
 
     [STAThread]
-    static void Main()
+    static void Main(string[] args)
     {
+        // The studio that takes the store pictures runs the app once per
+        // picture, usually while the developer's own copy is already in the
+        // tray, so it never takes part in the single-instance handshake.
+        if (Studio.StudioCommandLine.IsListRequest(args))
+        {
+            Studio.StudioCommandLine.PrintViews();
+            return;
+        }
+
+        if (Studio.StudioCommandLine.TryParse(args, out var studioRequest))
+        {
+            // The studio, unlike the product, is per-monitor DPI aware. Under
+            // the product's DpiUnawareGdiScaled the set could never fill its
+            // own window: custom drawing is not scaled up, and the clip stays
+            // at the logical client size, so the picture came out a quarter
+            // painted. Being aware puts drawing, the window and the screen
+            // copy in the same physical pixels.
+            Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
+            Studio.StudioSession.Run(studioRequest);
+            return;
+        }
+
         // Acquire a named mutex to prevent multiple instances from running.
         // If the mutex already exists, another instance is active — show a
         // message and exit immediately. The name keeps the misspelled
