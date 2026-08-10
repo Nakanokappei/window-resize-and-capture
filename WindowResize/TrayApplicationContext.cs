@@ -19,7 +19,7 @@ public class TrayApplicationContext : ApplicationContext
     // and subscribe to settings changes for live menu rebuilds.
     public TrayApplicationContext()
     {
-        _contextMenu = new ContextMenuStrip { ShowImageMargin = true };
+        _contextMenu = NewMenu();
         BuildMenu();
 
         _notifyIcon = new NotifyIcon
@@ -53,6 +53,15 @@ public class TrayApplicationContext : ApplicationContext
     }
 
     // ── Menu construction ────────────────────────────────────────────────
+
+    // An empty menu, laid out for the language the app is showing. In a language
+    // that reads right to left the items align that way and a submenu unfolds
+    // toward the left, which is the direction Windows opens its own menus in.
+    private static ContextMenuStrip NewMenu() => new()
+    {
+        ShowImageMargin = true,
+        RightToLeft = App.ReadsRightToLeft ? RightToLeft.Yes : RightToLeft.No,
+    };
 
     // Build the top-level context menu: Resize submenu, Settings, Quit.
     private void BuildMenu()
@@ -114,7 +123,7 @@ public class TrayApplicationContext : ApplicationContext
     internal static ContextMenuStrip BuildStudioMenu(
         IReadOnlyList<WindowInfo>? windows = null)
     {
-        var menu = new ContextMenuStrip { ShowImageMargin = true };
+        var menu = NewMenu();
         AddTopLevelItems(
             menu,
             populateWindows: parent => PopulateWindowList(parent, windows),
@@ -295,22 +304,25 @@ public class TrayApplicationContext : ApplicationContext
                 break;
 
             case ResizeOutcome.NeedsElevation:
-                MessageBox.Show(
-                    Strings.AlertResizeElevatedBody,
-                    Strings.AlertResizeFailedTitle,
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
+                Warn(Strings.AlertResizeElevatedBody);
                 break;
 
             default:
-                MessageBox.Show(
-                    Strings.AlertResizeFailedBody,
-                    Strings.AlertResizeFailedTitle,
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
+                Warn(Strings.AlertResizeFailedBody);
                 break;
         }
     }
+
+    // Explain a resize the app was not allowed to make. Both refusals read the
+    // same way, and a message box has to be told the reading direction at every
+    // call because it does not inherit the app's own.
+    private static void Warn(string body) => MessageBox.Show(
+        body,
+        Strings.AlertResizeFailedTitle,
+        MessageBoxButtons.OK,
+        MessageBoxIcon.Warning,
+        MessageBoxDefaultButton.Button1,
+        App.MessageReading);
 
     // Show the settings form, creating it on first use. Reuses the
     // existing instance (which hides instead of closing) when possible.

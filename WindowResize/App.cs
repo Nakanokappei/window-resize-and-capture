@@ -1,6 +1,8 @@
 using System;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Windows.Forms;
 
 namespace WindowResizeCapture;
 
@@ -37,6 +39,24 @@ internal static class App
         int commit = declared.IndexOf('+');
         return commit < 0 ? declared : declared[..commit];
     }
+
+    // ── How the app reads ────────────────────────────────────────────────
+
+    // Whether the language being shown reads right to left, which for this app
+    // means Arabic. Windows mirrors everything for such a language - the
+    // taskbar, a window's controls, the direction a menu unfolds - and an app
+    // that does not follow looks like it was translated and never laid out.
+    //
+    // Read each time rather than stored: the language is settled at startup,
+    // and by whatever the command line asked for.
+    internal static bool ReadsRightToLeft =>
+        CultureInfo.CurrentUICulture.TextInfo.IsRightToLeft;
+
+    // A message box does not follow the app's own layout the way a window
+    // does; it has to be told, at every call.
+    internal static MessageBoxOptions MessageReading => ReadsRightToLeft
+        ? MessageBoxOptions.RtlReading | MessageBoxOptions.RightAlign
+        : 0;
 
     // ── Embedded pictures ────────────────────────────────────────────────
 

@@ -79,6 +79,18 @@ public class SettingsForm : Form
         // This has no effect on the shipping app, which runs DPI unaware and
         // is therefore always told its display is 96 DPI. It is what lets the
         // studio photograph this window from a DPI-aware process.
+        // In a language that reads right to left, Windows mirrors a window's
+        // whole layout: the tabs run from the right, a check box keeps its box
+        // on the side the reading starts, a label its text. Both properties are
+        // needed - the first turns the text around, the second the layout - and
+        // they are set before anything is built. Every coordinate below stays
+        // written left to right; WinForms does the mirroring.
+        if (App.ReadsRightToLeft)
+        {
+            RightToLeft = RightToLeft.Yes;
+            RightToLeftLayout = true;
+        }
+
         Text = Strings.SettingsTitle;
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
@@ -89,13 +101,27 @@ public class SettingsForm : Form
         var tabs = new TabControl
         {
             Location = new Point(8, 8),
-            Size = new Size(404, 368)
+            Size = new Size(404, 368),
+
+            // The form's own RightToLeftLayout mirrors what sits directly on it
+            // and stops at a tab control, which carries its own. Without this
+            // one the tabs ran from the right while everything on their pages
+            // stayed left-aligned - the text turned around, the layout did not.
+            RightToLeftLayout = App.ReadsRightToLeft,
         };
 
         tabs.TabPages.Add(BuildGeneralTab());
         tabs.TabPages.Add(BuildCaptureTab());
         tabs.TabPages.Add(BuildBehaviorTab());
         Controls.Add(tabs);
+
+        // Everything now has its final size, which is what these need.
+        if (App.ReadsRightToLeft)
+        {
+            WrapWideSettings(this);
+            MirrorLayout(this);
+            MirrorPositionGrid();
+        }
 
         // Scale the finished layout explicitly rather than leaving it to
         // AutoScaleMode. Auto-scaling runs on every Controls.Add and writes
@@ -121,116 +147,102 @@ public class SettingsForm : Form
         var builtInGroup = new GroupBox
         {
             Text = Strings.SettingsBuiltIn,
-            Location = new Point(8, 8),
             Size = new Size(380, 100)
         };
+        Place(tab, builtInGroup, 8, 8);
 
         _builtInList = new ListBox
         {
-            Location = new Point(8, 20),
             Size = new Size(364, 70),
             SelectionMode = SelectionMode.None,
             BorderStyle = BorderStyle.None,
             AccessibleName = Strings.SettingsBuiltIn
         };
-        builtInGroup.Controls.Add(_builtInList);
-        tab.Controls.Add(builtInGroup);
+        Place(builtInGroup, _builtInList, 8, 20);
 
         // ── Custom sizes group ──
         var customGroup = new GroupBox
         {
             Text = Strings.SettingsCustom,
-            Location = new Point(8, 116),
             Size = new Size(380, 150)
         };
+        Place(tab, customGroup, 8, 116);
 
         _customList = new ListBox
         {
-            Location = new Point(8, 20),
             Size = new Size(280, 55),
             BorderStyle = BorderStyle.FixedSingle,
             AccessibleName = Strings.SettingsCustom
         };
-        customGroup.Controls.Add(_customList);
+        Place(customGroup, _customList, 8, 20);
 
         // Remove button beside the custom list
         _removeButton = new Button
         {
             Text = Strings.SettingsRemove,
-            Location = new Point(292, 20),
             Size = new Size(80, 28),
             Enabled = false
         };
         _removeButton.Click += OnRemovePreset;
-        customGroup.Controls.Add(_removeButton);
+        Place(customGroup, _removeButton, 292, 20);
 
         // Enable the remove button only when a custom size is selected
         _customList.SelectedIndexChanged += (_, _) =>
             _removeButton.Enabled = _customList.SelectedIndex >= 0;
 
         // ── Add-size rows: width × height, then optional name + Add ──
-        customGroup.Controls.Add(new Label
+        Place(customGroup, new Label
         {
             Text = Strings.SettingsWidth,
-            Location = new Point(8, 87),
             AutoSize = true
-        });
+        }, 8, 87);
 
         _widthBox = new TextBox
         {
-            Location = new Point(64, 84),
             Size = new Size(60, 23),
             AccessibleName = Strings.SettingsWidth
         };
-        customGroup.Controls.Add(_widthBox);
+        Place(customGroup, _widthBox, 64, 84);
 
-        customGroup.Controls.Add(new Label
+        Place(customGroup, new Label
         {
             Text = Strings.SettingsDimensionSeparator,
-            Location = new Point(130, 87),
             AutoSize = true
-        });
+        }, 130, 87);
 
-        customGroup.Controls.Add(new Label
+        Place(customGroup, new Label
         {
             Text = Strings.SettingsHeight,
-            Location = new Point(146, 87),
             AutoSize = true
-        });
+        }, 146, 87);
 
         _heightBox = new TextBox
         {
-            Location = new Point(204, 84),
             Size = new Size(60, 23),
             AccessibleName = Strings.SettingsHeight
         };
-        customGroup.Controls.Add(_heightBox);
+        Place(customGroup, _heightBox, 204, 84);
 
-        customGroup.Controls.Add(new Label
+        Place(customGroup, new Label
         {
             Text = Strings.SettingsName,
-            Location = new Point(8, 119),
             AutoSize = true
-        });
+        }, 8, 119);
 
         _nameBox = new TextBox
         {
-            Location = new Point(64, 116),
             Size = new Size(200, 23),
             AccessibleName = Strings.SettingsName
         };
-        customGroup.Controls.Add(_nameBox);
+        Place(customGroup, _nameBox, 64, 116);
 
         _addButton = new Button
         {
             Text = Strings.SettingsAdd,
-            Location = new Point(292, 114),
             Size = new Size(80, 26)
         };
         _addButton.Click += OnAddPreset;
-        customGroup.Controls.Add(_addButton);
-
-        tab.Controls.Add(customGroup);
+        Place(customGroup, _addButton, 292, 114);
 
         // ── Size by client area ──
         _resizeClientAreaCheck = AddSettingCheck(
@@ -254,24 +266,131 @@ public class SettingsForm : Form
         return tab;
     }
 
+    // ── Placing controls ─────────────────────────────────────────────────
+
+    // Put a control at a position written for a left-to-right layout.
+    private static void Place(Control parent, Control child, int x, int y)
+    {
+        child.Location = new Point(x, y);
+        parent.Controls.Add(child);
+    }
+
+    // Let a setting whose label is wider than the room it has wrap onto a second
+    // line, and push the rows below it down by what it grew.
+    //
+    // Arabic has the long labels. Left to right they simply run to the edge of
+    // the tab and stop, but mirrored they run off the side the reading starts
+    // at, where a sentence loses its beginning instead of its end - and the
+    // widest of them disappeared from the picture altogether.
+    private void WrapWideSettings(Control parent)
+    {
+        foreach (Control child in parent.Controls)
+        {
+            WrapWideSettings(child);
+
+            if (child is not CheckBox check || Array.IndexOf(_positionTiles, check) >= 0)
+                continue;
+
+            int room = parent.ClientSize.Width - check.Left - 8;
+            if (check.Width <= room)
+                continue;
+
+            int grew = WrapLabel(check, room);
+            foreach (Control below in parent.Controls)
+            {
+                if (below != check && below.Top > check.Top)
+                    below.Top += grew;
+            }
+        }
+    }
+
+    // Hold the check box to the width it has and let its label take the lines it
+    // needs. Returns how much taller it came out.
+    private static int WrapLabel(CheckBox check, int room)
+    {
+        int before = check.Height;
+
+        // What the box and its padding take, so only the text has to be fitted.
+        int furniture = check.Width - TextRenderer.MeasureText(check.Text, check.Font).Width;
+        var text = TextRenderer.MeasureText(
+            check.Text, check.Font,
+            new Size(Math.Max(room - furniture, 40), int.MaxValue),
+            TextFormatFlags.WordBreak);
+
+        check.AutoSize = false;
+        check.Size = new Size(room, Math.Max(text.Height + 4, before));
+
+        return check.Height - before;
+    }
+
+    // Turn a hand-written layout around for a language that reads right to left.
+    //
+    // WinForms turns the text inside a control around on its own, and mirrors
+    // what sits directly on a form or a tab strip, but not where a control sits
+    // inside a tab page or a panel - and every position in this window is
+    // written out by hand. Setting RightToLeft alone therefore produced an
+    // Arabic window whose labels read right to left while every row stayed
+    // pinned to the left edge.
+    //
+    // Done in one pass at the end rather than control by control, because a tab
+    // page has no width worth measuring until the tab control has it, and the
+    // page is filled before it is added.
+    private void MirrorLayout(Control parent)
+    {
+        foreach (Control child in parent.Controls)
+        {
+            // The position tiles are moved together, further down, and must not
+            // be turned around one at a time.
+            if (child is CheckBox tile && Array.IndexOf(_positionTiles, tile) >= 0)
+                continue;
+
+            // A tab page is positioned by the tab control, not from here.
+            if (child is not TabPage)
+                child.Left = parent.ClientSize.Width - child.Left - child.Width;
+
+            MirrorLayout(child);
+        }
+    }
+
+    // The grid of position tiles moves as a block, keeping its columns in order.
+    // It stands for places on a screen, and the tile that means "top left" is
+    // the reader's own top left whichever way the language runs.
+    private void MirrorPositionGrid()
+    {
+        var parent = _positionTiles[0].Parent;
+        if (parent == null)
+            return;
+
+        int left = int.MaxValue;
+        int right = 0;
+        foreach (var tile in _positionTiles)
+        {
+            left = Math.Min(left, tile.Left);
+            right = Math.Max(right, tile.Right);
+        }
+
+        int shift = parent.ClientSize.Width - right - left;
+        foreach (var tile in _positionTiles)
+            tile.Left += shift;
+    }
+
     // One setting shown as a check box: labelled, placed, filled in from the
     // store and writing straight back to it.
     //
     // Every check box on these three tabs is this same shape. Written out once
     // per setting, the shape is what a new setting is copied from, and the
     // copy that forgets to save looks exactly like the ones that do not.
-    private static CheckBox AddSettingCheck(
+    private CheckBox AddSettingCheck(
         Control parent, string label, Point at, bool value, Action<bool> apply)
     {
         var check = new CheckBox
         {
             Text = label,
-            Location = at,
             AutoSize = true,
             Checked = value
         };
         check.CheckedChanged += (_, _) => apply(check.Checked);
-        parent.Controls.Add(check);
+        Place(parent, check, at.X, at.Y);
         return check;
     }
 
@@ -332,12 +451,11 @@ public class SettingsForm : Form
         _chooseFolderButton = new Button
         {
             Text = chooseFolder,
-            Location = new Point(44, panelY),
             Size = new Size(chooseFolderWidth, 28),
             Enabled = _store.CaptureSaveToFile
         };
         _chooseFolderButton.Click += OnChooseCaptureFolder;
-        _captureOptionsPanel.Controls.Add(_chooseFolderButton);
+        Place(_captureOptionsPanel, _chooseFolderButton, 44, panelY);
 
         // GrayText keeps at least AA contrast in the default theme and
         // adapts to high-contrast themes, unlike a hard-coded gray
@@ -346,16 +464,19 @@ public class SettingsForm : Form
         // button beside it is as wide as its own label, so in a language with a
         // longer word for "Choose Folder" a fixed width ran the path off the
         // panel and cut it without even an ellipsis.
+        // Measured from where the button was asked to go rather than from where
+        // it ended up: Place may have mirrored it, and these are the numbers a
+        // left-to-right layout is written in.
+        int pathLeft = 44 + chooseFolderWidth + 8;
+
         _folderPathLabel = new Label
         {
             Text = FormatFolderPath(),
-            Location = new Point(_chooseFolderButton.Right + 8, panelY + 4),
-            Size = new Size(
-                Math.Max(_captureOptionsPanel.Width - _chooseFolderButton.Right - 16, 120), 20),
+            Size = new Size(Math.Max(_captureOptionsPanel.Width - pathLeft - 8, 120), 20),
             ForeColor = SystemColors.GrayText,
             AutoEllipsis = true
         };
-        _captureOptionsPanel.Controls.Add(_folderPathLabel);
+        Place(_captureOptionsPanel, _folderPathLabel, pathLeft, panelY + 4);
         panelY += _chooseFolderButton.Height + 2;
 
         // Copy-to-clipboard checkbox
@@ -410,12 +531,11 @@ public class SettingsForm : Form
             });
 
         // Position-after-resize label with a 3x3 tile grid below it
-        tab.Controls.Add(new Label
+        Place(tab, new Label
         {
             Text = Strings.SettingsWindowPosition,
-            Location = new Point(12, 72),
             AutoSize = true
-        });
+        }, 12, 72);
 
         // Screen readers cannot pronounce the geometric glyphs, so each
         // tile carries a localized position name as its UIA name
@@ -445,9 +565,6 @@ public class SettingsForm : Form
                 Appearance = Appearance.Button,
                 AutoCheck = false,
                 Size = new Size(tileSize, tileSize),
-                Location = new Point(
-                    12 + col * (tileSize + tileGap),
-                    gridTop + row * (tileSize + tileGap)),
                 FlatStyle = FlatStyle.Flat,
                 Tag = PositionOrder[i],
                 Font = glyphFont,
@@ -459,7 +576,10 @@ public class SettingsForm : Form
             tile.FlatAppearance.BorderSize = 1;
             tile.Click += OnPositionTileClick;
             _positionTiles[i] = tile;
-            tab.Controls.Add(tile);
+
+            Place(tab, tile,
+                12 + col * (tileSize + tileGap),
+                gridTop + row * (tileSize + tileGap));
         }
 
         RefreshPositionTiles();

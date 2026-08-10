@@ -65,7 +65,9 @@ static class Program
                 Strings.AlreadyRunningBody,
                 App.Name,
                 MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
+                MessageBoxIcon.Information,
+                MessageBoxDefaultButton.Button1,
+                App.MessageReading);
             return;
         }
 
