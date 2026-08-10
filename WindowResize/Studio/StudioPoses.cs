@@ -52,7 +52,7 @@ internal static class StudioPoses
         menu.Font = new System.Drawing.Font(menu.Font.FontFamily,
             menu.Font.Size * StudioSetForm.MenuMagnification);
 
-        menu.Show(set.TrayIconAnchor, ToolStripDropDownDirection.AboveLeft);
+        menu.Show(set.TrayIconAnchor, set.MenuDirection);
         await StudioCamera.Settle(250);
 
         // Resize, then the browser's group of five, then one of its windows,
@@ -172,11 +172,13 @@ internal static class StudioPoses
         if (scale > 1f)
             settings.Scale(new System.Drawing.SizeF(scale, scale));
 
-        // Sit toward the bottom right, near the tray the app lives in,
-        // leaving the top left clear for the marketing line.
-        int margin = set.Width / 16;
+        // Sit toward the bottom corner the tray lives in, leaving the opposite
+        // top corner clear for the marketing line - which is the left on a
+        // left-to-right set and the right on a mirrored one, the same corner the
+        // reader's eye starts from in each.
+        int margin = set.PictureMargin;
         settings.Location = new System.Drawing.Point(
-            set.Left + set.Width - settings.Width - margin,
+            set.Mirrored ? set.Left + margin : set.Left + set.Width - settings.Width - margin,
             set.Top + set.Height - settings.Height - margin);
 
         SelectTab(settings, tabIndex);

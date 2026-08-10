@@ -26,7 +26,13 @@ internal sealed class StudioSetForm : Form
     // where the clock goes. Both are measured from the right edge, because
     // the clock's width changes with the language.
     private const int TrayIconRightInset = 310;
-    private const int ClockRightMargin = 33;
+
+    // Measured on a real taskbar: the clock's text stops 0.42 of the band's
+    // height from the screen's edge, and stands 0.35 clear of the icons beside
+    // it. Both were fixed pixel counts before, which held at one band height
+    // and at no other.
+    private int ClockRightMargin => Math.Max(BandHeight * 42 / 100, 8);
+    private int ClockGap => Math.Max(BandHeight * 35 / 100, 6);
 
     // The picture is taken on the day of the shoot, so a listing never shows
     // a stale date, at an hour that reads well in every culture.
@@ -46,8 +52,8 @@ internal sealed class StudioSetForm : Form
         // keeps in store-shots/copy, so wording can be tried without editing
         // the copy a shoot uses.
         _copy = string.IsNullOrEmpty(request.SourcePath)
-            ? StudioCopy.Load(request.Language)
-            : StudioCopy.Read(request.SourcePath);
+            ? StudioCopy.Load(request.Language, request.View)
+            : StudioCopy.Read(request.SourcePath, request.View);
         _shell = StudioShell.Read();
         _trayIcon = LoadTrayIcon();
 
@@ -55,14 +61,15 @@ internal sealed class StudioSetForm : Form
         StartPosition = FormStartPosition.Manual;
         Size = request.Size;
 
-        // Sit in the screen's bottom right corner, where the real tray is.
-        // Menus open away from the edge they are near, so from here the tray
-        // menu unfolds up and to the left, into the picture. Staged in the top
-        // left corner instead, it unfolded outward and the camera, which only
-        // copies the set's own rectangle, cut it off.
+        // Sit in the screen's corner where the real tray is: the bottom right,
+        // or the bottom left in a language Windows mirrors its taskbar for.
+        // Menus open away from the edge they are near, so from that corner the
+        // tray menu unfolds up and inward, into the picture. Staged in the
+        // opposite corner it unfolded outward and the camera, which only copies
+        // the set's own rectangle, cut it off.
         var screen = Screen.PrimaryScreen?.Bounds ?? new Rectangle(0, 0, 1920, 1080);
         Location = new Point(
-            screen.Right - request.Size.Width,
+            Mirrored ? screen.Left : screen.Right - request.Size.Width,
             screen.Bottom - request.Size.Height);
         ShowInTaskbar = false;
         TopMost = true;
@@ -73,19 +80,83 @@ internal sealed class StudioSetForm : Form
         Text = $"{App.Name} studio set";
     }
 
+    // Windows mirrors its whole taskbar for a right-to-left language: Start and
+    // the search box move to the right end, the notification area and the clock
+    // to the left, and the tray menu therefore unfolds up and to the right. The
+    // set follows, because a listing picture for Arabic showing a left-to-right
+    // taskbar is a picture of a desktop that reader has never seen.
+    internal bool Mirrored => _language.TextInfo.IsRightToLeft;
+
+    // Which way the tray menu opens: inward from the edge the tray sits at, so
+    // it unfolds into the picture rather than off it.
+    //
+    // Both names mean the same side here. A menu laid out right to left reads
+    // these directions in its own terms, so the one that unfolds toward the
+    // middle of the set is called Left either way; asking for Right on a
+    // mirrored set opened it off the left edge of the screen, where the camera
+    // found nothing at all.
+    internal ToolStripDropDownDirection MenuDirection =>
+        ToolStripDropDownDirection.AboveLeft;
+
     // The point the tray menu should open from: just above this app's own icon
-    // in the band, in screen coordinates.
+    // in the band, in screen coordinates. Taken from the same slot the icon is
+    // drawn in, so the menu cannot drift away from the icon it belongs to.
     // Sit clear of the band rather than on its edge: a menu opened exactly at
     // the top of the taskbar had its last item cut off by it.
-    internal Point TrayIconAnchor => PointToScreen(new Point(
-        NotificationAreaRight - IconSize * 2 / 3 * 2 - IconSize / 2,
-        ClientSize.Height - BandHeight - BandHeight / 4));
+    internal Point TrayIconAnchor
+    {
+        get
+        {
+            var slot = NotificationSlot(TrayIconPlace);
+            return PointToScreen(new Point(
+                slot.Left + slot.Width / 2,
+                ClientSize.Height - BandHeight - BandHeight / 4));
+        }
+    }
 
-    // Where the icons end and the clock begins. The clock is the widest thing
-    // in this corner and its width changes with the language, so everything
-    // else is placed from here.
-    private int NotificationAreaRight =>
-        ClientSize.Width - ClockRightMargin - ClockWidth - IconSize / 2;
+    // The order the notification area is laid out in, counting away from the
+    // clock. This app's own icon sits where a third-party one belongs.
+    private const int VolumePlace = 0;
+    private const int NetworkPlace = 1;
+    private const int TrayIconPlace = 2;
+    private const int CloudPlace = 3;
+    private const int ChevronPlace = 4;
+
+    // Measured on a real taskbar: a notification glyph is 0.33 of the band, so
+    // it is smaller than a pinned icon.
+    private int NotificationIconSize => Math.Max(BandHeight * 33 / 100, 12);
+
+    // Where one place in the notification area is drawn.
+    //
+    // The spacing is not one number. Volume and network belong to the same group
+    // and sit 0.17 of the band apart; every other neighbour stands 0.47 away.
+    // Drawn all at 0.17, the row came out packed tighter than any real
+    // notification area.
+    private Rectangle NotificationSlot(int place)
+    {
+        int size = NotificationIconSize;
+        int tight = Math.Max(BandHeight * 17 / 100, 4);
+        int loose = Math.Max(BandHeight * 47 / 100, 6);
+
+        int offset = 0;
+        for (int step = 0; step < place; step++)
+            offset += size + (step == VolumePlace ? tight : loose);
+
+        int left = Mirrored
+            ? NotificationAreaInnerEdge + offset
+            : NotificationAreaInnerEdge - offset - size;
+
+        return new Rectangle(
+            left, ClientSize.Height - BandHeight + (BandHeight - size) / 2, size, size);
+    }
+
+    // Where the row of notification icons begins, beside the clock: its right
+    // end on a left-to-right desktop, its left end on a mirrored one. The clock
+    // is the widest thing in this corner and its width changes with the
+    // language, so everything else is placed from here.
+    private int NotificationAreaInnerEdge => Mirrored
+        ? ClockRightMargin + ClockWidth + ClockGap
+        : ClientSize.Width - ClockRightMargin - ClockWidth - ClockGap;
 
     // ── Painting ─────────────────────────────────────────────────────────
 
@@ -107,6 +178,7 @@ internal sealed class StudioSetForm : Form
         PaintNotificationArea(canvas);
         PaintClock(canvas);
         PaintMarketingLine(canvas);
+        PaintNotice(canvas);
     }
 
     private int _clockWidth;
@@ -183,8 +255,13 @@ internal sealed class StudioSetForm : Form
     // localized app rather than an English one with translated menus.
     private void PaintPinnedIcons(Graphics canvas)
     {
+        // Measured on a real taskbar: pinned icons repeat every 0.92 of the
+        // band, which at 0.49 each leaves 0.43 between them. The search box is
+        // closer to its neighbours than that - 0.28 on either side - so Start,
+        // the box and the icons do not read as one evenly spaced row.
         int size = IconSize;
         int gap = BandHeight * 43 / 100;
+        int searchGap = BandHeight * 28 / 100;
         int bandTop = ClientSize.Height - BandHeight;
         int y = bandTop + (BandHeight - size) / 2;
 
@@ -196,21 +273,41 @@ internal sealed class StudioSetForm : Form
         string label = StudioSearchLabel.For(_language);
         int searchWidth = SearchBoxWidth(canvas, label, searchFont);
 
-        int iconsWidth = _shell.PinnedIcons.Length * (size + gap);
-        int total = size + gap + searchWidth + gap + iconsWidth;
-        int x = (ClientSize.Width - total) / 2;
+        // The row's own width, with no gap hanging off its far end: counting one
+        // left the whole cluster sitting half a gap to one side of centre.
+        int icons = _shell.PinnedIcons.Length;
+        int iconsWidth = icons * size + Math.Max(icons - 1, 0) * gap;
+        int total = size + searchGap + searchWidth + searchGap + iconsWidth;
+        int clusterLeft = (ClientSize.Width - total) / 2;
 
-        DrawStart(canvas, new Rectangle(x, y, size, size));
-        x += size + gap;
+        // The row is walked in reading order - Start, the search box, then the
+        // pinned icons - and each slot turned into a left edge afterwards. On a
+        // mirrored desktop reading order runs the other way, which is the whole
+        // of what makes Start sit at the right end.
+        int walked = 0;
+        Rectangle Slot(int slotWidth, int slotTop, int slotHeight)
+        {
+            int left = Mirrored
+                ? clusterLeft + total - walked - slotWidth
+                : clusterLeft + walked;
+            walked += slotWidth;
+            return new Rectangle(left, slotTop, slotWidth, slotHeight);
+        }
 
-        PaintSearchBox(canvas, label, searchFont, new Rectangle(
-            x, bandTop + BandHeight * 27 / 100, searchWidth, BandHeight * 46 / 100));
-        x += searchWidth + gap;
+        DrawStart(canvas, Slot(size, y, size));
+        walked += searchGap;
+
+        // Measured on a real taskbar: the pill stands 0.62 of the band tall,
+        // centred in it. At the 0.46 it was drawn at before, it read as a thin
+        // slot rather than the box a person types into.
+        PaintSearchBox(canvas, label, searchFont,
+            Slot(searchWidth, bandTop + BandHeight * 19 / 100, BandHeight * 62 / 100));
+        walked += searchGap;
 
         foreach (var icon in _shell.PinnedIcons)
         {
-            canvas.DrawIcon(icon, new Rectangle(x, y, size, size));
-            x += size + gap;
+            canvas.DrawIcon(icon, Slot(size, y, size));
+            walked += gap;
         }
     }
 
@@ -223,16 +320,28 @@ internal sealed class StudioSetForm : Form
 
     // Four squares. Drawn rather than lifted from the running shell, like the
     // volume and network glyphs beside the clock.
+    //
+    // Measured off a real taskbar, where the logo is a square 0.479 of the band:
+    // each pane is 0.478 of that square and the gutter between them 0.043. The
+    // gutter had been drawn at 0.10, twice as wide as it is, which is what made
+    // the real logo look chunkier than this one beside it.
+    //
+    // The blue is not flat either. One gradient crosses the whole logo, light at
+    // the top left and deeper at the bottom right - the top right and bottom
+    // left panes come out the same shade, which is how a single diagonal is
+    // recognizable rather than four separately shaded squares.
     private static void DrawStart(Graphics canvas, Rectangle box)
     {
-        float pane = box.Width * 0.45f;
-        float split = box.Width - pane * 2;
+        float pane = box.Width * 0.478f;
+        float gutter = box.Width * 0.043f;
 
-        using var blue = new SolidBrush(Color.FromArgb(0, 120, 212));
+        using var blue = new LinearGradientBrush(
+            box, Color.FromArgb(74, 206, 253), Color.FromArgb(1, 121, 212), 45f);
+
         canvas.FillRectangle(blue, box.X, box.Y, pane, pane);
-        canvas.FillRectangle(blue, box.X + pane + split, box.Y, pane, pane);
-        canvas.FillRectangle(blue, box.X, box.Y + pane + split, pane, pane);
-        canvas.FillRectangle(blue, box.X + pane + split, box.Y + pane + split, pane, pane);
+        canvas.FillRectangle(blue, box.X + pane + gutter, box.Y, pane, pane);
+        canvas.FillRectangle(blue, box.X, box.Y + pane + gutter, pane, pane);
+        canvas.FillRectangle(blue, box.X + pane + gutter, box.Y + pane + gutter, pane, pane);
     }
 
     private void PaintSearchBox(Graphics canvas, string label, Font font, Rectangle box)
@@ -243,14 +352,19 @@ internal sealed class StudioSetForm : Form
         shape.AddArc(box.Right - radius * 2, box.Y, radius * 2, radius * 2, 270, 180);
         shape.CloseFigure();
 
+        // The outline is 0.02 of the band thick. A one-pixel pen was a hairline
+        // at the size the band is drawn, and the pill lost its edge entirely
+        // where the wallpaper behind it was light.
         using var fill = new SolidBrush(Color.FromArgb(252, 252, 252));
-        using var edge = new Pen(Color.FromArgb(196, 196, 196));
+        using var edge = new Pen(
+            Color.FromArgb(196, 196, 196), Math.Max(BandHeight / 48f, 1f));
         canvas.FillPath(fill, shape);
         canvas.DrawPath(edge, shape);
 
         // A magnifier drawn from a circle and a handle, so no glyph font has
-        // to be present on the machine taking the picture.
-        int glyph = box.Height / 3;
+        // to be present on the machine taking the picture. It stands 0.42 of
+        // the pill, which is 0.26 of the band, as the real one does.
+        int glyph = box.Height * 42 / 100;
         int glyphLeft = box.X + box.Height / 3;
         int glyphTop = box.Y + (box.Height - glyph) / 2;
         using var ink = new Pen(Color.FromArgb(96, 96, 96), Math.Max(glyph / 8f, 1.5f));
@@ -273,10 +387,11 @@ internal sealed class StudioSetForm : Form
         canvas.DrawString(label, font, text, textArea, format);
     }
 
-    // The notification area, laid out right to left the way Windows 11 does:
-    // the clock, then volume and network, then third-party icons, then the
-    // chevron that hides the rest. This app's own icon sits among the
-    // third-party ones.
+    // The notification area, counting outward from the clock the way Windows 11
+    // does: volume and network, then third-party icons, then the chevron that
+    // hides the rest. This app's own icon sits among the third-party ones. Which
+    // way "outward" runs is NotificationSlot's business, so a mirrored taskbar
+    // needs nothing here.
     //
     // Volume and network are drawn from shapes rather than copied off the real
     // taskbar. The shell owns those glyphs; nothing can extract them the way
@@ -284,47 +399,33 @@ internal sealed class StudioSetForm : Form
     // picture of Windows back into this project.
     private void PaintNotificationArea(Graphics canvas)
     {
-        // Measured on a real taskbar: a notification glyph is 32 pixels in a
-        // band of 96 and repeats every 48, so it is both smaller and more
-        // tightly packed than a pinned icon.
-        int size = Math.Max(BandHeight * 33 / 100, 12);
-        int gap = Math.Max(BandHeight * 17 / 100, 4);
-        int top = ClientSize.Height - BandHeight + (BandHeight - size) / 2;
-        int right = NotificationAreaRight;
-
-        using var ink = new Pen(Color.FromArgb(48, 48, 48), Math.Max(size / 12f, 1.5f));
+        using var ink = new Pen(
+            Color.FromArgb(48, 48, 48), Math.Max(NotificationIconSize / 12f, 1.5f));
         using var solid = new SolidBrush(Color.FromArgb(48, 48, 48));
 
-        // Volume, closest to the clock.
-        right -= size;
-        if (!DrawGlyph(canvas, GlyphVolume, solid, new Rectangle(right, top, size, size)))
-            DrawVolume(canvas, ink, solid, new Rectangle(right, top, size, size));
+        var volume = NotificationSlot(VolumePlace);
+        if (!DrawGlyph(canvas, GlyphVolume, solid, volume))
+            DrawVolume(canvas, ink, solid, volume);
 
-        // Network.
-        right -= size + gap;
-        if (!DrawGlyph(canvas, GlyphNetwork, solid, new Rectangle(right, top, size, size)))
-            DrawNetwork(canvas, ink, new Rectangle(right, top, size, size));
+        var network = NotificationSlot(NetworkPlace);
+        if (!DrawGlyph(canvas, GlyphNetwork, solid, network))
+            DrawNetwork(canvas, ink, network);
 
-        // This app, where a third-party icon belongs.
-        right -= size + gap;
         if (_trayIcon != null)
-            canvas.DrawIcon(_trayIcon, new Rectangle(right, top, size, size));
+            canvas.DrawIcon(_trayIcon, NotificationSlot(TrayIconPlace));
 
         // A cloud, standing in for the sync client every Windows desktop
         // carries. A generic shape rather than a particular product's icon:
         // this app's own icon should not sit alone in a notification area no
         // real desktop ever has, but which cloud it is does not matter.
-        right -= size + gap;
-        var cloud = new Rectangle(right, top, size, size);
-        if (_shell.SyncIcon != null)
-            canvas.DrawIcon(_shell.SyncIcon, cloud);
-        else if (!DrawGlyph(canvas, GlyphCloud, solid, cloud))
+        var cloud = NotificationSlot(CloudPlace);
+        if (!DrawGlyph(canvas, GlyphCloud, solid, cloud))
             DrawCloud(canvas, ink, cloud);
 
         // The chevron that opens the icons Windows keeps hidden.
-        right -= size + gap;
-        if (!DrawGlyph(canvas, GlyphChevronUp, solid, new Rectangle(right, top, size, size)))
-            DrawChevron(canvas, ink, new Rectangle(right, top, size, size));
+        var chevron = NotificationSlot(ChevronPlace);
+        if (!DrawGlyph(canvas, GlyphChevronUp, solid, chevron))
+            DrawChevron(canvas, ink, chevron);
     }
 
     // ── The system icon font ─────────────────────────────────────────────
@@ -378,7 +479,12 @@ internal sealed class StudioSetForm : Form
         if (family == null)
             return false;
 
-        using var font = new Font(family, box.Height * 0.62f, GraphicsUnit.Pixel);
+        // The glyph is asked for at the box's full height, not a fraction of it.
+        // These fonts draw their icons across the whole em, so a font two thirds
+        // of the box left ink two thirds of the size the taskbar was measured
+        // at - and the gaps between icons looked wider than they are for the
+        // same reason.
+        using var font = new Font(family, box.Height, GraphicsUnit.Pixel);
         using var format = new StringFormat
         {
             Alignment = StringAlignment.Center,
@@ -456,9 +562,9 @@ internal sealed class StudioSetForm : Form
         });
     }
 
-    // Two lines, both right-aligned to the wider one. Centering them does not
-    // look like Windows. The width changes with the language, so each line is
-    // placed from its measured width rather than a fixed left edge.
+    // Two lines, both aligned to the screen's outer edge - the right on a
+    // left-to-right desktop, the left on a mirrored one, where the clock stands
+    // in the opposite corner. Centering them does not look like Windows.
     private void PaintClock(Graphics canvas)
     {
         var (time, date) = ClockText();
@@ -466,31 +572,42 @@ internal sealed class StudioSetForm : Form
         using var font = ClockFont();
         using var ink = new SolidBrush(Color.FromArgb(28, 28, 28));
 
-        int right = ClientSize.Width - ClockRightMargin;
         int middle = ClientSize.Height - BandHeight / 2;
-        // The two lines sit 0.27 of the band apart, measured rather than taken
+        // The two lines sit 0.33 of the band apart, measured rather than taken
         // from the font, whose reported height carries leading the real clock
         // does not use.
-        int lineHeight = (int)Math.Round(BandHeight * 0.27f);
+        int lineHeight = (int)Math.Round(BandHeight * 0.33f);
 
-        DrawRightAligned(canvas, time, font, ink, right, middle - lineHeight);
-        DrawRightAligned(canvas, date, font, ink, right, middle);
+        DrawClockLine(canvas, time, font, ink, middle - lineHeight);
+        DrawClockLine(canvas, date, font, ink, middle);
     }
 
-    // Align to the right edge of a box rather than by subtracting a measured
+    // Align to the outer edge of a box rather than by subtracting a measured
     // width. MeasureString pads both ends of a string, and the padding differs
     // between "10:08" and "2026/08/10", which left the two lines a few pixels
     // out of line with each other.
-    private void DrawRightAligned(
-        Graphics canvas, string text, Font font, Brush ink, int right, int top)
+    //
+    // A mirrored desktop also gets the reading direction, so that a language
+    // whose clock carries a word - Arabic's ص for the morning - puts it where
+    // Windows puts it rather than where a left-to-right layout would.
+    private void DrawClockLine(Graphics canvas, string text, Font font, Brush ink, int top)
     {
         using var format = new StringFormat(StringFormat.GenericTypographic)
         {
             Alignment = StringAlignment.Far,
         };
 
-        canvas.DrawString(text, font, ink,
-            new RectangleF(0, top, right, BandHeight), format);
+        if (Mirrored)
+        {
+            // With the reading direction reversed, "far" is the left edge.
+            format.FormatFlags |= StringFormatFlags.DirectionRightToLeft;
+            canvas.DrawString(text, font, ink, new RectangleF(
+                ClockRightMargin, top, ClientSize.Width - ClockRightMargin, BandHeight), format);
+            return;
+        }
+
+        canvas.DrawString(text, font, ink, new RectangleF(
+            0, top, ClientSize.Width - ClockRightMargin, BandHeight), format);
     }
 
     // The marketing line is a translated string like any other. Burning it
@@ -517,40 +634,61 @@ internal sealed class StudioSetForm : Form
     // stands, so the first pass guesses with the full width and the second
     // settles it.
     private float DrawBlock(
-        Graphics canvas, string text, Font font, Brush ink, int margin, int top)
+        Graphics canvas, string text, Font font, Brush ink, int margin, int top,
+        float lineHeight)
     {
         if (string.IsNullOrEmpty(text))
             return 0;
 
-        int width = WidthBeside(margin, top, top + (int)font.GetHeight(canvas));
-        var lines = StudioText.Wrap(canvas, text, font, width);
+        var box = BoxBeside(margin, top, top + (int)font.GetHeight(canvas));
+        var lines = StudioText.Wrap(canvas, text, font, box.width);
 
-        float height = lines.Count * font.GetHeight(canvas) * 1.15f;
-        width = WidthBeside(margin, top, top + (int)Math.Ceiling(height));
-        lines = StudioText.Wrap(canvas, text, font, width);
+        float height = lines.Count * font.GetHeight(canvas) * lineHeight;
+        box = BoxBeside(margin, top, top + (int)Math.Ceiling(height));
 
-        return StudioText.Draw(canvas, lines, font, ink, margin, top,
-            width, _language.TextInfo.IsRightToLeft);
+        // Settle the size against the box the block ended up with, then lay it
+        // out again at that size.
+        using var fitted = StudioText.FitToWidth(canvas, text, font, box.width);
+        lines = StudioText.Wrap(canvas, text, fitted, box.width);
+
+        return StudioText.Draw(canvas, lines, fitted, ink, box.left, top,
+            box.width, Mirrored, lineHeight);
     }
 
-    private int WidthBeside(int margin, int top, int bottom)
+    // The box a block of text gets, as a left edge and a width: the set less its
+    // margins, pulled in on whichever side the pose put something. That side is
+    // the right on a left-to-right set and the left on a mirrored one, where the
+    // text starts at the right edge and the settings window stands opposite it.
+    private (int left, int width) BoxBeside(int margin, int top, int bottom)
     {
+        int left = margin;
         int right = ClientSize.Width - margin;
 
         if (!_reserved.IsEmpty && _reserved.Bottom > top && _reserved.Top < bottom)
-            right = Math.Min(right, _reserved.Left - margin);
+        {
+            if (Mirrored)
+                left = Math.Max(left, _reserved.Right + margin);
+            else
+                right = Math.Min(right, _reserved.Left - margin);
+        }
 
         // Never collapse to nothing: a sliver of text is worse than text that
         // runs a little close to the window beside it.
-        return Math.Max(right - margin, ClientSize.Width / 5);
+        return (left, Math.Max(right - left, ClientSize.Width / 5));
     }
+
+    // The margin the whole picture keeps: the height of the taskbar band, so
+    // one measurement governs the frame the same way it governs the desktop
+    // inside it. A sixteenth of the width before, which started the text
+    // further in than the band it sits above.
+    internal int PictureMargin => BandHeight;
 
     private void PaintMarketingLine(Graphics canvas)
     {
         if (string.IsNullOrEmpty(_copy.Headline))
             return;
 
-        int margin = ClientSize.Width / 16;
+        int margin = PictureMargin;
 
         using var headlineFont = new Font("Segoe UI", ClientSize.Height / 26f, FontStyle.Bold);
         using var bodyFont = new Font("Segoe UI", ClientSize.Height / 52f);
@@ -561,10 +699,55 @@ internal sealed class StudioSetForm : Form
         // the pose put on the set, and only where that thing actually sits
         // beside the block: a menu low in the frame leaves the headline the
         // full width and only narrows the paragraph beneath it.
-        float used = DrawBlock(canvas, _copy.Headline, headlineFont, headlineInk, margin, margin);
+        //
+        // The headline's lines sit closer together than the paragraph's. At the
+        // size a headline is drawn, the leading the typeface carries is already
+        // more air than it needs.
+        float used = DrawBlock(
+            canvas, _copy.Headline, headlineFont, headlineInk, margin, margin, 0.85f);
 
-        int bodyTop = (int)(margin + used + ClientSize.Height / 90f);
-        DrawBlock(canvas, _copy.Body, bodyFont, bodyInk, margin, bodyTop);
+        // The gap between the two blocks is its own measurement, not what is
+        // left over from the headline's leading. Closing the headline's lines up
+        // took that leftover away and left the paragraph sitting on top of the
+        // headline; the space between them belongs here, where it can be seen.
+        int bodyTop = (int)(margin + used + ClientSize.Height / 20f);
+        DrawBlock(canvas, _copy.Body, bodyFont, bodyInk, margin, bodyTop, 0.95f);
+    }
+
+    // The note that says the desktop is drawn and not photographed: the
+    // wallpaper, the taskbar, and the windows the menu lists. The app's own menu
+    // and settings window in these pictures are the real ones, and the note is
+    // what keeps the difference honest.
+    //
+    // It sits in the bottom corner the reading starts at, just above the band,
+    // small and quiet. A listing has to say what it shows without competing with
+    // it.
+    private void PaintNotice(Graphics canvas)
+    {
+        string notice = StudioCopy.Notice(_language);
+        if (notice.Length == 0)
+            return;
+
+        int margin = PictureMargin;
+
+        using var font = new Font("Segoe UI", ClientSize.Height / 100f);
+        using var ink = new SolidBrush(Color.FromArgb(150, 255, 255, 255));
+        using var format = new StringFormat(StringFormat.GenericTypographic)
+        {
+            // Near is the side the reading starts at, which the reversed
+            // direction moves to the right on its own.
+            Alignment = StringAlignment.Near,
+        };
+
+        if (Mirrored)
+            format.FormatFlags |= StringFormatFlags.DirectionRightToLeft;
+
+        float height = font.GetHeight(canvas);
+        canvas.DrawString(notice, font, ink, new RectangleF(
+            margin,
+            ClientSize.Height - BandHeight - margin / 2f - height,
+            ClientSize.Width - margin * 2,
+            height + 1), format);
     }
 
     // Measured on a real taskbar: a pinned icon is 47 pixels in a band of 96.
@@ -610,7 +793,6 @@ internal sealed class StudioSetForm : Form
         {
             _wallpaper?.Dispose();
             _trayIcon?.Dispose();
-            _shell.SyncIcon?.Dispose();
             foreach (var icon in _shell.PinnedIcons)
                 icon.Dispose();
         }

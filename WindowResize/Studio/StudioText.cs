@@ -86,6 +86,45 @@ internal static class StudioText
         return lines;
     }
 
+    // The same font, or a smaller one when a single run of this text has
+    // nowhere to break and nowhere to fit.
+    //
+    // Japanese offers no break inside a phrase: a headline written as one
+    // phrase either fits the picture or loses the characters that fall off the
+    // end, and it loses them silently. The first Japanese headline written for
+    // the listing lost its last two characters, which changed what it said.
+    // Drawing it a little smaller says the whole thing.
+    //
+    // Always a new font, so the caller can dispose what it is handed without
+    // having to know whether anything was changed.
+    internal static Font FitToWidth(Graphics canvas, string text, Font font, float width)
+    {
+        float widest = WidestRun(canvas, text, font);
+
+        // A hair under, because the measurement is tight and a run that is
+        // exactly as wide as its box still loses its last pixel column.
+        float size = widest <= width ? font.Size : font.Size * width / widest * 0.99f;
+
+        return new Font(font.FontFamily, size, font.Style, font.Unit);
+    }
+
+    // How wide the longest unbreakable run of this text is, split the same way
+    // the layout splits it.
+    private static float WidestRun(Graphics canvas, string text, Font font)
+    {
+        float widest = 0;
+
+        foreach (var run in BreakOffer.Split(AfterClause.Replace(text ?? "", " ")))
+        {
+            if (run.Trim().Length == 0)
+                continue;
+
+            widest = Math.Max(widest, Measure(canvas, run.Trim(), font));
+        }
+
+        return widest;
+    }
+
     // What goes between two runs kept on the same line: nothing when either
     // side is CJK punctuation, a single space otherwise. The author wrote two;
     // two spaces mid-sentence would be a typographic mistake in any language.
@@ -115,24 +154,40 @@ internal static class StudioText
     // edge of the column rather than the left. Without this the block would
     // start where a European language starts and end ragged on the side the
     // reader begins at.
+    // lineHeight is a multiple of the font's own line height, which already
+    // carries the leading the typeface asks for. Large type needs less air
+    // between its lines than small type does, so a headline is given less than
+    // a paragraph; the earlier single value of 1.15 for both left the marketing
+    // line looking like a list of separate sentences.
     internal static float Draw(
         Graphics canvas, IReadOnlyList<string> lines, Font font, Brush ink,
-        float left, float top, float width, bool rightToLeft)
+        float left, float top, float width, bool rightToLeft, float lineHeight)
     {
         using var format = new StringFormat(StringFormat.GenericTypographic);
         if (rightToLeft)
         {
+            // Near, not Far. With the reading direction reversed GDI+ reads
+            // "near" as the right edge, which is where a line of Arabic starts.
+            // Asking for Far instead left every line hugging the left edge of
+            // its box, ragged down the side the reader begins at, and once the
+            // box moved to the right of the set the text ran off the picture.
             format.FormatFlags |= StringFormatFlags.DirectionRightToLeft;
-            format.Alignment = StringAlignment.Far;
+            format.Alignment = StringAlignment.Near;
         }
 
-        float step = font.GetHeight(canvas) * 1.15f;
+        // How far apart the lines sit, and how tall a box each is drawn in.
+        // They are not the same number: GDI+ leaves out a line that does not
+        // fit its box, so a box as short as the step drew nothing at all once
+        // the step was tightened. The box stays the height the font asks for
+        // and only the distance between lines closes up.
+        float step = font.GetHeight(canvas) * lineHeight;
+        float box = font.GetHeight(canvas) + 1;
         float y = top;
 
         foreach (var line in lines)
         {
             canvas.DrawString(line, font, ink,
-                new RectangleF(left, y, width, step), format);
+                new RectangleF(left, y, width, box), format);
             y += step;
         }
 
