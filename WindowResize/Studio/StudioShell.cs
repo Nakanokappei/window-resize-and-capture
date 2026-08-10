@@ -21,6 +21,9 @@ internal sealed class StudioShell
     [DllImport("user32.dll")]
     private static extern bool GetWindowRect(IntPtr hwnd, out RECT rect);
 
+    [DllImport("user32.dll")]
+    private static extern uint GetDpiForWindow(IntPtr hwnd);
+
     [StructLayout(LayoutKind.Sequential)]
     private struct RECT
     {
@@ -35,13 +38,13 @@ internal sealed class StudioShell
     // an autohidden or replaced shell still produces a plausible picture.
     private const int FallbackHeight = 48;
 
-    internal int Height { get; private init; } = FallbackHeight;
-
-    // The width of the display the taskbar spans, in the same physical pixels
-    // as Height. A picture narrower than the screen has to shrink the band by
-    // the same ratio, or a correct 96-pixel taskbar looks twice as thick as it
-    // should in a half-width picture.
-    internal int ScreenWidth { get; private init; } = 1920;
+    // How tall the taskbar would be on a display at 100 per cent, which is the
+    // 48 pixels Windows 11 uses. The measurement itself is in the physical
+    // pixels of whatever display the shoot runs on - 96 at 200 per cent - and a
+    // picture drawn from that number came out with a different band on every
+    // machine. Dividing the scaling back out is what makes two machines produce
+    // the same picture.
+    internal int HeightAt100Percent { get; private init; } = FallbackHeight;
     internal Color TopLine { get; private init; } = Color.FromArgb(178, 178, 178);
     internal Color FillTop { get; private init; } = Color.FromArgb(220, 220, 220);
     internal Color FillBottom { get; private init; } = Color.FromArgb(216, 216, 216);
@@ -58,8 +61,7 @@ internal sealed class StudioShell
 
         return new StudioShell
         {
-            Height = height,
-            ScreenWidth = ScreenWidthPixels(),
+            HeightAt100Percent = height,
             TopLine = band.top,
             FillTop = band.fillTop,
             FillBottom = band.fillBottom,
@@ -174,18 +176,23 @@ internal sealed class StudioShell
     // sampled band came out warm pink, and every listing picture would have
     // carried whatever wallpaper the operator happened to be using. The theme
     // is what a reader recognizes as a taskbar.
-    // The studio runs DPI aware, so this is the display's real pixel width.
-    private static int ScreenWidthPixels() =>
-        System.Windows.Forms.Screen.PrimaryScreen?.Bounds.Width ?? 1920;
-
+    // Measure the taskbar and report its height as it would be at 100 per cent.
+    //
+    // The studio runs DPI aware, so the rectangle comes back in the display's
+    // real pixels: the same taskbar measures 48 on one machine and 96 on
+    // another. Asking Windows what scaling that window is drawn at, and
+    // dividing it back out, leaves a number every machine agrees on.
     private static (int height, (Color top, Color fillTop, Color fillBottom) band) MeasureTaskbar()
     {
         var taskbar = FindWindow(TaskbarClass, null);
-        int height = taskbar != IntPtr.Zero && GetWindowRect(taskbar, out RECT bounds)
-            ? Math.Max(bounds.Bottom - bounds.Top, 1)
-            : FallbackHeight;
 
-        return (height, ThemeColors());
+        if (taskbar == IntPtr.Zero || !GetWindowRect(taskbar, out RECT bounds))
+            return (FallbackHeight, ThemeColors());
+
+        int measured = Math.Max(bounds.Bottom - bounds.Top, 1);
+        uint dpi = GetDpiForWindow(taskbar);
+
+        return (dpi > 0 ? measured * 96 / (int)dpi : measured, ThemeColors());
     }
 
     // The colors Windows 11 paints its taskbar in. When the user has asked for

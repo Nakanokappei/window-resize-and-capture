@@ -16,6 +16,12 @@ internal sealed record StudioCopy(string Headline, string Body)
 {
     private static readonly StudioCopy Empty = new("", "");
 
+    // A file named for this one picture, read by the same rules as the files
+    // in store-shots/copy so that wording tried this way can be moved into
+    // them unchanged. The session has already refused a path with no file at
+    // it, which is where that failure can be reported.
+    internal static StudioCopy Read(string path) => Parse(File.ReadAllLines(path));
+
     internal static StudioCopy Load(CultureInfo language)
     {
         string? folder = FindCopyFolder();

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -17,18 +16,18 @@ internal sealed class StudioRequest
     internal int SettleMs { get; init; } = StudioViews.DefaultSettleMs;
     internal string OutputPath { get; init; } = "";
 
-    // Marketing copy given on the command line, which wins over the files in
-    // store-shots/copy. Wording is tried and thrown away many times before it
-    // is settled; having to edit a file for each attempt makes that slow.
-    // Two spaces in a row mark a place the text may break.
-    internal string Headline { get; init; } = "";
-    internal string Body { get; init; } = "";
+    // A file of marketing copy to use instead of the one store-shots/copy
+    // holds for this language: first line the headline, the rest the body.
+    // Wording is tried and thrown away many times before it is settled, and a
+    // file being named rather than the text itself keeps each attempt out of
+    // the shell's own quoting and word splitting.
+    internal string SourcePath { get; init; } = "";
 }
 
 // Reads the studio's command line.
 //
 //   WindowResizeCapture.exe --list-views
-//   WindowResizeCapture.exe --language ja --screenshot view=tray-menu out=shot.png
+//   WindowResizeCapture.exe --language ja --screenshot view=choose-a-size out=shot.png
 //
 // A run without --screenshot or --list-views is an ordinary launch and must
 // behave exactly as it always has.
@@ -86,9 +85,9 @@ internal static class StudioCommandLine
         if (shootAt < 0)
             return false;
 
-        // Everything after --screenshot is key=value for this one picture.
-        // The value keeps its spaces: two in a row are how the copy marks a
-        // place it may break, and trimming them would erase the instruction.
+        // Everything after --screenshot is key=value for this one picture, in
+        // any order. The value keeps its spaces, because a path may contain
+        // them.
         var settings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         for (int index = shootAt + 1; index < args.Length; index++)
         {
@@ -110,42 +109,15 @@ internal static class StudioCommandLine
         request = new StudioRequest
         {
             View = settings.GetValueOrDefault("view", StudioViews.All[0].Name),
-            Language = ResolveLanguage(args),
+            // A shoot names its language for every picture. When it does not,
+            // English is photographed rather than whatever the machine taking
+            // the picture happens to be set to.
+            Language = CommandLine.Language(args) ?? CultureInfo.GetCultureInfo("en"),
             Size = size,
             SettleMs = settle,
             OutputPath = settings.GetValueOrDefault("out", "studio-shot.png"),
-            Headline = settings.GetValueOrDefault("headline", ""),
-            Body = settings.GetValueOrDefault("body", ""),
+            SourcePath = settings.GetValueOrDefault("source", ""),
         };
         return true;
     }
-
-    // --language accepts a culture tag (ja, zh-Hant) or an English name
-    // (japanese), because both turn up in scripts written by hand.
-    private static CultureInfo ResolveLanguage(string[] args)
-    {
-        int at = Array.IndexOf(args, "--language");
-        if (at < 0 || at + 1 >= args.Length)
-            return CultureInfo.GetCultureInfo("en");
-
-        string wanted = args[at + 1];
-
-        try
-        {
-            return CultureInfo.GetCultureInfo(wanted);
-        }
-        catch (CultureNotFoundException)
-        {
-        }
-
-        // Fall back to matching an English name such as "japanese".
-        foreach (var candidate in CultureInfo.GetCultures(CultureTypes.NeutralCultures))
-        {
-            if (string.Equals(candidate.EnglishName, wanted, StringComparison.OrdinalIgnoreCase))
-                return candidate;
-        }
-
-        return CultureInfo.GetCultureInfo("en");
-    }
-
 }

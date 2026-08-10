@@ -39,8 +39,21 @@ than spread through the UI.
 **Run these from a shell, not from PowerShell's `Start-Process`.** The app is a
 WinExe, so `--list-views` prints to the console it was started from and shows
 nothing when there is none. `Start-Process` also joins its argument list with
-spaces, which cuts a headline off at its first word and a path off at its
-first folder with a space in it. Both failures look like app bugs and are not.
+spaces, which cuts a path off at its first folder with a space in it. Both
+failures look like app bugs and are not.
+
+The whole listing, every language and every pose, is one command. It builds
+Release first and refuses to shoot a binary older than the source, because
+three copies of the executable live under `bin` at once and the stalest of them
+is the one a wildcard finds.
+
+```bash
+bash store-shots/take-store-screenshots.sh
+```
+
+It stops at the first picture that comes out the wrong size instead of spending
+the rest of the run producing more of them, and prints what the app wrote to
+its log. A single picture, for trying out wording, is a run of the app by hand:
 
 ```bash
 exe=WindowResize/bin/Release/net8.0-windows10.0.17763.0/WindowResizeCapture.exe
@@ -48,11 +61,14 @@ exe=WindowResize/bin/Release/net8.0-windows10.0.17763.0/WindowResizeCapture.exe
 # What the app can hold, and in which languages. Never keep a second copy of this list.
 "$exe" --list-views
 
-# One picture. Copy given here wins over the files in copy/.
+# One picture. A copy file named here stands in for the one in copy/.
 "$exe" --language ja --screenshot view=choose-a-size \
-  "headline=ウィンドウのサイズを、いつでも同じに。" \
+  "source=/tmp/trying-a-line.txt" \
   "out=store-shots/out/store-choose-a-size-ja.png"
 ```
+
+The keys after `--screenshot` may come in any order. Naming a copy file that is
+not there is an error rather than a picture with nothing written on it.
 
 **Do not touch the machine while a shoot runs.** The picture is a copy of the
 screen, so a notification or another window taking the foreground lands in it.

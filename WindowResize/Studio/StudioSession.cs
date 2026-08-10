@@ -19,10 +19,24 @@ internal static class StudioSession
 
     internal static void Run(StudioRequest request)
     {
+        // A copy file that was asked for and is not there would otherwise
+        // produce a picture with no marketing line on it, which passes every
+        // other check a shoot makes.
+        if (request.SourcePath.Length > 0 && !File.Exists(request.SourcePath))
+        {
+            Log($"error\t{request.View}\t{request.Language.Name}\t" +
+                $"no copy at {request.SourcePath}");
+            return;
+        }
+
         // The language has to be settled before any control is built, because
         // WinForms reads the culture as it creates each one.
         CultureInfo.CurrentUICulture = request.Language;
         CultureInfo.CurrentCulture = request.Language;
+
+        // And the settings before that, because the window being photographed
+        // reads them as it is built. In memory only: see StudioPhotogenicSettings.
+        StudioPhotogenicSettings.Apply(request.View);
 
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
@@ -30,6 +44,7 @@ internal static class StudioSession
         using var set = new StudioSetForm(request);
         set.Show();
         set.Activate();
+        StudioCamera.Raise(set.Handle);
 
         // Arrange and photograph on the message loop, then close the set. The
         // work is asynchronous because the compositor needs time between the

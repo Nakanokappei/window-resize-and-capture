@@ -35,10 +35,26 @@ internal static class StudioCamera
     [DllImport("user32.dll")]
     private static extern IntPtr SetThreadDpiAwarenessContext(IntPtr context);
 
+    [DllImport("user32.dll")]
+    private static extern bool SetWindowPos(
+        IntPtr hwnd, IntPtr insertAfter, int x, int y, int width, int height, uint flags);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr WindowFromPoint(POINT point);
+
+    [DllImport("user32.dll")]
+    private static extern uint GetWindowThreadProcessId(IntPtr hwnd, out uint processId);
+
     [StructLayout(LayoutKind.Sequential)]
     private struct RECT
     {
         public int Left, Top, Right, Bottom;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct POINT
+    {
+        public int X, Y;
     }
 
     // The rectangle a person sees. Form.Bounds is larger: an invisible resize
@@ -57,7 +73,27 @@ internal static class StudioCamera
     // whole process aware was tried before and broke that layout.
     private static readonly IntPtr PerMonitorAwareV2 = new(-4);
 
+    // Where SetWindowPos puts a window in the z-order, and the three things it
+    // is told not to change while doing it.
+    private static readonly IntPtr TopOfTopmost = new(-1);
+    private const uint NoSize = 0x0001;
+    private const uint NoMove = 0x0002;
+    private const uint NoActivate = 0x0010;
+
     // ── Public API ───────────────────────────────────────────────────────
+
+    // Lift the set to the top of the topmost band, asking for nothing else.
+    //
+    // Show and Activate are not enough. A process nobody clicked to start
+    // cannot take the foreground, so the set is left under whatever was
+    // already at the top of that band - usually the taskbar, which the check
+    // before the shutter then reports as explorer. Moving the window in the
+    // z-order needs no such permission.
+    //
+    // Called before the pose is arranged, never after: the menu and the
+    // settings window are shown later and have to stay above the set.
+    internal static void Raise(IntPtr handle) =>
+        SetWindowPos(handle, TopOfTopmost, 0, 0, 0, 0, NoMove | NoSize | NoActivate);
 
     // Resize the form until the rectangle a person sees measures exactly
     // width x height physical pixels, then copy that rectangle off the screen
@@ -71,7 +107,80 @@ internal static class StudioCamera
         // Let anything asynchronous finish arriving before the shutter opens.
         await Settle(settleMs);
 
-        return CopyScreenRegion(form.Handle, outputPath);
+        // Measure, check and copy without leaving the aware context, so the
+        // rectangle found clear is exactly the one photographed.
+        IntPtr previous = SetThreadDpiAwarenessContext(PerMonitorAwareV2);
+        try
+        {
+            var frame = VisibleFrame(form.Handle);
+
+            // A window that has slipped in front of the set is copied along
+            // with it, and the file comes out exactly the right size, so
+            // nothing else catches it. This has happened: a browser left open
+            // over the set put its own page and the real taskbar into a
+            // finished picture.
+            string? intruder = WhatIsCovering(frame);
+            if (intruder != null)
+                throw new InvalidOperationException($"{intruder} is in front of the set");
+
+            return CopyScreenRegion(frame, outputPath);
+        }
+        finally
+        {
+            if (previous != IntPtr.Zero)
+                SetThreadDpiAwarenessContext(previous);
+        }
+    }
+
+    // The name of the program covering the set, or null when only this app's
+    // own windows are in front of it - the menu and the settings window in a
+    // pose belong there and are the point of the picture.
+    //
+    // The set is sampled at its middle and just inside its corners rather than
+    // asked which window is foreground: a window covering a corner is enough
+    // to spoil a picture without ever being activated.
+    //
+    // Physical pixels, so this runs inside the aware context its caller sets.
+    private static string? WhatIsCovering(Rectangle frame)
+    {
+        if (frame.IsEmpty)
+            return null;
+
+        int inset = Math.Min(frame.Width, frame.Height) / 20;
+        var samples = new[]
+        {
+            new POINT { X = frame.Left + frame.Width / 2, Y = frame.Top + frame.Height / 2 },
+            new POINT { X = frame.Left + inset, Y = frame.Top + inset },
+            new POINT { X = frame.Right - inset, Y = frame.Top + inset },
+            new POINT { X = frame.Left + inset, Y = frame.Bottom - inset },
+            new POINT { X = frame.Right - inset, Y = frame.Bottom - inset },
+        };
+
+        uint own = (uint)Environment.ProcessId;
+        foreach (var sample in samples)
+        {
+            GetWindowThreadProcessId(WindowFromPoint(sample), out uint owner);
+            if (owner == 0 || owner == own)
+                continue;
+
+            return Name(owner);
+        }
+
+        return null;
+    }
+
+    // Named in the log so the operator knows what to close, not just that
+    // something was there.
+    private static string Name(uint processId)
+    {
+        try
+        {
+            return System.Diagnostics.Process.GetProcessById((int)processId).ProcessName;
+        }
+        catch (ArgumentException)
+        {
+            return $"process {processId}";
+        }
     }
 
     // Pump the message loop for the given time. Task.Delay alone would leave
@@ -132,31 +241,21 @@ internal static class StudioCamera
 
     // ── The shutter ──────────────────────────────────────────────────────
 
-    // Copy the visible frame off the screen at full physical resolution.
-    private static Size CopyScreenRegion(IntPtr handle, string outputPath)
+    // Copy the given rectangle off the screen at full physical resolution.
+    // Physical pixels again, so this too runs inside the caller's context.
+    private static Size CopyScreenRegion(Rectangle visible, string outputPath)
     {
-        IntPtr previous = SetThreadDpiAwarenessContext(PerMonitorAwareV2);
-        try
+        using var picture = new Bitmap(
+            visible.Width, visible.Height, PixelFormat.Format32bppArgb);
+        using (var canvas = Graphics.FromImage(picture))
         {
-            var visible = VisibleFrame(handle);
-
-            using var picture = new Bitmap(
-                visible.Width, visible.Height, PixelFormat.Format32bppArgb);
-            using (var canvas = Graphics.FromImage(picture))
-            {
-                canvas.CopyFromScreen(
-                    visible.Left, visible.Top, 0, 0, visible.Size,
-                    CopyPixelOperation.SourceCopy);
-            }
-
-            picture.Save(outputPath, ImageFormat.Png);
-            return picture.Size;
+            canvas.CopyFromScreen(
+                visible.Left, visible.Top, 0, 0, visible.Size,
+                CopyPixelOperation.SourceCopy);
         }
-        finally
-        {
-            if (previous != IntPtr.Zero)
-                SetThreadDpiAwarenessContext(previous);
-        }
+
+        picture.Save(outputPath, ImageFormat.Png);
+        return picture.Size;
     }
 
     // Ask the compositor for the rectangle a person actually sees, in

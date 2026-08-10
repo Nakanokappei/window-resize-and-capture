@@ -7,8 +7,8 @@ namespace WindowResizeCapture.Studio;
 
 // Lays out a line of marketing copy.
 //
-// Where the text may break is written into the copy itself, as two spaces in
-// a row. Everything else is one unbreakable run. That puts the decision with
+// Where the text may break is written into the copy itself, as a space.
+// Everything else is one unbreakable run. That puts the decision with
 // whoever wrote the sentence, which is the only place it can honestly sit: a
 // machine can find the spaces in English, but nothing here can tell where a
 // Thai or Japanese phrase is willing to be cut.
@@ -17,8 +17,8 @@ namespace WindowResizeCapture.Studio;
 // last one that still fits, so the same copy suits a wide picture and a narrow
 // column without being rewritten.
 //
-// A break that is not used disappears. Two spaces collapse into one, and even
-// that one is dropped where it meets CJK punctuation, which never wants a
+// A break that is not used disappears. A run of spaces collapses to one, and
+// even that one is dropped where it meets CJK punctuation, which never wants a
 // space beside it.
 internal static class StudioText
 {

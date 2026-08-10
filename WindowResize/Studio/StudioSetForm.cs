@@ -42,12 +42,12 @@ internal sealed class StudioSetForm : Form
     internal StudioSetForm(StudioRequest request)
     {
         _language = request.Language;
-        // Copy given on the command line wins, so a line can be tried without
-        // editing a file first.
-        var written = StudioCopy.Load(request.Language);
-        _copy = new StudioCopy(
-            string.IsNullOrEmpty(request.Headline) ? written.Headline : request.Headline,
-            string.IsNullOrEmpty(request.Body) ? written.Body : request.Body);
+        // A file named for this picture stands in for the one this language
+        // keeps in store-shots/copy, so wording can be tried without editing
+        // the copy a shoot uses.
+        _copy = string.IsNullOrEmpty(request.SourcePath)
+            ? StudioCopy.Load(request.Language)
+            : StudioCopy.Read(request.SourcePath);
         _shell = StudioShell.Read();
         _trayIcon = LoadTrayIcon();
 
@@ -70,7 +70,7 @@ internal sealed class StudioSetForm : Form
         BackColor = Color.FromArgb(16, 32, 58);
 
         // The set is scenery, never something the operator interacts with.
-        Text = "Window Resize & Capture studio set";
+        Text = $"{App.Name} studio set";
     }
 
     // The point the tray menu should open from: just above this app's own icon
@@ -570,6 +570,14 @@ internal sealed class StudioSetForm : Form
     // Measured on a real taskbar: a pinned icon is 47 pixels in a band of 96.
     private int IconSize => Math.Max(BandHeight * 49 / 100, 16);
 
+    // The desktop the set pretends to be: 1920 x 1080 with no scaling, whatever
+    // the machine taking the picture actually runs. Everything measured from
+    // the live shell is expressed against this width, so two machines produce
+    // the same picture. Deriving it from the real screen instead made the band
+    // 96 pixels tall on one display and 128 on another, and a language
+    // re-photographed later no longer matched the rest of the listing.
+    private const int ReferenceWidth = 1920;
+
     // A listing picture is never shown at its own size: the store scales it
     // down to fit a card. Drawn true to life, the taskbar and the menu come
     // out too small to read there, so the whole desktop is staged at twice
@@ -584,18 +592,15 @@ internal sealed class StudioSetForm : Form
     // the image beside it does not.
     internal const float MenuMagnification = 1.25f;
 
-    // The real taskbar's height, scaled to this picture. The screen is wider
-    // than the picture, so a band drawn at its measured pixel height would
-    // look far too thick: the picture shrinks it by the same ratio it shrinks
-    // the desktop, then the magnification above brings it back up.
+    // The real taskbar's height, drawn as it would look on the reference
+    // desktop. The picture is wider than 1920, so the band grows by the same
+    // ratio the desktop does, and the magnification above brings it up again.
     private int BandHeight => Math.Max(
-        _shell.Height * ClientSize.Width * Magnification / Math.Max(_shell.ScreenWidth, 1), 16);
+        _shell.HeightAt100Percent * ClientSize.Width * Magnification / ReferenceWidth, 16);
 
     private static Icon? LoadTrayIcon()
     {
-        var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-        using var stream = assembly.GetManifestResourceStream(
-            "WindowResizeCapture.Resources.app.ico");
+        using var stream = App.OpenIcon();
         return stream == null ? null : new Icon(stream, new Size(64, 64));
     }
 
