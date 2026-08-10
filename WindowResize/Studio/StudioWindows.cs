@@ -43,7 +43,7 @@ internal static class StudioWindows
         }
 
         windows.Add(Make(handle++, 102, titles[8], titles[5], LoadIcon(SystemApp("notepad.exe"))));
-        windows.Add(Make(handle++, 103, titles[9], titles[6], LoadIcon(SystemApp("mspaint.exe"))));
+        windows.Add(Make(handle++, 103, titles[9], titles[6], LoadIcon(Explorer())));
 
         return windows;
     }
@@ -85,6 +85,11 @@ internal static class StudioWindows
 
     private static string SystemApp(string executable) => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.System), executable);
+
+    // File Explorer keeps its executable in the Windows folder itself, not in
+    // System32 beside the others.
+    private static string Explorer() => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.Windows), "explorer.exe");
 
     private static string EdgePath()
     {

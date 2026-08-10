@@ -5,22 +5,23 @@
 # in a store listing. This file stands in for it.
 #
 # Format: a [tag] line starts a language, then ten lines in order:
-#   five browser window titles, the Notepad title, the Paint title,
-#   then the three application names shown on the group headings:
-#   browser, notepad, paint.
+#   five browser window titles, the Notepad window title, the File Explorer
+#   window title, then the three application names shown on the group headings:
+#   browser, notepad, file explorer.
 #
-# The application names are the everyday words for the programs, not the names
-# on their title bars. A listing picture is read by someone deciding whether
-# to install; "Browser" tells them more than a product name would, and it does
-# not put another company's brand in our picture.
+# The browser is called by the everyday word for it rather than by a product
+# name: a listing picture is read by someone deciding whether to install, and
+# "Browser" tells them more while keeping another company's brand out of the
+# picture. Notepad and File Explorer are Windows' own and are named, because a
+# menu item reading "Untitled" looks like a window nobody can identify.
 #
 # Lines starting with # are ignored. A language with no section falls back to
 # [en]. A section without exactly ten lines is dropped rather than used short.
 #
-# The titles are deliberately dull. A listing picture should not advertise
-# anybody else's site, and a title that draws the eye competes with the menu
-# the picture is about. These are provisional; replace them if better ones
-# come along.
+# The browser titles are deliberately dull. A listing picture should not
+# advertise anybody else's site, and a title that draws the eye competes with
+# the menu the picture is about. These are provisional; replace them if better
+# ones come along.
 
 [en]
 Getting started
@@ -28,11 +29,11 @@ Release notes
 Documentation
 Downloads
 New tab
-Notes
-Untitled
+Notepad
+File Explorer
 Browser
 Notepad
-Paint
+File Explorer
 
 [ja]
 はじめに
@@ -40,11 +41,11 @@ Paint
 ドキュメント
 ダウンロード
 新しいタブ
-メモ
-無題
+メモ帳
+エクスプローラー
 ブラウザー
 メモ帳
-ペイント
+エクスプローラー
 
 [de]
 Erste Schritte
@@ -52,11 +53,11 @@ Versionshinweise
 Dokumentation
 Downloads
 Neuer Tab
-Notizen
-Unbenannt
+Editor
+Explorer
 Browser
 Editor
-Paint
+Explorer
 
 [fr]
 Premiers pas
@@ -64,11 +65,11 @@ Notes de version
 Documentation
 Téléchargements
 Nouvel onglet
-Notes
-Sans titre
+Bloc-notes
+Explorateur de fichiers
 Navigateur
 Bloc-notes
-Paint
+Explorateur de fichiers
 
 [es]
 Primeros pasos
@@ -76,11 +77,11 @@ Notas de la versión
 Documentación
 Descargas
 Nueva pestaña
-Notas
-Sin título
+Bloc de notas
+Explorador de archivos
 Navegador
 Bloc de notas
-Paint
+Explorador de archivos
 
 [pt]
 Primeiros passos
@@ -88,11 +89,11 @@ Notas da versão
 Documentação
 Downloads
 Nova guia
-Notas
-Sem título
+Bloco de Notas
+Explorador de Arquivos
 Navegador
 Bloco de Notas
-Paint
+Explorador de Arquivos
 
 [it]
 Guida introduttiva
@@ -100,11 +101,11 @@ Note di rilascio
 Documentazione
 Download
 Nuova scheda
-Note
-Senza titolo
+Blocco note
+Esplora file
 Browser
 Blocco note
-Paint
+Esplora file
 
 [ru]
 Начало работы
@@ -112,11 +113,11 @@ Paint
 Документация
 Загрузки
 Новая вкладка
-Заметки
-Без имени
+Блокнот
+Проводник
 Браузер
 Блокнот
-Paint
+Проводник
 
 [ko]
 시작하기
@@ -124,11 +125,11 @@ Paint
 설명서
 다운로드
 새 탭
-메모
-제목 없음
+메모장
+파일 탐색기
 브라우저
 메모장
-그림판
+파일 탐색기
 
 [zh-Hans]
 入门
@@ -136,11 +137,11 @@ Paint
 文档
 下载
 新标签页
-记事
-无标题
+记事本
+文件资源管理器
 浏览器
 记事本
-画图
+文件资源管理器
 
 [zh-Hant]
 快速入門
@@ -148,11 +149,11 @@ Paint
 文件
 下載
 新分頁
-記事
-未命名
+記事本
+檔案總管
 瀏覽器
 記事本
-小畫家
+檔案總管
 
 [ar]
 البدء
@@ -160,11 +161,11 @@ Paint
 الوثائق
 التنزيلات
 علامة تبويب جديدة
-ملاحظات
-بدون عنوان
+المفكرة
+مستكشف الملفات
 المستعرض
 المفكرة
-الرسام
+مستكشف الملفات
 
 [hi]
 आरंभ करें
@@ -172,11 +173,11 @@ Paint
 दस्तावेज़
 डाउनलोड
 नया टैब
-नोट्स
-शीर्षकहीन
+नोटपैड
+फ़ाइल एक्सप्लोरर
 ब्राउज़र
 नोटपैड
-पेंट
+फ़ाइल एक्सप्लोरर
 
 [id]
 Memulai
@@ -184,11 +185,11 @@ Catatan rilis
 Dokumentasi
 Unduhan
 Tab baru
-Catatan
-Tanpa judul
+Notepad
+File Explorer
 Peramban
 Notepad
-Paint
+File Explorer
 
 [th]
 เริ่มต้นใช้งาน
@@ -196,11 +197,11 @@ Paint
 เอกสาร
 ดาวน์โหลด
 แท็บใหม่
-บันทึก
-ไม่มีชื่อ
+โน้ตแพด
+File Explorer
 เบราว์เซอร์
 โน้ตแพด
-เพนต์
+File Explorer
 
 [vi]
 Bắt đầu
@@ -208,8 +209,8 @@ Ghi chú phát hành
 Tài liệu
 Tải xuống
 Tab mới
-Ghi chú
-Chưa đặt tên
+Notepad
+File Explorer
 Trình duyệt
 Notepad
-Paint
+File Explorer
