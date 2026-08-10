@@ -27,7 +27,7 @@ public class TrayApplicationContext : ApplicationContext
             Icon = LoadTrayIcon(),
             ContextMenuStrip = _contextMenu,
             Visible = true,
-            Text = "Window Resize & Capture"
+            Text = App.Name
         };
 
         // Show the context menu on left-click as well (default is right-click only)
@@ -59,7 +59,7 @@ public class TrayApplicationContext : ApplicationContext
     {
         AddTopLevelItems(
             _contextMenu,
-            populateWindows: PopulateWindowList,
+            populateWindows: parent => PopulateWindowList(parent, staged: null),
             onSettings: ShowSettingsForm,
             onQuit: () =>
             {
@@ -127,9 +127,6 @@ public class TrayApplicationContext : ApplicationContext
     // Enumerate visible windows and add each as a submenu item with its
     // app icon. When three or more windows belong to the same process,
     // group them under an app-level parent item.
-    private static void PopulateWindowList(ToolStripMenuItem parent) =>
-        PopulateWindowList(parent, null);
-
     private static void PopulateWindowList(
         ToolStripMenuItem parent, IReadOnlyList<WindowInfo>? staged)
     {
@@ -175,25 +172,12 @@ public class TrayApplicationContext : ApplicationContext
             var groupItem = new ToolStripMenuItem(EscapeMenuMnemonics(groupLabel));
 
             // Use the first window's icon for the group header
-            if (appWindows[0].AppIcon is { } groupIcon)
-            {
-                try
-                {
-                    groupItem.Image = groupIcon.ToBitmap();
-                    groupItem.ImageScaling = ToolStripItemImageScaling.SizeToFit;
-                }
-                catch { }
-            }
+            ShowAppIcon(groupItem, appWindows[0].AppIcon);
 
-            // Each window becomes a child of the group
+            // Each window becomes a child of the group. No icon here: the
+            // group above already carries the app's.
             foreach (var window in appWindows)
-            {
-                string displayTitle = string.IsNullOrEmpty(window.Title) ? Strings.MenuUntitled : window.Title;
-                string truncatedTitle = TruncateToFit(displayTitle, menuFont, maxMenuWidth);
-                var windowItem = new ToolStripMenuItem(EscapeMenuMnemonics(truncatedTitle));
-                BuildSizeSubmenu(windowItem, window);
-                groupItem.DropDownItems.Add(windowItem);
-            }
+                groupItem.DropDownItems.Add(WindowItem(window, menuFont, maxMenuWidth));
 
             parent.DropDownItems.Add(groupItem);
         }
@@ -207,24 +191,40 @@ public class TrayApplicationContext : ApplicationContext
     private static void AddFlatWindowItem(
         ToolStripMenuItem parent, WindowInfo window, Font menuFont, float maxMenuWidth)
     {
+        var item = WindowItem(window, menuFont, maxMenuWidth);
+        ShowAppIcon(item, window.AppIcon);
+        parent.DropDownItems.Add(item);
+    }
+
+    // One window as a menu item: its title, shortened to fit, with the sizes
+    // it can be resized to beneath it. Built in one place because a window
+    // reached through a group and one reached directly have to offer the same
+    // thing; two copies of this drifted apart once already.
+    private static ToolStripMenuItem WindowItem(
+        WindowInfo window, Font menuFont, float maxMenuWidth)
+    {
         string displayTitle = string.IsNullOrEmpty(window.Title) ? Strings.MenuUntitled : window.Title;
         string truncatedTitle = TruncateToFit(displayTitle, menuFont, maxMenuWidth);
 
         var item = new ToolStripMenuItem(EscapeMenuMnemonics(truncatedTitle));
-
-        // Display the application's icon beside the menu item
-        if (window.AppIcon != null)
-        {
-            try
-            {
-                item.Image = window.AppIcon.ToBitmap();
-                item.ImageScaling = ToolStripItemImageScaling.SizeToFit;
-            }
-            catch { }
-        }
-
         BuildSizeSubmenu(item, window);
-        parent.DropDownItems.Add(item);
+        return item;
+    }
+
+    // Put an application's own icon beside a menu item. A window can hand
+    // back an icon handle that will not become a bitmap, and a menu missing
+    // one picture is better than no menu at all.
+    private static void ShowAppIcon(ToolStripMenuItem item, Icon? icon)
+    {
+        if (icon == null)
+            return;
+
+        try
+        {
+            item.Image = icon.ToBitmap();
+            item.ImageScaling = ToolStripItemImageScaling.SizeToFit;
+        }
+        catch { }
     }
 
     // Attach preset-size children to a window menu item. Sizes that
@@ -363,9 +363,7 @@ public class TrayApplicationContext : ApplicationContext
     // missing, draw a minimal fallback resize icon.
     private static Icon LoadTrayIcon()
     {
-        var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-        var stream = assembly.GetManifestResourceStream("WindowResizeCapture.Resources.app.ico");
-
+        using var stream = App.OpenIcon();
         if (stream != null)
             return new Icon(stream);
 
