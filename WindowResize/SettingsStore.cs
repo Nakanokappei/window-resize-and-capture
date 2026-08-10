@@ -37,8 +37,9 @@ public partial class SettingsStore
     // declared in the package manifest, and the settings directory. Renaming
     // any of them would silently discard the user's preferences or leave an
     // orphaned auto-start entry pointing at an executable that no longer
-    // exists. Nothing here is ever shown in the UI.
-    private const string AppName = "WindowsResizeCapture";
+    // exists. Nothing here is ever shown in the UI - the name the app shows a
+    // person is App.Name, and these are not it.
+    private const string RegistryRunValueName = "WindowsResizeCapture";
     private const string StartupTaskId = "WindowsResizeCaptureStartup";
     private const string SettingsDirectoryName = "WindowsResizeCapture";
 
@@ -134,7 +135,7 @@ public partial class SettingsStore
             try
             {
                 using var key = Registry.CurrentUser.OpenSubKey(RegistryRunKey, false);
-                return key?.GetValue(AppName) != null;
+                return key?.GetValue(RegistryRunValueName) != null;
             }
             catch { return false; }
         }
@@ -171,11 +172,11 @@ public partial class SettingsStore
                 if (value)
                 {
                     string exePath = Environment.ProcessPath ?? "";
-                    key.SetValue(AppName, $"\"{exePath}\"");
+                    key.SetValue(RegistryRunValueName, $"\"{exePath}\"");
                 }
                 else
                 {
-                    key.DeleteValue(AppName, false);
+                    key.DeleteValue(RegistryRunValueName, false);
                 }
             }
             catch { }
@@ -250,11 +251,11 @@ public partial class SettingsStore
     // auto-enable/disable logic during deserialization.
     private void Load()
     {
+        if (!File.Exists(_settingsPath))
+            return;
+
         try
         {
-            if (!File.Exists(_settingsPath))
-                return;
-
             string json = File.ReadAllText(_settingsPath);
             var data = JsonSerializer.Deserialize(json, SettingsJsonContext.Default.SettingsData);
 
@@ -278,7 +279,39 @@ public partial class SettingsStore
                 data?.CaptureCopyToClipboard ?? data?.LegacyCaptureCopyToClipboard ?? false;
             CaptureClientArea = data?.CaptureClientArea ?? false;
         }
-        catch { }
+        catch (Exception failure)
+        {
+            // A file that cannot be read leaves this instance on its defaults,
+            // and the first setting the user changes writes over it. Everything
+            // they had chosen would be gone with no way back and nothing to
+            // look at, so the file is kept and what went wrong is written
+            // beside it.
+            KeepUnreadableSettings(failure);
+        }
+    }
+
+    // Move the unreadable file aside, with a note saying why, and leave the
+    // reason where a person looking for their settings will find it: next to
+    // them. Overwrites an earlier copy, because the useful one is the file that
+    // was in place when the settings were last lost.
+    private void KeepUnreadableSettings(Exception failure)
+    {
+        try
+        {
+            string kept = _settingsPath + ".unreadable";
+            File.Copy(_settingsPath, kept, overwrite: true);
+            File.WriteAllText(
+                _settingsPath + ".unreadable.txt",
+                $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}{Environment.NewLine}" +
+                $"{Path.GetFileName(_settingsPath)} could not be read, so the app " +
+                $"started with its default settings and has kept the file as " +
+                $"{Path.GetFileName(kept)}.{Environment.NewLine}" +
+                $"{failure.GetType().Name}: {failure.Message}{Environment.NewLine}");
+        }
+        catch
+        {
+            // Nothing further to try: the app still runs on its defaults.
+        }
     }
 
     // Serialize all current settings to JSON and write to disk.
