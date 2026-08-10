@@ -270,6 +270,34 @@ internal static class StudioPoses
         return null;
     }
 
+    // Draw the save folder in a typeface that spells a path the way the language
+    // being photographed spells it.
+    //
+    // A Japanese typeface draws the path separator as a yen sign. That is not a
+    // fault: it is the convention Japanese Windows has always followed, and a
+    // Japanese user sees it in Explorer too. But the shoot runs on one machine,
+    // and this app takes the font Windows hands it, so fifteen listings came out
+    // reading C:\Users\Alex\Pictures\Captures with yen signs in it - the
+    // operator's own machine showing through a picture meant for somebody else's.
+    //
+    // Only this one label, and only its typeface. The path itself is ASCII, so a
+    // Latin face has every character it needs, and the Japanese picture is left
+    // exactly as a Japanese user would see it.
+    private static void ShowThePathAsThatLanguageWould(Form settings)
+    {
+        if (System.Globalization.CultureInfo.CurrentUICulture
+            .TwoLetterISOLanguageName == "ja")
+            return;
+
+        var found = settings.Controls.Find(SettingsForm.FolderPathName, searchAllChildren: true);
+        if (found.Length == 0)
+            return;
+
+        var label = found[0];
+        label.Font = new System.Drawing.Font(
+            "Segoe UI", label.Font.Size, label.Font.Style, label.Font.Unit);
+    }
+
     // The real settings window, centered on the set and switched to one tab.
     private static async Task<Arrangement> OpenSettings(StudioSetForm set, int tabIndex)
     {
@@ -277,6 +305,8 @@ internal static class StudioPoses
         settings.StartPosition = FormStartPosition.Manual;
         settings.TopMost = true;
         settings.Show();
+
+        ShowThePathAsThatLanguageWould(settings);
 
         // Grow with the rest of the set, on top of the scaling the form
         // already does for the display's own DPI, but never past the point

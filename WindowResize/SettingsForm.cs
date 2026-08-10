@@ -32,6 +32,9 @@ public class SettingsForm : Form
     private Button _chooseFolderButton = null!;
     private Label _folderPathLabel = null!;
 
+    // How the studio finds the path label among the controls of a built form.
+    internal const string FolderPathName = "captureSaveFolderPath";
+
     // Behavior tab controls. The position tiles are checkbox-styled
     // buttons so UI Automation exposes their checked state to screen
     // readers (a plain Button has no toggle state).
@@ -471,6 +474,12 @@ public class SettingsForm : Form
 
         _folderPathLabel = new Label
         {
+            // Named so that the studio taking the store pictures can find it.
+            // The path is the one place in this window where a character is
+            // drawn differently depending on the language Windows itself is
+            // running in, and a listing picture has to show the language it is
+            // for rather than the machine the picture was taken on.
+            Name = FolderPathName,
             Text = FormatFolderPath(),
             Size = new Size(Math.Max(_captureOptionsPanel.Width - pathLeft - 8, 120), 20),
             ForeColor = SystemColors.GrayText,
