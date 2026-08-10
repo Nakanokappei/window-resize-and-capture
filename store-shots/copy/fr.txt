@@ -1,0 +1,19 @@
+# One [section] per picture, named as --list-views prints it. The first line of
+# a section is the headline, the rest is the body. A single space is where a line
+# may break. Translated from en.txt.
+
+[choose-a-size]
+Redimensionner une fenêtre depuis la zone de notification
+Cliquez sur l'icône à droite de la barre des tâches, puis choisissez la fenêtre et la taille voulue.
+
+[settings-general]
+Enregistrez vos tailles habituelles
+En plus des tailles intégrées, ajoutez les vôtres en saisissant une largeur et une hauteur. Un nom permet de les distinguer.
+
+[settings-capture]
+Redimensionner et capturer d'un coup
+Enregistrez la fenêtre redimensionnée en image et copiez-la en même temps dans le presse-papiers.
+
+[settings-behavior]
+Choisissez où la fenêtre se place
+Choisissez l'une des neuf positions à l'écran. La fenêtre peut aussi passer au premier plan ou aller sur l'écran principal.

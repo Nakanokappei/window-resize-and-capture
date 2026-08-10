@@ -1,4 +1,20 @@
-# 1 行目が見出し、以降が本文。# で始まる行は無視される。
-# これは仮のコピー。最終稿に差し替えること。
-ウィンドウを、決めたサイズに。
-トレイのアイコンから 2 クリック。リサイズして、そのままキャプチャ。
+# One [section] per picture, named as --list-views prints it. The first line of
+# a section is the headline, the rest is the body. Lines starting with a hash
+# are ignored. A single space is where a line may break; after a clause mark the
+# app inserts one itself.
+
+[choose-a-size]
+通知領域からウィンドウをリサイズ
+タスク バーの右端にあるアイコンをクリックし、ウィンドウと目的のサイズを選ぶだけです。
+
+[settings-general]
+よく使うサイズを登録
+初期設定に加えて、幅と高さを指定したカスタム サイズを登録できます。名前を付けて区別できます。
+
+[settings-capture]
+リサイズしてそのままキャプチャ
+サイズを変更したウィンドウをそのまま画像として保存し、クリップボードにもコピーできます。
+
+[settings-behavior]
+リサイズ後の配置も指定
+画面の 9 か所から配置を選べます。ウィンドウを最前面に出したり、メインスクリーンへ移動することもできます。

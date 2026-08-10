@@ -1,0 +1,61 @@
+# The line that admits the desktop around the app is drawn rather than
+# photographed: the wallpaper, the taskbar, and the windows the menu lists.
+# The app's own menu and settings window in these pictures are the real ones.
+#
+# One [tag] section per language, one line each. A language with no section
+# falls back to [en].
+#
+# This is not one sentence translated sixteen times. Every language has its own
+# convention for "this is an illustration, not the thing itself", and the word
+# that carries it is different in each: the German Symbolbild, the Chinese
+# 示意图, the Korean 연출된 화면, the Japanese イメージ. Translating any of them
+# literally into another language says something else - the English "image"
+# would only be stating that a picture is a picture.
+
+[en]
+Simulated desktop
+
+[ja]
+※ デスクトップはイメージです
+
+[de]
+Desktop: Symbolbild
+
+[fr]
+Bureau simulé
+
+[es]
+Escritorio simulado
+
+[pt]
+Área de trabalho simulada
+
+[it]
+Desktop simulato
+
+[ru]
+Рабочий стол показан условно
+
+[ko]
+데스크톱은 연출된 화면입니다
+
+[zh-Hans]
+桌面为示意图
+
+[zh-Hant]
+桌面為示意圖
+
+[ar]
+سطح المكتب توضيحي
+
+[hi]
+डेस्कटॉप केवल उदाहरण के लिए
+
+[id]
+Desktop hanya ilustrasi
+
+[th]
+เดสก์ท็อปเป็นภาพประกอบ
+
+[vi]
+Màn hình nền chỉ mang tính minh họa

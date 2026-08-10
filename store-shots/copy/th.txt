@@ -1,0 +1,26 @@
+# One [section] per picture, named as --list-views prints it. The first line of
+# a section is the headline, the rest is the body.
+#
+# Thai is the language that has to carry its own line breaks. It separates
+# neither its words with spaces nor its sentences with a mark, so the spaces
+# below are the only places a line may break, and they are put where Thai
+# convention puts them: between phrases. A phrase written without one runs on
+# until it leaves the picture, or is drawn smaller to fit.
+#
+# Translated from en.txt.
+
+[choose-a-size]
+ปรับขนาดหน้าต่าง จากพื้นที่แจ้งเตือน
+คลิกไอคอน ที่ปลายขวาของแถบงาน แล้วเลือกหน้าต่าง และขนาดที่ต้องการ
+
+[settings-general]
+บันทึกขนาด ที่ใช้บ่อย
+นอกจากขนาดในตัว คุณเพิ่มขนาดของคุณเองได้ ด้วยการกรอกความกว้างและความสูง ตั้งชื่อไว้ เพื่อแยกความต่าง
+
+[settings-capture]
+ปรับขนาด แล้วจับภาพหน้าจอในขั้นเดียว
+บันทึกหน้าต่างที่เพิ่งปรับขนาด เป็นรูปภาพ และคัดลอกไปยังคลิปบอร์ด ในเวลาเดียวกัน
+
+[settings-behavior]
+เลือกตำแหน่ง ที่หน้าต่างจะไปอยู่
+เลือกหนึ่งใน เก้าตำแหน่งบนหน้าจอ หน้าต่างยังมาอยู่ด้านหน้า หรือย้ายไปหน้าจอหลักได้

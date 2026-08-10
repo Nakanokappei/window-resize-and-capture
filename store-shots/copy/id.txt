@@ -1,0 +1,19 @@
+# One [section] per picture, named as --list-views prints it. The first line of
+# a section is the headline, the rest is the body. A single space is where a line
+# may break. Translated from en.txt.
+
+[choose-a-size]
+Ubah ukuran jendela dari area notifikasi
+Klik ikon di ujung kanan bilah tugas, lalu pilih jendela dan ukuran yang diinginkan.
+
+[settings-general]
+Simpan ukuran yang sering dipakai
+Selain ukuran bawaan, Anda bisa menambahkan sendiri dengan mengisi lebar dan tinggi. Beri nama agar mudah dibedakan.
+
+[settings-capture]
+Ubah ukuran sekaligus tangkap layar
+Simpan jendela yang baru diubah ukurannya sebagai gambar, dan salin ke papan klip pada saat yang sama.
+
+[settings-behavior]
+Tentukan posisi jendela setelahnya
+Pilih satu dari sembilan posisi di layar. Jendela juga bisa dibawa ke depan atau dipindahkan ke layar utama.

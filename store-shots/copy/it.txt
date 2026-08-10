@@ -1,0 +1,19 @@
+# One [section] per picture, named as --list-views prints it. The first line of
+# a section is the headline, the rest is the body. A single space is where a line
+# may break. Translated from en.txt.
+
+[choose-a-size]
+Ridimensiona una finestra dall'area di notifica
+Fai clic sull'icona all'estremità destra della barra delle applicazioni, poi scegli la finestra e la dimensione.
+
+[settings-general]
+Salva le dimensioni che usi più spesso
+Oltre alle dimensioni integrate puoi aggiungere le tue, indicando larghezza e altezza. Un nome aiuta a distinguerle.
+
+[settings-capture]
+Ridimensiona e cattura in un passaggio
+Salva come immagine la finestra appena ridimensionata e copiala negli appunti nello stesso momento.
+
+[settings-behavior]
+Scegli dove va la finestra
+Scegli una delle nove posizioni sullo schermo. La finestra può anche passare in primo piano o spostarsi sullo schermo principale.

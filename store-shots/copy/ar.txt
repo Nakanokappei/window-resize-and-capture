@@ -1,0 +1,20 @@
+# One [section] per picture, named as --list-views prints it. The first line of
+# a section is the headline, the rest is the body. A single space is where a line
+# may break. The app lays Arabic out from the right on its own, taken from the
+# culture. Translated from en.txt.
+
+[choose-a-size]
+تغيير حجم النافذة من منطقة الإشعارات
+انقر الأيقونة في الطرف الأيمن من شريط المهام، ثم اختر النافذة والحجم المطلوب.
+
+[settings-general]
+احفظ المقاسات التي تستخدمها كثيرًا
+إلى جانب المقاسات المدمجة، يمكنك إضافة مقاساتك بكتابة العرض والارتفاع. أعطِ كل مقاس اسمًا لتمييزه.
+
+[settings-capture]
+تغيير الحجم مع لقطة الشاشة في خطوة واحدة
+احفظ النافذة التي غيّرت حجمها كصورة، وانسخها إلى الحافظة في الوقت نفسه.
+
+[settings-behavior]
+اختر مكان النافذة بعد التغيير
+اختر واحدًا من تسعة مواضع على الشاشة. يمكن للنافذة أيضًا أن تظهر في المقدمة أو تنتقل إلى الشاشة الرئيسية.

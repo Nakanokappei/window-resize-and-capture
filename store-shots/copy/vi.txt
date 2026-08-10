@@ -1,0 +1,19 @@
+# One [section] per picture, named as --list-views prints it. The first line of
+# a section is the headline, the rest is the body. A single space is where a line
+# may break. Translated from en.txt.
+
+[choose-a-size]
+Đổi kích thước cửa sổ từ khu vực thông báo
+Bấm biểu tượng ở cuối bên phải thanh tác vụ, rồi chọn cửa sổ và kích thước bạn muốn.
+
+[settings-general]
+Lưu những kích thước bạn dùng nhiều
+Ngoài các kích thước có sẵn, bạn có thể thêm kích thước riêng bằng cách nhập chiều rộng và chiều cao. Đặt tên để phân biệt.
+
+[settings-capture]
+Đổi kích thước và chụp trong một bước
+Lưu cửa sổ vừa đổi kích thước thành hình ảnh, đồng thời sao chép vào bảng tạm.
+
+[settings-behavior]
+Chọn nơi cửa sổ sẽ nằm
+Chọn một trong chín vị trí trên màn hình. Cửa sổ cũng có thể lên trước hoặc chuyển sang màn hình chính.

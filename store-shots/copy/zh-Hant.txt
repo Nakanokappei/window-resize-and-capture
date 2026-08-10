@@ -1,0 +1,20 @@
+# One [section] per picture, named as --list-views prints it. The first line of
+# a section is the headline, the rest is the body. A single space is where a line
+# may break; the app also inserts one after every clause mark, so Chinese copy
+# needs no spaces of its own. Translated from en.txt.
+
+[choose-a-size]
+從通知區域調整視窗大小
+按一下工作列右端的圖示，選擇視窗和需要的尺寸。
+
+[settings-general]
+儲存常用的尺寸
+除了內建尺寸，還可以輸入寬度和高度加入自己的尺寸。可以命名以便區分。
+
+[settings-capture]
+調整大小並順手截圖
+把剛調整過的視窗儲存為圖片，同時拷貝至剪貼簿。
+
+[settings-behavior]
+指定調整後的位置
+可以從螢幕上的九個位置中選擇。視窗還可以移至最前，或移到主螢幕。

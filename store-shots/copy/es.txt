@@ -1,0 +1,19 @@
+# One [section] per picture, named as --list-views prints it. The first line of
+# a section is the headline, the rest is the body. A single space is where a line
+# may break. Translated from en.txt.
+
+[choose-a-size]
+Cambia el tamaño desde el área de notificación
+Haz clic en el icono del extremo derecho de la barra de tareas y elige la ventana y el tamaño.
+
+[settings-general]
+Guarda los tamaños que más usas
+Además de los tamaños integrados, puedes añadir los tuyos escribiendo un ancho y un alto. Ponles un nombre para distinguirlos.
+
+[settings-capture]
+Cambia el tamaño y captura a la vez
+Guarda como imagen la ventana que acabas de redimensionar y cópiala al portapapeles al mismo tiempo.
+
+[settings-behavior]
+Elige dónde queda la ventana
+Elige una de las nueve posiciones de la pantalla. La ventana también puede pasar al frente o moverse a la pantalla principal.

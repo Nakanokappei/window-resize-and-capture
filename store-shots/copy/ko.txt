@@ -1,0 +1,19 @@
+# One [section] per picture, named as --list-views prints it. The first line of
+# a section is the headline, the rest is the body. A single space is where a line
+# may break. Translated from en.txt.
+
+[choose-a-size]
+알림 영역에서 창 크기 조절
+작업 표시줄 오른쪽 끝의 아이콘을 클릭하고 창과 원하는 크기를 선택하세요.
+
+[settings-general]
+자주 쓰는 크기를 저장
+기본 제공 크기 외에 너비와 높이를 입력해 직접 추가할 수 있습니다. 이름을 붙여 구분하세요.
+
+[settings-capture]
+크기 조절과 스크린샷을 한 번에
+방금 크기를 조절한 창을 이미지로 저장하고 클립보드에도 복사합니다.
+
+[settings-behavior]
+창이 놓일 위치를 지정
+화면의 아홉 곳 중에서 위치를 고를 수 있습니다. 창을 맨 앞으로 보내거나 주 화면으로 옮길 수도 있습니다.

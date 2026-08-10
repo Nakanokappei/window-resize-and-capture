@@ -1,0 +1,19 @@
+# One [section] per picture, named as --list-views prints it. The first line of
+# a section is the headline, the rest is the body. A single space is where a line
+# may break. Translated from en.txt.
+
+[choose-a-size]
+Fenstergröße aus dem Infobereich ändern
+Klicken Sie auf das Symbol am rechten Ende der Taskleiste und wählen Sie das Fenster und die gewünschte Größe.
+
+[settings-general]
+Eigene Größen speichern
+Neben den integrierten Größen können Sie eigene hinzufügen: Breite und Höhe eingeben. Ein Name hilft, sie zu unterscheiden.
+
+[settings-capture]
+Ändern und gleich aufnehmen
+Speichern Sie das gerade geänderte Fenster als Bild und kopieren Sie es gleichzeitig in die Zwischenablage.
+
+[settings-behavior]
+Position nach dem Ändern wählen
+Wählen Sie eine von neun Positionen auf dem Bildschirm. Das Fenster kann außerdem in den Vordergrund kommen oder zum Hauptbildschirm wechseln.

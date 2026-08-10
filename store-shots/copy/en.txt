@@ -1,4 +1,23 @@
-# The first line is the headline; the rest is the body. Lines starting with
-# a hash are ignored. This is placeholder copy - replace it with the final text.
-Every window, exactly the size you need.
-Two clicks from the tray. Resize the window, then capture it in the same step.
+# One [section] per picture, named as --list-views prints it. The first line of
+# a section is the headline, the rest is the body. Lines starting with a hash
+# are ignored. A single space is where a line may break.
+#
+# This file is the one the other languages are written from. It reuses the words
+# the app's own UI uses - built-in, clipboard, main screen - so that a reader who
+# installs after seeing a picture finds the same words in the window.
+
+[choose-a-size]
+Resize a window from the notification area
+Click the icon at the right end of the taskbar, then pick the window and the size you want.
+
+[settings-general]
+Save the sizes you use most
+Along with the built-in sizes, you can add your own by typing a width and a height. Give each one a name to tell them apart.
+
+[settings-capture]
+Resize and capture in one step
+Save the window you just resized as an image, and copy it to the clipboard at the same time.
+
+[settings-behavior]
+Choose where the window lands
+Pick one of nine positions on the screen. The window can also come to the front, or move to your main screen.

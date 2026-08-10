@@ -1,0 +1,19 @@
+# One [section] per picture, named as --list-views prints it. The first line of
+# a section is the headline, the rest is the body. A single space is where a line
+# may break. Translated from en.txt.
+
+[choose-a-size]
+Redimensione pela área de notificação
+Clique no ícone na extremidade direita da barra de tarefas e escolha a janela e o tamanho.
+
+[settings-general]
+Salve os tamanhos que você mais usa
+Além dos tamanhos integrados, você pode adicionar os seus digitando largura e altura. Dê um nome para diferenciá-los.
+
+[settings-capture]
+Redimensione e capture de uma vez
+Salve como imagem a janela que acabou de redimensionar e copie para a área de transferência ao mesmo tempo.
+
+[settings-behavior]
+Escolha onde a janela fica
+Escolha uma das nove posições da tela. A janela também pode vir para frente ou ir para a tela principal.
