@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -35,6 +36,21 @@ static class Program
             return;
         }
 
+        // A language named on the command line applies to this launch only.
+        // Nothing is stored: the app otherwise follows the language Windows is
+        // set to, and remembering an override would leave the language decided
+        // in two places with nothing in the UI to show which one won.
+        //
+        // Settled here, before the first string is read, because both the
+        // message below and every control the tray builds take the culture as
+        // they are created.
+        var language = CommandLine.Language(args);
+        if (language != null)
+        {
+            CultureInfo.CurrentUICulture = language;
+            CultureInfo.CurrentCulture = language;
+        }
+
         // Acquire a named mutex to prevent multiple instances from running.
         // If the mutex already exists, another instance is active — show a
         // message and exit immediately. The name keeps the misspelled
@@ -47,7 +63,7 @@ static class Program
         {
             MessageBox.Show(
                 Strings.AlreadyRunningBody,
-                "Window Resize & Capture",
+                App.Name,
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
             return;
