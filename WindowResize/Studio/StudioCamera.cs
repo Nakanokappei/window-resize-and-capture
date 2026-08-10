@@ -97,25 +97,67 @@ internal static class StudioCamera
     internal static void Raise(IntPtr handle) =>
         SetWindowPos(handle, TopOfTopmost, 0, 0, 0, 0, NoMove | NoSize | NoActivate);
 
-    // Which window a person sees at this point on screen.
+    // The first of these windows that the given one is covering, or null when
+    // every one of them is where a person would see it.
     //
-    // Logical pixels, because the caller is the message loop this app runs on,
-    // where WinForms reports its own windows in the same units. Entering the
-    // aware context here would sample a different point on a scaled display.
-    internal static IntPtr WindowAt(Point point) =>
-        WindowFromPoint(new POINT { X = point.X, Y = point.Y });
+    // Each is sampled at its own middle. Logical pixels, because the caller is
+    // the message loop this app runs on, where WinForms reports its windows in
+    // the same units; entering the aware context here would sample a different
+    // point on a scaled display.
+    internal static Control? FirstCoveredBy(
+        IntPtr coverer, IReadOnlyList<Control> windows)
+    {
+        foreach (var window in windows)
+        {
+            var bounds = window.Bounds;
+            var middle = new POINT
+            {
+                X = bounds.Left + bounds.Width / 2,
+                Y = bounds.Top + bounds.Height / 2,
+            };
+
+            if (WindowFromPoint(middle) == coverer)
+                return window;
+        }
+
+        return null;
+    }
 
     // Resize the form until the rectangle a person sees measures exactly
     // width x height physical pixels, then copy that rectangle off the screen
     // and save it. Returns the size actually written, which the caller checks.
     internal static async Task<Size> Photograph(
-        Form form, int width, int height, string outputPath, int settleMs)
+        Form form, int width, int height, string outputPath, int settleMs,
+        IReadOnlyList<Control> pose)
     {
         SquareTheCorners(form.Handle);
         await MatchVisibleSize(form, width, height);
 
         // Let anything asynchronous finish arriving before the shutter opens.
         await Settle(settleMs);
+
+        // Then put what the pose opened in front of the set one last time, and
+        // look at the screen rather than trust the call.
+        //
+        // The pose already did this when it was arranged, and it was not enough:
+        // everything above pumps messages, and the set's own activation - asked
+        // for at startup and refused, because a process nobody clicked cannot
+        // take the foreground - arrives during that pumping often enough to
+        // matter. It lifts the set inside the topmost band and the menu opened
+        // before it drops behind. Four pictures in one pass of sixteen came out
+        // that way, all of them missing the top level of the menu.
+        foreach (var window in pose)
+            Raise(window.Handle);
+
+        await Settle(120);
+
+        var covered = FirstCoveredBy(form.Handle, pose);
+        if (covered != null)
+        {
+            throw new InvalidOperationException(
+                $"the set is in front of the {covered.GetType().Name} " +
+                $"the pose opened at {covered.Bounds}");
+        }
 
         // Measure, check and copy without leaving the aware context, so the
         // rectangle found clear is exactly the one photographed.

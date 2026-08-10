@@ -12,11 +12,24 @@ namespace WindowResizeCapture.Studio;
 // listing does not match the app.
 internal static class StudioPoses
 {
-    // What a pose leaves on screen, so the session can take it down again.
+    // What a pose leaves on screen, so the session can take it down again, and
+    // why it cannot be photographed when that is how it ended.
+    //
+    // A failed pose is reported rather than thrown, so that what it opened is
+    // still handed back and still closed. Thrown, the menu was left open, and an
+    // open menu keeps a message filter that swallows Application.Exit: the run
+    // that failed on the Chinese picture stayed alive afterwards, holding its own
+    // binary and its zh-Hant resources locked against the next build.
     internal sealed class Arrangement : IDisposable
     {
         internal ContextMenuStrip? Menu { get; init; }
         internal Form? Window { get; init; }
+        internal string? Failure { get; init; }
+
+        // Every window this pose put on the set, in the order it opened them.
+        // The camera lifts them in front of the set again before the shutter and
+        // refuses the picture if one of them is not there.
+        internal IReadOnlyList<Control> Opened { get; init; } = Array.Empty<Control>();
 
         public void Dispose()
         {
@@ -62,31 +75,34 @@ internal static class StudioPoses
 
         var resize = menu.Items[0] as ToolStripMenuItem;
         if (!await Open(resize, inward))
-            return new Arrangement { Menu = menu };
+            return new Arrangement { Menu = menu, Failure = "the resize menu did not open" };
 
         // The grouped item is the only one with a count after its name.
         var browser = FindItem(resize!, name => name.EndsWith(")", StringComparison.Ordinal));
         if (!await Open(browser, inward))
-            return new Arrangement { Menu = menu };
+            return new Arrangement { Menu = menu, Failure = "the grouped windows did not open" };
 
         var window = browser!.DropDownItems.Count > 0
             ? browser.DropDownItems[0] as ToolStripMenuItem
             : null;
         if (!await Open(window, inward))
-            return new Arrangement { Menu = menu };
+            return new Arrangement { Menu = menu, Failure = "the sizes for the window did not open" };
 
         await StudioCamera.Settle(300);
 
-        // Now that every level is open, tell the set how much of itself the
-        // menu covers, so the marketing line keeps clear of it.
+        // Now that every level is open, tell the set which parts of itself the
+        // menu covers, so the marketing line keeps clear of them.
         var levels = OpenLevels(menu);
-        set.Reserve(OpenArea(levels));
+        set.Reserve(Areas(levels));
 
         await StudioCamera.Settle(150);
 
         // Then, because the set repaints itself for that reservation and the
         // menu is what has to be in front when the shutter opens.
-        LiftAboveSet(set, levels);
+        string? failure = await LiftAboveSet(set, levels)
+            ?? StackedLevel(levels);
+        if (failure != null)
+            return new Arrangement { Menu = menu, Opened = levels, Failure = failure };
 
         // The highlight goes on last of all. It leaves the pointer's choice
         // sitting under it, so the picture catches the moment before the click
@@ -98,9 +114,14 @@ internal static class StudioPoses
         await StudioCamera.Settle(150);
 
         if (wanted != null && !wanted.Selected)
-            throw new InvalidOperationException("the size being chosen lost its highlight");
+            return new Arrangement
+            {
+                Menu = menu,
+                Opened = levels,
+                Failure = "the size being chosen lost its highlight",
+            };
 
-        return new Arrangement { Menu = menu };
+        return new Arrangement { Menu = menu, Opened = levels };
     }
 
     // Every level of the menu that is open, outermost first.
@@ -130,17 +151,19 @@ internal static class StudioPoses
         return levels;
     }
 
-    // The rectangle the pose occupies on screen, counting every window it opened.
-    private static System.Drawing.Rectangle OpenArea(IReadOnlyList<Control> levels)
+    // Where on screen each window the pose opened stands. Kept apart rather than
+    // unioned: an open menu is a staircase, and the box around it claims room
+    // beside the tall level that nothing is standing in.
+    private static System.Drawing.Rectangle[] Areas(IReadOnlyList<Control> opened)
     {
-        var area = levels[0].Bounds;
-        foreach (var level in levels)
-            area = System.Drawing.Rectangle.Union(area, level.Bounds);
-        return area;
+        var areas = new System.Drawing.Rectangle[opened.Count];
+        for (int index = 0; index < opened.Count; index++)
+            areas[index] = opened[index].Bounds;
+        return areas;
     }
 
-    // Put what the pose opened back in front of the set, and refuse the picture
-    // if it did not go there.
+    // Put what the pose opened back in front of the set. Returns null once it is
+    // there, or why the picture cannot be taken.
     //
     // The set and every window a pose opens are all topmost, and the set is
     // activated once more while the levels are being opened - often enough to
@@ -150,24 +173,62 @@ internal static class StudioPoses
     // window belonging to another program, which is all the shutter checks.
     //
     // So raise them again in the order they were opened, then look at the screen
-    // to see which window is really there. A shoot that stops with a reason in
-    // its log costs one command; a listing published with half a menu in it costs
-    // a submission.
-    private static void LiftAboveSet(StudioSetForm set, IReadOnlyList<Control> opened)
+    // to see which window is really there. Raising once was not always enough:
+    // a full shoot of sixteen languages lost the Chinese picture to this. Try a
+    // few times, a moment apart, and only then give up - a shoot that stops
+    // costs the operator the rest of the run.
+    private static async Task<string?> LiftAboveSet(
+        StudioSetForm set, IReadOnlyList<Control> opened)
     {
-        foreach (var window in opened)
-            StudioCamera.Raise(window.Handle);
+        Control? behind = null;
 
-        foreach (var window in opened)
+        for (int attempt = 0; attempt < 4; attempt++)
         {
-            var bounds = window.Bounds;
-            var middle = new System.Drawing.Point(
-                bounds.Left + bounds.Width / 2, bounds.Top + bounds.Height / 2);
+            foreach (var window in opened)
+                StudioCamera.Raise(window.Handle);
 
-            if (StudioCamera.WindowAt(middle) == set.Handle)
-                throw new InvalidOperationException(
-                    $"the set is in front of the {window.GetType().Name} the pose opened");
+            await StudioCamera.Settle(120);
+
+            behind = StudioCamera.FirstCoveredBy(set.Handle, opened);
+            if (behind == null)
+                return null;
         }
+
+        // The rectangle is in the message because it is the only way to tell a
+        // window that is really behind the set from one that reported a place
+        // nobody could see it.
+        return $"the set stayed in front of the {behind!.GetType().Name} " +
+            $"the pose opened at {behind.Bounds}";
+    }
+
+    // Why the picture cannot be taken when one level of the menu has opened on
+    // top of another, or null when the four of them stand side by side.
+    //
+    // Every level is a panel beside its parent, so a level over a level means one
+    // of them opened somewhere it was not asked to and is hiding what is under
+    // it. This is how the Russian picture came out of a full shoot: its list of
+    // windows was underneath its list of sizes, and every other check passed.
+    //
+    // Panels that merely touch are not stacked. The tolerance is what a shared
+    // edge and a shadow come to; a level that is really hidden overlaps its
+    // neighbour by its whole width.
+    private static string? StackedLevel(IReadOnlyList<Control> levels)
+    {
+        const int touching = 8;
+
+        for (int outer = 0; outer < levels.Count; outer++)
+        {
+            for (int inner = outer + 1; inner < levels.Count; inner++)
+            {
+                var shared = System.Drawing.Rectangle.Intersect(
+                    levels[outer].Bounds, levels[inner].Bounds);
+
+                if (shared.Width > touching && shared.Height > touching)
+                    return "two levels of the menu opened on top of each other";
+            }
+        }
+
+        return null;
     }
 
     private static async Task<bool> Open(
@@ -244,14 +305,19 @@ internal static class StudioPoses
 
         // Keep the marketing line clear of the window, the same way the menu
         // pose does.
-        set.Reserve(settings.Bounds);
+        set.Reserve(new[] { settings.Bounds });
 
         await StudioCamera.Settle(400);
 
         // And in front of the set, for the same reason the menu has to be.
-        LiftAboveSet(set, new[] { settings });
+        string? failure = await LiftAboveSet(set, new[] { settings });
 
-        return new Arrangement { Window = settings };
+        return new Arrangement
+        {
+            Window = settings,
+            Opened = new[] { settings },
+            Failure = failure,
+        };
     }
 
     // Switch tabs the way a click does, so a tab that fails to build shows up

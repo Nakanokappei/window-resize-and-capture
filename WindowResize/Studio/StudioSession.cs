@@ -78,8 +78,18 @@ internal static class StudioSession
 
         using var pose = await StudioPoses.Arrange(request.View, set);
 
+        // A pose that could not be arranged is not photographed. It is reported
+        // here rather than thrown from there, so that what it opened is closed on
+        // the way out and this run ends instead of sitting on its own binary.
+        if (pose.Failure != null)
+        {
+            Log($"error\t{request.View}\t{request.Language.Name}\t{pose.Failure}");
+            return;
+        }
+
         var written = await StudioCamera.Photograph(
-            set, request.Size.Width, request.Size.Height, request.OutputPath, request.SettleMs);
+            set, request.Size.Width, request.Size.Height, request.OutputPath,
+            request.SettleMs, pose.Opened);
 
         // An unattended shoot must shout about a wrong size here, not leave it
         // to be discovered on the store listing.

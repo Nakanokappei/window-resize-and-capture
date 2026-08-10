@@ -634,14 +634,25 @@ internal sealed class StudioSetForm : Form
     // Keep the marketing line clear of whatever the pose put on the set. A
     // menu four levels deep reaches a long way up and to the left, and text
     // running underneath it is worse than text that had to wrap early.
-    internal void Reserve(Rectangle screenArea)
+    //
+    // One rectangle per window the pose opened, not the one box around them all.
+    // An open menu is a staircase: the list of sizes stands tall and the three
+    // levels beside it sit low, so the box around the four of them claims a
+    // large empty area to the right of the sizes that a paragraph fits in. Five
+    // pictures went out with their text crushed into the strip above that box
+    // while that area sat empty.
+    internal void Reserve(IReadOnlyList<Rectangle> screenAreas)
     {
-        _reserved = RectangleToClient(screenArea);
+        var areas = new Rectangle[screenAreas.Count];
+        for (int index = 0; index < screenAreas.Count; index++)
+            areas[index] = RectangleToClient(screenAreas[index]);
+
+        _reserved = areas;
         Invalidate();
         Update();
     }
 
-    private Rectangle _reserved = Rectangle.Empty;
+    private IReadOnlyList<Rectangle> _reserved = Array.Empty<Rectangle>();
 
     // The box one block of text gets: as wide as the set allows, less the
     // same margin on the right that it has on the left, and pulled in further
@@ -675,33 +686,60 @@ internal sealed class StudioSetForm : Form
     }
 
     // The box a block of text gets, as a left edge and a width: the set less its
-    // margins, pulled in on whichever side the pose put something. That side is
-    // the right on a left-to-right set and the left on a mirrored one, where the
-    // text starts at the right edge and the settings window stands opposite it.
+    // margins, pulled in to whichever side of the pose has more room for it.
     private (int left, int width) BoxBeside(int margin, int top, int bottom)
     {
         int left = margin;
         int right = ClientSize.Width - margin;
 
-        if (!_reserved.IsEmpty && _reserved.Bottom > top && _reserved.Top < bottom)
+        // Only what the block would actually run into: the windows the pose
+        // opened that stand at this height. A menu level lower down the frame
+        // than the block leaves it the whole width.
+        int inTheWay = int.MaxValue;
+        int pastTheWay = int.MinValue;
+
+        foreach (var area in _reserved)
         {
-            int besideLeft = Mirrored ? Math.Max(left, _reserved.Right + margin) : left;
-            int besideRight = Mirrored ? right : Math.Min(right, _reserved.Left - margin);
+            if (area.IsEmpty || area.Bottom <= top || area.Top >= bottom)
+                continue;
+
+            inTheWay = Math.Min(inTheWay, area.Left);
+            pastTheWay = Math.Max(pastTheWay, area.Right);
+        }
+
+        if (inTheWay != int.MaxValue)
+        {
+            // A pose that stands in the middle of the frame leaves a column on
+            // each side of it. Both are measured and the wider one is kept.
+            //
+            // Only one was measured before - the one the reading starts at - and
+            // that side is regularly the sliver while the other holds the whole
+            // sentence. Searching from one end only cannot see the larger room
+            // behind the obstacle it stopped at.
+            int leftColumn = Math.Min(right, inTheWay - margin) - left;
+            int rightLeft = Math.Max(left, pastTheWay + margin);
+            int rightColumn = right - rightLeft;
+
+            // A tie goes to the side the reading starts at, which is where a
+            // block belongs whenever the pose leaves it a choice.
+            bool takeRight = Mirrored
+                ? rightColumn >= leftColumn
+                : rightColumn > leftColumn;
+
+            int keptLeft = takeRight ? rightLeft : left;
+            int keptWidth = takeRight ? rightColumn : leftColumn;
 
             // Step aside only while a sentence still fits in what is left. The
-            // tray menu now unfolds across most of the set, and the strip beside
-            // it is narrower than a single word of Arabic; the block is better
-            // off keeping the full width and standing above the menu, which is
-            // where it starts from anyway.
+            // tray menu unfolds across most of the set, and the strip beside it
+            // is narrower than a single word of Arabic; the block is better off
+            // keeping the full width and standing above the menu, which is where
+            // it starts from anyway.
             //
             // Widening a collapsed box instead, which is what this did before,
             // kept the edge the obstacle had pushed the text to. The Arabic body
             // was pushed right and then made wide enough to run off the picture.
-            if (besideRight - besideLeft >= ClientSize.Width / 3)
-            {
-                left = besideLeft;
-                right = besideRight;
-            }
+            if (keptWidth >= ClientSize.Width / 3)
+                return (keptLeft, keptWidth);
         }
 
         return (left, right - left);
@@ -717,9 +755,14 @@ internal sealed class StudioSetForm : Form
     {
         int floor = ClientSize.Height - BandHeight - margin;
 
-        bool beside = box.left + box.width <= _reserved.Left || box.left >= _reserved.Right;
-        if (!_reserved.IsEmpty && !beside)
-            floor = Math.Min(floor, _reserved.Top - margin / 2);
+        foreach (var area in _reserved)
+        {
+            bool beside = box.left + box.width <= area.Left || box.left >= area.Right;
+            if (area.IsEmpty || beside)
+                continue;
+
+            floor = Math.Min(floor, area.Top - margin / 2);
+        }
 
         // Never nothing. A pose that reaches almost to the top of the picture
         // would otherwise shrink the text away rather than crowd it.
