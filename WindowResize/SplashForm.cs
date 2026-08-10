@@ -18,8 +18,8 @@ public class SplashForm : Form
     {
         // The content is owner-drawn, so give the form itself a name that
         // screen readers can announce
-        Text = "Window Resize & Capture";
-        AccessibleName = "Window Resize & Capture";
+        Text = App.Name;
+        AccessibleName = App.Name;
 
         FormBorderStyle = FormBorderStyle.None;
         StartPosition = FormStartPosition.CenterScreen;
@@ -76,8 +76,7 @@ public class SplashForm : Form
         g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
 
         // Draw the app icon from the embedded resource
-        var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-        using var stream = assembly.GetManifestResourceStream("WindowResizeCapture.Resources.splash.png");
+        using var stream = App.OpenSplashPicture();
         if (stream != null)
         {
             using var icon = Image.FromStream(stream);
@@ -95,13 +94,13 @@ public class SplashForm : Form
         // Application name
         using var titleFont = new Font("Segoe UI", 18, FontStyle.Bold);
         using var titleBrush = new SolidBrush(Color.White);
-        g.DrawString("Window Resize & Capture", titleFont, titleBrush,
+        g.DrawString(App.Name, titleFont, titleBrush,
             new RectangleF(0, 85, Width, 35), centered);
 
         // Version string
         using var versionFont = new Font("Segoe UI", 10);
         using var versionBrush = new SolidBrush(Color.FromArgb(160, 160, 160));
-        g.DrawString("v1.8.2", versionFont, versionBrush,
+        g.DrawString($"v{App.Version}", versionFont, versionBrush,
             new RectangleF(0, 120, Width, 20), centered);
 
         // Copyright notice

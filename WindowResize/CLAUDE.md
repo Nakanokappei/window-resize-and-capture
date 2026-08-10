@@ -36,13 +36,15 @@ The project works around this with `EnableWindowsTargeting=true` plus a direct
 
 | File | Responsibility |
 |---|---|
-| `Program.cs` | Entry point, single-instance mutex |
+| `Program.cs` | Entry point, single-instance mutex, `--language` |
+| `App.cs` | The app's own name, version and embedded pictures |
+| `CommandLine.cs` | The one argument the product reads: `--language` |
 | `TrayApplicationContext.cs` | Tray icon, menu construction, resize + capture flow |
 | `WindowManager.cs` | Win32 P/Invoke: enumeration, resize, positioning, foreground |
 | `CaptureHelper.cs` | Window capture via `PrintWindow`, scaling, delivery |
 | `SettingsStore.cs` | JSON persistence, launch-at-login, built-in preset list |
 | `SettingsForm.cs` | Settings window (tabs: General, Capture, Behavior) |
-| `SplashForm.cs` | Startup splash, and the place the version string is drawn |
+| `SplashForm.cs` | Startup splash |
 | `PresetSize.cs` | Size model |
 | `Package/` | MSIX manifest and Store assets |
 | `Resources/` | `Strings.resx` (English) plus 15 translations, icon, splash |
@@ -149,11 +151,13 @@ and fails the build otherwise, so bump the manifest before tagging.
 
 ## Release procedure
 
-1. Update the version in **four** places:
-   `WindowResize.csproj` `<Version>`, `SplashForm.cs`, `Package/AppxManifest.xml`,
+1. Update the version in **three** places:
+   `WindowResize.csproj` `<Version>`, `Package/AppxManifest.xml`,
    `installer/WindowResize.iss`.
    Omitting the csproj one makes the executable report `1.0.0.0` in its file
-   properties and in the installed-programs list.
+   properties and in the installed-programs list, and the splash show nothing:
+   `App.Version` reads what the project file declares, so the splash is not a
+   fourth place to edit.
 2. Publish, then build the two local artifacts:
    - `dist/WindowResizeCapture-Windows-v{VERSION}.zip` — exe + README + LICENSE
    - `dist/WindowResizeCapture-Setup-v{VERSION}.exe` — `ISCC.exe installer/WindowResize.iss`
@@ -176,6 +180,10 @@ real upgrade before submitting to the Store.
 - Name things after the UI. The capture feature is "Capture" everywhere —
   label, resource key, property, JSON key — because someone who reads the UI
   should be able to grep for it.
+- The app's name is `App.Name`, read from the project file's `<Product>`. Never
+  write it out again: a sentence containing the name belongs in `Strings.resx`,
+  and the bare name has one home. `SettingsStore.RegistryRunValueName` looks
+  like the name and is not — it is the value Windows keeps for auto-start.
 - Resource keys are PascalCase and mirror the UI wording: `MenuResize`,
   `SettingsWidth`, `AlertResizeFailedTitle`.
 - Menu item text passes through `EscapeMenuMnemonics`: WinForms treats `&` as a
