@@ -86,6 +86,41 @@ internal static class StudioText
         return lines;
     }
 
+    // The same font, or a smaller one, so the whole block fits the box it is
+    // given: wide enough for the longest run that cannot break, and no taller
+    // than the room the pose left above whatever it put on the set.
+    //
+    // The pose comes first. These pictures are here to show the app working, so
+    // the menu and the settings window keep every pixel they need and the
+    // sentence beside them is set smaller until it fits what is left. The
+    // alternative is a sentence that runs underneath the menu or off the
+    // picture, and both of those were tried.
+    internal static Font FitToBox(
+        Graphics canvas, string text, Font font, float width, float height,
+        float lineHeight)
+    {
+        var fitted = FitToWidth(canvas, text, font, width);
+
+        // Take a tenth off and wrap again, until the block stands in the room
+        // it has. Twelve rounds reach a third of the size asked for, which is
+        // further than any copy written for the listing has had to go; stopping
+        // there keeps a box of nearly no height from shrinking the text away to
+        // nothing.
+        for (int round = 0; round < 12; round++)
+        {
+            var lines = Wrap(canvas, text, fitted, width);
+            if (lines.Count * fitted.GetHeight(canvas) * lineHeight <= height)
+                break;
+
+            var smaller = new Font(
+                fitted.FontFamily, fitted.Size * 0.9f, fitted.Style, fitted.Unit);
+            fitted.Dispose();
+            fitted = smaller;
+        }
+
+        return fitted;
+    }
+
     // The same font, or a smaller one when a single run of this text has
     // nowhere to break and nowhere to fit.
     //
@@ -97,7 +132,7 @@ internal static class StudioText
     //
     // Always a new font, so the caller can dispose what it is handed without
     // having to know whether anything was changed.
-    internal static Font FitToWidth(Graphics canvas, string text, Font font, float width)
+    private static Font FitToWidth(Graphics canvas, string text, Font font, float width)
     {
         float widest = WidestRun(canvas, text, font);
 

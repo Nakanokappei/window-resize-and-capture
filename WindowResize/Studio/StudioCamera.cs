@@ -82,7 +82,7 @@ internal static class StudioCamera
 
     // ── Public API ───────────────────────────────────────────────────────
 
-    // Lift the set to the top of the topmost band, asking for nothing else.
+    // Lift a window to the top of the topmost band, asking for nothing else.
     //
     // Show and Activate are not enough. A process nobody clicked to start
     // cannot take the foreground, so the set is left under whatever was
@@ -90,10 +90,20 @@ internal static class StudioCamera
     // before the shutter then reports as explorer. Moving the window in the
     // z-order needs no such permission.
     //
-    // Called before the pose is arranged, never after: the menu and the
-    // settings window are shown later and have to stay above the set.
+    // Called for the set before the pose is arranged, and for the pose's own
+    // windows once it is. Both are topmost, so which of them a person sees is
+    // decided by the order they were last raised in, and the order they were
+    // shown in does not settle that on its own.
     internal static void Raise(IntPtr handle) =>
         SetWindowPos(handle, TopOfTopmost, 0, 0, 0, 0, NoMove | NoSize | NoActivate);
+
+    // Which window a person sees at this point on screen.
+    //
+    // Logical pixels, because the caller is the message loop this app runs on,
+    // where WinForms reports its own windows in the same units. Entering the
+    // aware context here would sample a different point on a scaled display.
+    internal static IntPtr WindowAt(Point point) =>
+        WindowFromPoint(new POINT { X = point.X, Y = point.Y });
 
     // Resize the form until the rectangle a person sees measures exactly
     // width x height physical pixels, then copy that rectangle off the screen

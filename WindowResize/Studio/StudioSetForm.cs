@@ -90,13 +90,31 @@ internal sealed class StudioSetForm : Form
     // Which way the tray menu opens: inward from the edge the tray sits at, so
     // it unfolds into the picture rather than off it.
     //
-    // Both names mean the same side here. A menu laid out right to left reads
-    // these directions in its own terms, so the one that unfolds toward the
-    // middle of the set is called Left either way; asking for Right on a
-    // mirrored set opened it off the left edge of the screen, where the camera
-    // found nothing at all.
-    internal ToolStripDropDownDirection MenuDirection =>
-        ToolStripDropDownDirection.AboveLeft;
+    // These names are not turned round by a language that reads right to left.
+    // They say where the menu goes on screen, so the mirrored set - whose tray
+    // is at the left end of the band - is the one that asks for Right. Asking
+    // for Left there put the menu's own left edge outside the picture and the
+    // camera cut its first column off.
+    internal ToolStripDropDownDirection MenuDirection => Mirrored
+        ? ToolStripDropDownDirection.AboveRight
+        : ToolStripDropDownDirection.AboveLeft;
+
+    // Which way each level below the top one opens.
+    //
+    // Left to itself, a submenu opens to the right of the item it belongs to
+    // and only turns back when the screen edge leaves it no room. The tray
+    // stands close to that edge, so the second level still fitted, the third
+    // did not, and it turned back onto the first - which left the picture with
+    // no top-level menu in it at all. The reader could not see that any of
+    // this starts from the icon in the notification area.
+    //
+    // Naming the direction instead makes every level turn the same way, so the
+    // four panels stand side by side. Windows itself does this whenever a tray
+    // menu opens with a wide submenu near the edge; what it does not do is pick
+    // the turn one level too late.
+    internal ToolStripDropDownDirection SubmenuDirection => Mirrored
+        ? ToolStripDropDownDirection.Right
+        : ToolStripDropDownDirection.Left;
 
     // The point the tray menu should open from: just above this app's own icon
     // in the band, in screen coordinates. Taken from the same slot the icon is
@@ -648,7 +666,8 @@ internal sealed class StudioSetForm : Form
 
         // Settle the size against the box the block ended up with, then lay it
         // out again at that size.
-        using var fitted = StudioText.FitToWidth(canvas, text, font, box.width);
+        using var fitted = StudioText.FitToBox(
+            canvas, text, font, box.width, RoomBelow(margin, top, box), lineHeight);
         lines = StudioText.Wrap(canvas, text, fitted, box.width);
 
         return StudioText.Draw(canvas, lines, fitted, ink, box.left, top,
@@ -666,15 +685,45 @@ internal sealed class StudioSetForm : Form
 
         if (!_reserved.IsEmpty && _reserved.Bottom > top && _reserved.Top < bottom)
         {
-            if (Mirrored)
-                left = Math.Max(left, _reserved.Right + margin);
-            else
-                right = Math.Min(right, _reserved.Left - margin);
+            int besideLeft = Mirrored ? Math.Max(left, _reserved.Right + margin) : left;
+            int besideRight = Mirrored ? right : Math.Min(right, _reserved.Left - margin);
+
+            // Step aside only while a sentence still fits in what is left. The
+            // tray menu now unfolds across most of the set, and the strip beside
+            // it is narrower than a single word of Arabic; the block is better
+            // off keeping the full width and standing above the menu, which is
+            // where it starts from anyway.
+            //
+            // Widening a collapsed box instead, which is what this did before,
+            // kept the edge the obstacle had pushed the text to. The Arabic body
+            // was pushed right and then made wide enough to run off the picture.
+            if (besideRight - besideLeft >= ClientSize.Width / 3)
+            {
+                left = besideLeft;
+                right = besideRight;
+            }
         }
 
-        // Never collapse to nothing: a sliver of text is worse than text that
-        // runs a little close to the window beside it.
-        return (left, Math.Max(right - left, ClientSize.Width / 5));
+        return (left, right - left);
+    }
+
+    // How far down a block of text may run: to the top of the taskbar when the
+    // block has the frame to itself, and only as far as the pose when the pose
+    // is underneath it rather than beside it.
+    //
+    // A block that has already stepped aside keeps the full height, because
+    // what it stepped aside from is no longer in its way.
+    private float RoomBelow(int margin, int top, (int left, int width) box)
+    {
+        int floor = ClientSize.Height - BandHeight - margin;
+
+        bool beside = box.left + box.width <= _reserved.Left || box.left >= _reserved.Right;
+        if (!_reserved.IsEmpty && !beside)
+            floor = Math.Min(floor, _reserved.Top - margin / 2);
+
+        // Never nothing. A pose that reaches almost to the top of the picture
+        // would otherwise shrink the text away rather than crowd it.
+        return Math.Max(floor - top, ClientSize.Height / 20f);
     }
 
     // The margin the whole picture keeps: the height of the taskbar band, so
@@ -719,9 +768,15 @@ internal sealed class StudioSetForm : Form
     // and settings window in these pictures are the real ones, and the note is
     // what keeps the difference honest.
     //
-    // It sits in the bottom corner the reading starts at, just above the band,
-    // small and quiet. A listing has to say what it shows without competing with
-    // it.
+    // It sits in the top corner the reading ends at - the right on a
+    // left-to-right set, the left on a mirrored one - inside a strip as tall as
+    // the taskbar, which is the margin the picture keeps all round. Small and
+    // quiet: a listing has to say what it shows without competing with it.
+    //
+    // The bottom corner it had before is the corner the tray menu unfolds into.
+    // Four levels deep, the menu reached across the note and cut it off in the
+    // middle of a word. Up here nothing else is drawn in any language, because
+    // the headline starts where this strip ends.
     private void PaintNotice(Graphics canvas)
     {
         string notice = StudioCopy.Notice(_language);
@@ -734,18 +789,21 @@ internal sealed class StudioSetForm : Form
         using var ink = new SolidBrush(Color.FromArgb(150, 255, 255, 255));
         using var format = new StringFormat(StringFormat.GenericTypographic)
         {
-            // Near is the side the reading starts at, which the reversed
-            // direction moves to the right on its own.
-            Alignment = StringAlignment.Near,
+            // Far is the side the reading ends at, which the reversed direction
+            // moves to the left on its own.
+            Alignment = StringAlignment.Far,
         };
 
         if (Mirrored)
             format.FormatFlags |= StringFormatFlags.DirectionRightToLeft;
 
+        // Centered in the top margin. That margin is the band's height, so the
+        // note stands in a strip the same depth as the taskbar at the other end
+        // of the picture.
         float height = font.GetHeight(canvas);
         canvas.DrawString(notice, font, ink, new RectangleF(
             margin,
-            ClientSize.Height - BandHeight - margin / 2f - height,
+            (margin - height) / 2f,
             ClientSize.Width - margin * 2,
             height + 1), format);
     }
