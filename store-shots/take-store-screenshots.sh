@@ -54,19 +54,28 @@ if [ ! -f "$exe" ]; then
   exit 1
 fi
 
-# A build with nothing to do leaves the old timestamp, so being newer than
-# every source file is what says the binary holds the current code.
+# A build with nothing to do leaves the old timestamps, so being newer than
+# every source file is what says the build holds the current code.
+#
+# Against the newest thing the build wrote, not against the executable. The
+# executable is only the launcher: MSBuild rewrites it when the main assembly
+# changes and leaves it alone when only a translation changes, so a Vietnamese
+# fix that landed in a satellite assembly was reported here as a build that did
+# not take, on the strength of a file nobody had asked it to rewrite.
+newestBuilt="$(find "$(dirname "$exe")" -type f \( -name '*.dll' -o -name '*.exe' \) \
+  -printf '%T@ %p\n' | sort -n | tail -1 | cut -d' ' -f2-)"
+
 newerSource="$(find "$repo/WindowResize" \
   -name bin -prune -o -name obj -prune -o \
-  -type f -newer "$exe" -print -quit)"
+  -type f -newer "$newestBuilt" -print -quit)"
 
 if [ -n "$newerSource" ]; then
-  echo "$(basename "$exe") is older than $newerSource - the build did not take" >&2
+  echo "$newerSource is newer than anything the build wrote - the build did not take" >&2
   exit 1
 fi
 
 echo "Photographing $exe"
-echo "  built $(date -r "$exe" '+%Y-%m-%d %H:%M:%S')"
+echo "  built $(date -r "$newestBuilt" '+%Y-%m-%d %H:%M:%S') ($(basename "$newestBuilt"))"
 
 # ── The shot list ──────────────────────────────────────────────────────────
 
