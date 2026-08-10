@@ -16,6 +16,13 @@ internal sealed class StudioRequest
     internal Size Size { get; init; } = StudioViews.DefaultSize;
     internal int SettleMs { get; init; } = StudioViews.DefaultSettleMs;
     internal string OutputPath { get; init; } = "";
+
+    // Marketing copy given on the command line, which wins over the files in
+    // store-shots/copy. Wording is tried and thrown away many times before it
+    // is settled; having to edit a file for each attempt makes that slow.
+    // Two spaces in a row mark a place the text may break.
+    internal string Headline { get; init; } = "";
+    internal string Body { get; init; } = "";
 }
 
 // Reads the studio's command line.
@@ -80,6 +87,8 @@ internal static class StudioCommandLine
             return false;
 
         // Everything after --screenshot is key=value for this one picture.
+        // The value keeps its spaces: two in a row are how the copy marks a
+        // place it may break, and trimming them would erase the instruction.
         var settings = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         for (int index = shootAt + 1; index < args.Length; index++)
         {
@@ -105,6 +114,8 @@ internal static class StudioCommandLine
             Size = size,
             SettleMs = settle,
             OutputPath = settings.GetValueOrDefault("out", "studio-shot.png"),
+            Headline = settings.GetValueOrDefault("headline", ""),
+            Body = settings.GetValueOrDefault("body", ""),
         };
         return true;
     }

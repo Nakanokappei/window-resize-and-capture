@@ -42,7 +42,12 @@ internal sealed class StudioSetForm : Form
     internal StudioSetForm(StudioRequest request)
     {
         _language = request.Language;
-        _copy = StudioCopy.Load(request.Language);
+        // Copy given on the command line wins, so a line can be tried without
+        // editing a file first.
+        var written = StudioCopy.Load(request.Language);
+        _copy = new StudioCopy(
+            string.IsNullOrEmpty(request.Headline) ? written.Headline : request.Headline,
+            string.IsNullOrEmpty(request.Body) ? written.Body : request.Body);
         _shell = StudioShell.Read();
         _trayIcon = LoadTrayIcon();
 
@@ -503,34 +508,63 @@ internal sealed class StudioSetForm : Form
 
     private Rectangle _reserved = Rectangle.Empty;
 
+    // The box one block of text gets: as wide as the set allows, less the
+    // same margin on the right that it has on the left, and pulled in further
+    // where the pose has put something beside it.
+    //
+    // Measured twice. How tall the text stands depends on how wide the box
+    // is, and whether the obstacle is beside the text depends on how tall it
+    // stands, so the first pass guesses with the full width and the second
+    // settles it.
+    private float DrawBlock(
+        Graphics canvas, string text, Font font, Brush ink, int margin, int top)
+    {
+        if (string.IsNullOrEmpty(text))
+            return 0;
+
+        int width = WidthBeside(margin, top, top + (int)font.GetHeight(canvas));
+        var lines = StudioText.Wrap(canvas, text, font, width);
+
+        float height = lines.Count * font.GetHeight(canvas) * 1.15f;
+        width = WidthBeside(margin, top, top + (int)Math.Ceiling(height));
+        lines = StudioText.Wrap(canvas, text, font, width);
+
+        return StudioText.Draw(canvas, lines, font, ink, margin, top,
+            width, _language.TextInfo.IsRightToLeft);
+    }
+
+    private int WidthBeside(int margin, int top, int bottom)
+    {
+        int right = ClientSize.Width - margin;
+
+        if (!_reserved.IsEmpty && _reserved.Bottom > top && _reserved.Top < bottom)
+            right = Math.Min(right, _reserved.Left - margin);
+
+        // Never collapse to nothing: a sliver of text is worse than text that
+        // runs a little close to the window beside it.
+        return Math.Max(right - margin, ClientSize.Width / 5);
+    }
+
     private void PaintMarketingLine(Graphics canvas)
     {
         if (string.IsNullOrEmpty(_copy.Headline))
             return;
 
         int margin = ClientSize.Width / 16;
-        int wrapWidth = ClientSize.Width / 2;
-
-        // Only the part of the reserved area that reaches up into the text's
-        // own band matters; something low on the set is no obstacle.
-        if (!_reserved.IsEmpty && _reserved.Top < ClientSize.Height / 2)
-        {
-            int room = _reserved.Left - margin * 2;
-            if (room > margin)
-                wrapWidth = Math.Min(wrapWidth, room);
-        }
 
         using var headlineFont = new Font("Segoe UI", ClientSize.Height / 26f, FontStyle.Bold);
         using var bodyFont = new Font("Segoe UI", ClientSize.Height / 52f);
         using var headlineInk = new SolidBrush(Color.White);
         using var bodyInk = new SolidBrush(Color.FromArgb(214, 224, 238));
 
-        canvas.DrawString(_copy.Headline, headlineFont, headlineInk,
-            new RectangleF(margin, margin, wrapWidth, ClientSize.Height / 3f));
+        // Each block runs as far right as it can. What stops it is whatever
+        // the pose put on the set, and only where that thing actually sits
+        // beside the block: a menu low in the frame leaves the headline the
+        // full width and only narrows the paragraph beneath it.
+        float used = DrawBlock(canvas, _copy.Headline, headlineFont, headlineInk, margin, margin);
 
-        float used = canvas.MeasureString(_copy.Headline, headlineFont, wrapWidth).Height;
-        canvas.DrawString(_copy.Body, bodyFont, bodyInk,
-            new RectangleF(margin, margin + used + 12, wrapWidth, ClientSize.Height / 3f));
+        int bodyTop = (int)(margin + used + ClientSize.Height / 90f);
+        DrawBlock(canvas, _copy.Body, bodyFont, bodyInk, margin, bodyTop);
     }
 
     // Measured on a real taskbar: a pinned icon is 47 pixels in a band of 96.
@@ -545,7 +579,10 @@ internal sealed class StudioSetForm : Form
     // The menu grows less than the desktop around it. At the full doubling it
     // filled the frame and left no room for the marketing line, and a menu
     // four levels deep already stands tall on its own.
-    internal const float MenuMagnification = 1.5f;
+    // Less again than the set. At one and a half the menu's own icons were
+    // clipped by the rows they sit in, because a row grows with its font while
+    // the image beside it does not.
+    internal const float MenuMagnification = 1.25f;
 
     // The real taskbar's height, scaled to this picture. The screen is wider
     // than the picture, so a band drawn at its measured pixel height would

@@ -36,18 +36,49 @@ than spread through the UI.
 
 ## Running a shoot
 
+**Run these from a shell, not from PowerShell's `Start-Process`.** The app is a
+WinExe, so `--list-views` prints to the console it was started from and shows
+nothing when there is none. `Start-Process` also joins its argument list with
+spaces, which cuts a headline off at its first word and a path off at its
+first folder with a space in it. Both failures look like app bugs and are not.
+
 ```bash
 exe=WindowResize/bin/Release/net8.0-windows10.0.17763.0/WindowResizeCapture.exe
 
 # What the app can hold, and in which languages. Never keep a second copy of this list.
 "$exe" --list-views
 
-# One picture.
-"$exe" --language ja --screenshot view=tray-menu out=store-shots/out/store-tray-menu-ja.png
+# One picture. Copy given here wins over the files in copy/.
+"$exe" --language ja --screenshot view=choose-a-size \
+  "headline=ウィンドウのサイズを、いつでも同じに。" \
+  "out=store-shots/out/store-choose-a-size-ja.png"
 ```
 
 **Do not touch the machine while a shoot runs.** The picture is a copy of the
 screen, so a notification or another window taking the foreground lands in it.
+
+## Writing the copy
+
+A space is where a line may break. English already has them between its words.
+Japanese, Chinese and Korean have none, so the app puts one after every clause
+mark itself - nothing has to be written into the copy, and an unused break
+disappears rather than leaving a gap.
+
+**Thai is the exception.** It separates neither its words with spaces nor its
+sentences with a mark, so the only breaks it gets are the ones its own
+convention puts between phrases. Copy written in Thai has to carry them, or a
+line runs on until it leaves the picture. Finding word boundaries there needs a
+dictionary, which is far more than this is worth.
+
+Arabic is laid out from the right, which the app does on its own from the
+culture.
+
+## Checking a language nobody here reads
+
+Point a phone's camera translation at the picture. If it can read the text
+back, the shaping is right - Arabic that has lost its letter joining is not
+recognized as words at all, and neither is Devanagari whose marks have come
+apart. It catches in seconds what an unfamiliar script hides.
 
 ## Rules that matter here
 
