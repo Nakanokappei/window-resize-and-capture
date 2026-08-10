@@ -37,7 +37,7 @@ public class SettingsForm : Form
     // readers (a plain Button has no toggle state).
     private CheckBox _bringToFrontCheck = null!;
     private CheckBox _moveToMainScreenCheck = null!;
-    private CheckBox[] _positionButtons = null!;
+    private CheckBox[] _positionTiles = null!;
 
     // Geometric glyphs for the 3x3 position grid (TL, T, TR, L, C, R, BL, B,
     // BR): filled triangles pointing/leaning toward each edge or corner, and
@@ -103,11 +103,14 @@ public class SettingsForm : Form
         // in code compares 192 against 192 and scales by one. The system font
         // already grows with the display, which is what left the text too big
         // for its controls; only the bounds need this.
-        float scale = DeviceDpi / 96f;
-        if (scale > 1f)
-            Scale(new SizeF(scale, scale));
-
+        if (DesignScale > 1f)
+            Scale(new SizeF(DesignScale, DesignScale));
     }
+
+    // How much larger the display draws things than the 96 DPI every number in
+    // this form is written for. Anything measured from the running font has to
+    // be divided by this to become a design number.
+    private float DesignScale => Math.Max(DeviceDpi / 96f, 1f);
 
     // General tab: built-in preset list, custom size editor, launch at login.
     private TabPage BuildGeneralTab()
@@ -230,33 +233,46 @@ public class SettingsForm : Form
         tab.Controls.Add(customGroup);
 
         // ── Size by client area ──
-        _resizeClientAreaCheck = new CheckBox
-        {
-            Text = Strings.SettingsResizeClientArea,
-            Location = new Point(12, 274),
-            AutoSize = true,
-            Checked = _store.ResizeClientArea
-        };
-        _resizeClientAreaCheck.CheckedChanged += (_, _) =>
-        {
-            _store.ResizeClientArea = _resizeClientAreaCheck.Checked;
-            _store.SaveAndNotify();
-        };
-        tab.Controls.Add(_resizeClientAreaCheck);
+        _resizeClientAreaCheck = AddSettingCheck(
+            tab, Strings.SettingsResizeClientArea, new Point(12, 274),
+            _store.ResizeClientArea,
+            on =>
+            {
+                _store.ResizeClientArea = on;
+                _store.SaveAndNotify();
+            });
 
         // ── Launch at login ──
-        _launchAtLoginCheck = new CheckBox
-        {
-            Text = Strings.SettingsLaunchAtLogin,
-            Location = new Point(12, 300),
-            AutoSize = true,
-            Checked = _store.LaunchAtLogin
-        };
-        _launchAtLoginCheck.CheckedChanged += (_, _) =>
-            _store.LaunchAtLogin = _launchAtLoginCheck.Checked;
-        tab.Controls.Add(_launchAtLoginCheck);
+        // The only setting that is not kept in the settings file, so it is
+        // also the only one that does not save and notify: writing it registers
+        // the app with Windows itself.
+        _launchAtLoginCheck = AddSettingCheck(
+            tab, Strings.SettingsLaunchAtLogin, new Point(12, 300),
+            _store.LaunchAtLogin,
+            on => _store.LaunchAtLogin = on);
 
         return tab;
+    }
+
+    // One setting shown as a check box: labelled, placed, filled in from the
+    // store and writing straight back to it.
+    //
+    // Every check box on these three tabs is this same shape. Written out once
+    // per setting, the shape is what a new setting is copied from, and the
+    // copy that forgets to save looks exactly like the ones that do not.
+    private static CheckBox AddSettingCheck(
+        Control parent, string label, Point at, bool value, Action<bool> apply)
+    {
+        var check = new CheckBox
+        {
+            Text = label,
+            Location = at,
+            AutoSize = true,
+            Checked = value
+        };
+        check.CheckedChanged += (_, _) => apply(check.Checked);
+        parent.Controls.Add(check);
+        return check;
     }
 
     // Capture tab: master toggle plus a panel of destination options
@@ -266,21 +282,16 @@ public class SettingsForm : Form
         var tab = new TabPage(Strings.SettingsCapture);
 
         // Master capture toggle
-        _captureEnabledCheck = new CheckBox
-        {
-            Text = Strings.SettingsCaptureEnabled,
-            Location = new Point(12, 12),
-            AutoSize = true,
-            Checked = _store.CaptureEnabled
-        };
-        _captureEnabledCheck.CheckedChanged += (_, _) =>
-        {
-            _store.CaptureEnabled = _captureEnabledCheck.Checked;
-            _store.SaveAndNotify();
-            SynchronizeCaptureControls();
-            _captureOptionsPanel.Visible = _store.CaptureEnabled;
-        };
-        tab.Controls.Add(_captureEnabledCheck);
+        _captureEnabledCheck = AddSettingCheck(
+            tab, Strings.SettingsCaptureEnabled, new Point(12, 12),
+            _store.CaptureEnabled,
+            on =>
+            {
+                _store.CaptureEnabled = on;
+                _store.SaveAndNotify();
+                SynchronizeCaptureControls();
+                _captureOptionsPanel.Visible = _store.CaptureEnabled;
+            });
 
         // Panel for capture destination options, hidden when disabled
         _captureOptionsPanel = new Panel
@@ -293,29 +304,36 @@ public class SettingsForm : Form
         int panelY = 0;
 
         // Save-to-file checkbox
-        _captureSaveToFileCheck = new CheckBox
-        {
-            Text = Strings.SettingsCaptureSaveToFile,
-            Location = new Point(28, panelY),
-            AutoSize = true,
-            Checked = _store.CaptureSaveToFile
-        };
-        _captureSaveToFileCheck.CheckedChanged += (_, _) =>
-        {
-            _store.CaptureSaveToFile = _captureSaveToFileCheck.Checked;
-            _store.SaveAndNotify();
-            _chooseFolderButton.Enabled = _store.CaptureSaveToFile;
-            SynchronizeCaptureControls();
-        };
-        _captureOptionsPanel.Controls.Add(_captureSaveToFileCheck);
+        _captureSaveToFileCheck = AddSettingCheck(
+            _captureOptionsPanel, Strings.SettingsCaptureSaveToFile, new Point(28, panelY),
+            _store.CaptureSaveToFile,
+            on =>
+            {
+                _store.CaptureSaveToFile = on;
+                _store.SaveAndNotify();
+                _chooseFolderButton.Enabled = _store.CaptureSaveToFile;
+                SynchronizeCaptureControls();
+            });
         panelY += 26;
 
         // Folder chooser button and path label
+        //
+        // The button is measured here rather than left to AutoSize. Every number
+        // in this form is written for 96 DPI and the whole layout is scaled once
+        // at the end, but a control that sizes itself has already measured the
+        // display's own font, and scaling that again drew this button twice the
+        // size of the ones beside it. Measuring the text and dividing the
+        // display's scaling back out puts it in the same units as its
+        // neighbours, and still fits whichever language labels it.
+        string chooseFolder = Strings.SettingsCaptureChooseFolder;
+        int chooseFolderWidth =
+            (int)(TextRenderer.MeasureText(chooseFolder, Font).Width / DesignScale) + 20;
+
         _chooseFolderButton = new Button
         {
-            Text = Strings.SettingsCaptureChooseFolder,
+            Text = chooseFolder,
             Location = new Point(44, panelY),
-            AutoSize = true,
+            Size = new Size(chooseFolderWidth, 28),
             Enabled = _store.CaptureSaveToFile
         };
         _chooseFolderButton.Click += OnChooseCaptureFolder;
@@ -323,48 +341,44 @@ public class SettingsForm : Form
 
         // GrayText keeps at least AA contrast in the default theme and
         // adapts to high-contrast themes, unlike a hard-coded gray
+        //
+        // The width is what is left of the panel rather than a fixed 220: the
+        // button beside it is as wide as its own label, so in a language with a
+        // longer word for "Choose Folder" a fixed width ran the path off the
+        // panel and cut it without even an ellipsis.
         _folderPathLabel = new Label
         {
             Text = FormatFolderPath(),
             Location = new Point(_chooseFolderButton.Right + 8, panelY + 4),
-            Size = new Size(220, 20),
+            Size = new Size(
+                Math.Max(_captureOptionsPanel.Width - _chooseFolderButton.Right - 16, 120), 20),
             ForeColor = SystemColors.GrayText,
             AutoEllipsis = true
         };
         _captureOptionsPanel.Controls.Add(_folderPathLabel);
-        panelY += 30;
+        panelY += _chooseFolderButton.Height + 2;
 
         // Copy-to-clipboard checkbox
-        _captureCopyToClipboardCheck = new CheckBox
-        {
-            Text = Strings.SettingsCaptureCopyToClipboard,
-            Location = new Point(28, panelY),
-            AutoSize = true,
-            Checked = _store.CaptureCopyToClipboard
-        };
-        _captureCopyToClipboardCheck.CheckedChanged += (_, _) =>
-        {
-            _store.CaptureCopyToClipboard = _captureCopyToClipboardCheck.Checked;
-            _store.SaveAndNotify();
-            SynchronizeCaptureControls();
-        };
-        _captureOptionsPanel.Controls.Add(_captureCopyToClipboardCheck);
+        _captureCopyToClipboardCheck = AddSettingCheck(
+            _captureOptionsPanel, Strings.SettingsCaptureCopyToClipboard, new Point(28, panelY),
+            _store.CaptureCopyToClipboard,
+            on =>
+            {
+                _store.CaptureCopyToClipboard = on;
+                _store.SaveAndNotify();
+                SynchronizeCaptureControls();
+            });
         panelY += 26;
 
         // Capture client area only
-        _captureClientAreaCheck = new CheckBox
-        {
-            Text = Strings.SettingsCaptureClientArea,
-            Location = new Point(28, panelY),
-            AutoSize = true,
-            Checked = _store.CaptureClientArea
-        };
-        _captureClientAreaCheck.CheckedChanged += (_, _) =>
-        {
-            _store.CaptureClientArea = _captureClientAreaCheck.Checked;
-            _store.SaveAndNotify();
-        };
-        _captureOptionsPanel.Controls.Add(_captureClientAreaCheck);
+        _captureClientAreaCheck = AddSettingCheck(
+            _captureOptionsPanel, Strings.SettingsCaptureClientArea, new Point(28, panelY),
+            _store.CaptureClientArea,
+            on =>
+            {
+                _store.CaptureClientArea = on;
+                _store.SaveAndNotify();
+            });
         tab.Controls.Add(_captureOptionsPanel);
 
         return tab;
@@ -376,34 +390,24 @@ public class SettingsForm : Form
         var tab = new TabPage(Strings.SettingsBehavior);
 
         // Bring to front
-        _bringToFrontCheck = new CheckBox
-        {
-            Text = Strings.SettingsBringToFront,
-            Location = new Point(12, 12),
-            AutoSize = true,
-            Checked = _store.BringToFront
-        };
-        _bringToFrontCheck.CheckedChanged += (_, _) =>
-        {
-            _store.BringToFront = _bringToFrontCheck.Checked;
-            _store.SaveAndNotify();
-        };
-        tab.Controls.Add(_bringToFrontCheck);
+        _bringToFrontCheck = AddSettingCheck(
+            tab, Strings.SettingsBringToFront, new Point(12, 12),
+            _store.BringToFront,
+            on =>
+            {
+                _store.BringToFront = on;
+                _store.SaveAndNotify();
+            });
 
         // Move to main screen
-        _moveToMainScreenCheck = new CheckBox
-        {
-            Text = Strings.SettingsMoveToMainScreen,
-            Location = new Point(12, 40),
-            AutoSize = true,
-            Checked = _store.MoveToMainScreen
-        };
-        _moveToMainScreenCheck.CheckedChanged += (_, _) =>
-        {
-            _store.MoveToMainScreen = _moveToMainScreenCheck.Checked;
-            _store.SaveAndNotify();
-        };
-        tab.Controls.Add(_moveToMainScreenCheck);
+        _moveToMainScreenCheck = AddSettingCheck(
+            tab, Strings.SettingsMoveToMainScreen, new Point(12, 40),
+            _store.MoveToMainScreen,
+            on =>
+            {
+                _store.MoveToMainScreen = on;
+                _store.SaveAndNotify();
+            });
 
         // Position-after-resize label with a 3x3 tile grid below it
         tab.Controls.Add(new Label
@@ -423,9 +427,9 @@ public class SettingsForm : Form
         };
 
         int gridTop = 96;
-        int buttonSize = 32;
-        int buttonGap = 2;
-        _positionButtons = new CheckBox[9];
+        int tileSize = 32;
+        int tileGap = 2;
+        _positionTiles = new CheckBox[9];
 
         var glyphFont = new Font("Segoe UI Symbol", 10f);
         for (int i = 0; i < 9; i++)
@@ -436,14 +440,14 @@ public class SettingsForm : Form
             // Checked on every tile (only one may be active).
             int col = i % 3;
             int row = i / 3;
-            var btn = new CheckBox
+            var tile = new CheckBox
             {
                 Appearance = Appearance.Button,
                 AutoCheck = false,
-                Size = new Size(buttonSize, buttonSize),
+                Size = new Size(tileSize, tileSize),
                 Location = new Point(
-                    12 + col * (buttonSize + buttonGap),
-                    gridTop + row * (buttonSize + buttonGap)),
+                    12 + col * (tileSize + tileGap),
+                    gridTop + row * (tileSize + tileGap)),
                 FlatStyle = FlatStyle.Flat,
                 Tag = PositionOrder[i],
                 Font = glyphFont,
@@ -452,13 +456,13 @@ public class SettingsForm : Form
                 Padding = Padding.Empty,
                 AccessibleName = positionNames[i]
             };
-            btn.FlatAppearance.BorderSize = 1;
-            btn.Click += OnPositionButtonClick;
-            _positionButtons[i] = btn;
-            tab.Controls.Add(btn);
+            tile.FlatAppearance.BorderSize = 1;
+            tile.Click += OnPositionTileClick;
+            _positionTiles[i] = tile;
+            tab.Controls.Add(tile);
         }
 
-        RefreshPositionButtonHighlights();
+        RefreshPositionTiles();
         return tab;
     }
 
@@ -510,40 +514,44 @@ public class SettingsForm : Form
     // optional user-supplied name.
     private void OnAddPreset(object? sender, EventArgs e)
     {
-        if (int.TryParse(_widthBox.Text, out int w) &&
-            int.TryParse(_heightBox.Text, out int h) &&
-            w > 0 && h > 0)
+        // A size has to be two positive numbers. Anything else leaves the
+        // boxes as they are, so the typing is not thrown away.
+        if (!int.TryParse(_widthBox.Text, out int width) ||
+            !int.TryParse(_heightBox.Text, out int height) ||
+            width <= 0 || height <= 0)
         {
-            string name = _nameBox.Text.Trim();
-            _store.AddSize(new PresetSize(w, h, name.Length > 0 ? name : null));
-            _widthBox.Clear();
-            _heightBox.Clear();
-            _nameBox.Clear();
-            RefreshCustomList();
+            return;
         }
+
+        string name = _nameBox.Text.Trim();
+        _store.AddSize(new PresetSize(width, height, name.Length > 0 ? name : null));
+        _widthBox.Clear();
+        _heightBox.Clear();
+        _nameBox.Clear();
+        RefreshCustomList();
     }
 
     // Remove the currently selected custom preset.
     private void OnRemovePreset(object? sender, EventArgs e)
     {
         int index = _customList.SelectedIndex;
-        if (index >= 0 && index < _store.CustomSizes.Count)
-        {
-            _store.RemoveSize(_store.CustomSizes[index]);
-            RefreshCustomList();
-        }
+        if (index < 0 || index >= _store.CustomSizes.Count)
+            return;
+
+        _store.RemoveSize(_store.CustomSizes[index]);
+        RefreshCustomList();
     }
 
     // Toggle the selected snap position. Clicking the already-active
     // position clears it (no snap).
-    private void OnPositionButtonClick(object? sender, EventArgs e)
+    private void OnPositionTileClick(object? sender, EventArgs e)
     {
-        if (sender is not CheckBox btn || btn.Tag is not WindowPosition pos)
+        if (sender is not CheckBox tile || tile.Tag is not WindowPosition position)
             return;
 
-        _store.Position = (_store.Position == pos) ? null : pos;
+        _store.Position = (_store.Position == position) ? null : position;
         _store.SaveAndNotify();
-        RefreshPositionButtonHighlights();
+        RefreshPositionTiles();
     }
 
     // Open a folder browser to choose the capture save location.
@@ -577,15 +585,15 @@ public class SettingsForm : Form
 
     // Highlight the currently selected position tile and reset the rest.
     // Checked feeds the UIA toggle state; the colours are the visual cue.
-    private void RefreshPositionButtonHighlights()
+    private void RefreshPositionTiles()
     {
-        foreach (var btn in _positionButtons)
+        foreach (var tile in _positionTiles)
         {
-            if (btn.Tag is not WindowPosition pos) continue;
-            bool selected = _store.Position == pos;
-            btn.Checked = selected;
-            btn.BackColor = selected ? SelectedTileColor : SystemColors.Control;
-            btn.ForeColor = selected ? Color.White : SystemColors.ControlText;
+            if (tile.Tag is not WindowPosition position) continue;
+            bool selected = _store.Position == position;
+            tile.Checked = selected;
+            tile.BackColor = selected ? SelectedTileColor : SystemColors.Control;
+            tile.ForeColor = selected ? Color.White : SystemColors.ControlText;
         }
     }
 
