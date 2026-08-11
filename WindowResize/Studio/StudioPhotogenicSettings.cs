@@ -29,13 +29,21 @@ internal static class StudioPhotogenicSettings
         {
             // The General tab is mostly the two size lists, and the custom one
             // is empty until somebody adds a size. Two sizes show what the list
-            // is for. They carry no name, because a name shown in sixteen
-            // languages would be sixteen more strings to translate for a
-            // picture, and the dimensions are what the feature is about.
+            // is for, and both carry a name: the listing beside this picture
+            // says a size can be named to tell it from another, and two unnamed
+            // rows of numbers were showing the opposite.
+            //
+            // Named after what these sizes are called, so the name means
+            // something to a reader in every language. Preset names are not
+            // translated - they are the same word in the product's sixteen
+            // languages - so a name costs nothing to show here.
+            //
+            // Neither is a built-in size, which is what makes them plausible as
+            // somebody's own additions.
             case "settings-general":
                 store.CustomSizes.Clear();
-                store.CustomSizes.Add(new PresetSize(1512, 982));
-                store.CustomSizes.Add(new PresetSize(2048, 1280));
+                store.CustomSizes.Add(new PresetSize(640, 480, "VGA"));
+                store.CustomSizes.Add(new PresetSize(1600, 1200, "UXGA"));
                 store.ResizeClientArea = false;
                 break;
 

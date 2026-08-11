@@ -192,7 +192,10 @@ public partial class SettingsStore
         new(1680, 1050, "WSXGA+"),
         new(1600, 900,  "HD+"),
         new(1440, 900,  "WXGA+"),
-        new(1366, 768,  "WXGA"),
+        // FWXGA, not WXGA. WXGA is 1280x800 (and 1280x768); 1366x768 is the
+        // "full" one. The wrong name here would have shipped a size list that
+        // disagrees with every table a user can look this up in.
+        new(1366, 768,  "FWXGA"),
         new(1280, 1024, "SXGA"),
         new(1280, 720,  "HD"),
         new(1024, 768,  "XGA"),
