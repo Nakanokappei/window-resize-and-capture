@@ -55,8 +55,20 @@ public class TrayApplicationContext : ApplicationContext
     // ── Menu construction ────────────────────────────────────────────────
 
     // An empty menu, laid out for the language the app is showing. In a language
-    // that reads right to left the items align that way and a submenu unfolds
-    // toward the left, which is the direction Windows opens its own menus in.
+    // that reads right to left the items align that way, the image column moves
+    // to the right, and the mark that says an item has a submenu moves to the
+    // left of it and points that way.
+    //
+    // The mark belongs on the left even where the submenu opens to the right,
+    // which is what happens on an Arabic desktop: the taskbar is mirrored, so the
+    // tray is at the left end of it and a menu opened there unfolds rightward.
+    // Windows' own menus were checked on Arabic Windows - the desktop's context
+    // menu and Explorer's "open with" - and both put it on the left. Do not
+    // "correct" it: a picture of this menu from 1.8.1, before any of this, shows
+    // it on the right because that build laid the menu out left to right.
+    //
+    // WinForms does all of it from the property below. Nothing here places the
+    // mark.
     private static ContextMenuStrip NewMenu() => new()
     {
         ShowImageMargin = true,
