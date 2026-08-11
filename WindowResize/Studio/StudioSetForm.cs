@@ -216,8 +216,43 @@ internal sealed class StudioSetForm : Form
         var instant = new DateTime(
             today.Year, today.Month, today.Day, ClockHour, ClockMinute, 0);
 
-        return (instant.ToString(_language.DateTimeFormat.ShortTimePattern, _language),
-                instant.ToString(_language.DateTimeFormat.ShortDatePattern, _language));
+        return (
+            InTheLanguagesDigits(
+                instant.ToString(_language.DateTimeFormat.ShortTimePattern, _language)),
+            InTheLanguagesDigits(
+                instant.ToString(_language.DateTimeFormat.ShortDatePattern, _language)));
+    }
+
+    // The clock written in the digits the language counts with.
+    //
+    // Formatting a date in .NET always writes the ASCII digits and leaves the
+    // substitution to whoever draws the string, which on a real desktop is the
+    // shell. So the studio has to do it, or the Arabic picture shows a clock no
+    // Arabic desktop shows: 10:08 where Windows draws ١٠:٠٨, verified against a
+    // machine with both its language and its regional format set to Arabic.
+    //
+    // Arabic is the only one of the sixteen that asks. Every other culture reports
+    // no substitution and passes through unchanged - including Hindi and Thai,
+    // whose scripts have digits of their own that Windows does not put in the
+    // clock.
+    private string InTheLanguagesDigits(string text)
+    {
+        var counting = _language.NumberFormat;
+        if (counting.DigitSubstitution == DigitShapes.None)
+            return text;
+
+        var digits = counting.NativeDigits;
+        var written = new System.Text.StringBuilder(text.Length);
+
+        foreach (char letter in text)
+        {
+            if (letter is >= '0' and <= '9')
+                written.Append(digits[letter - '0']);
+            else
+                written.Append(letter);
+        }
+
+        return written.ToString();
     }
 
     // The date is normally the wider of the two lines, but not in every
@@ -382,26 +417,60 @@ internal sealed class StudioSetForm : Form
         // A magnifier drawn from a circle and a handle, so no glyph font has
         // to be present on the machine taking the picture. It stands 0.42 of
         // the pill, which is 0.26 of the band, as the real one does.
+        //
+        // It sits at the end the reading starts from, and turns round with it: on
+        // a mirrored taskbar it stands at the right of the pill with its handle
+        // running down to the left, which is how a real Arabic taskbar draws it.
+        // Left where a left-to-right desktop puts it, the pill was the one part of
+        // the mirrored band still facing the other way.
         int glyph = box.Height * 42 / 100;
-        int glyphLeft = box.X + box.Height / 3;
         int glyphTop = box.Y + (box.Height - glyph) / 2;
+        int glyphLeft = Mirrored
+            ? box.Right - box.Height / 3 - glyph
+            : box.X + box.Height / 3;
+
         using var ink = new Pen(Color.FromArgb(96, 96, 96), Math.Max(glyph / 8f, 1.5f));
-        canvas.DrawEllipse(ink, glyphLeft, glyphTop, glyph * 3 / 4, glyph * 3 / 4);
-        canvas.DrawLine(ink,
-            glyphLeft + glyph * 5 / 8, glyphTop + glyph * 5 / 8,
-            glyphLeft + glyph, glyphTop + glyph);
+
+        if (Mirrored)
+        {
+            canvas.DrawEllipse(
+                ink, glyphLeft + glyph / 4, glyphTop, glyph * 3 / 4, glyph * 3 / 4);
+            canvas.DrawLine(ink,
+                glyphLeft + glyph * 3 / 8, glyphTop + glyph * 5 / 8,
+                glyphLeft, glyphTop + glyph);
+        }
+        else
+        {
+            canvas.DrawEllipse(ink, glyphLeft, glyphTop, glyph * 3 / 4, glyph * 3 / 4);
+            canvas.DrawLine(ink,
+                glyphLeft + glyph * 5 / 8, glyphTop + glyph * 5 / 8,
+                glyphLeft + glyph, glyphTop + glyph);
+        }
 
         // The commonest ink color inside the real search box is rgb(93,94,95).
         // An earlier reading of rgb(48,61,64) came from taking the darkest
         // pixel, which belongs to the magnifier rather than to the letters.
         using var text = new SolidBrush(Color.FromArgb(93, 94, 95));
-        var textArea = new RectangleF(
-            glyphLeft + glyph * 2, box.Y, box.Right - glyphLeft - glyph * 2, box.Height);
+
+        // The word starts a glyph's width in from the magnifier, on whichever
+        // side of it the reading runs.
+        var textArea = Mirrored
+            ? new RectangleF(box.X, box.Y, glyphLeft - glyph - box.X, box.Height)
+            : new RectangleF(
+                glyphLeft + glyph * 2, box.Y, box.Right - glyphLeft - glyph * 2, box.Height);
+
         using var format = new StringFormat
         {
             LineAlignment = StringAlignment.Center,
+
+            // Near is the side the reading starts at, which the reversed
+            // direction moves to the right on its own.
             Alignment = StringAlignment.Near,
         };
+
+        if (Mirrored)
+            format.FormatFlags |= StringFormatFlags.DirectionRightToLeft;
+
         canvas.DrawString(label, font, text, textArea, format);
     }
 
