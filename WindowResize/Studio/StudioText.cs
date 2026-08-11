@@ -50,11 +50,6 @@ internal static class StudioText
     private static readonly Regex AfterClause =
         new($"(?<=[{ClauseMarks}])(?![{ClosingMarks}])", RegexOptions.Compiled);
 
-    // Punctuation that closes or opens a clause in Chinese, Japanese and
-    // Korean. A space next to any of these reads as a gap in the sentence.
-    private const string CjkPunctuation =
-        "、。，．！？；：「」『』（）【】〔〕《》〈〉“”‘’・…ー";
-
     internal static IReadOnlyList<string> Wrap(
         Graphics canvas, string text, Font font, float width)
     {
@@ -208,16 +203,24 @@ internal static class StudioText
     // What goes between two runs kept on the same line: nothing when either
     // side is CJK punctuation, a single space otherwise. The author wrote two;
     // two spaces mid-sentence would be a typographic mistake in any language.
-    private static string Glue(string before, string after)
-    {
-        char left = before[^1];
-        char right = after[0];
+    private static string Glue(string before, string after) =>
+        WrittenWithoutSpaces(before[^1]) || WrittenWithoutSpaces(after[0]) ? "" : " ";
 
-        bool touchesCjk =
-            CjkPunctuation.IndexOf(left) >= 0 || CjkPunctuation.IndexOf(right) >= 0;
-
-        return touchesCjk ? "" : " ";
-    }
+    // Whether a space beside this character would be a mistake.
+    //
+    // Chinese and Japanese are written without spaces between their words, so a
+    // break offered inside a phrase has to leave nothing behind when the line
+    // does not break there.
+    //
+    // Only the punctuation counted before, which meant a translator could offer a
+    // break after a comma and nowhere else: a Japanese phrase with no punctuation
+    // in it was one run that could not be broken, and a run that cannot be broken
+    // is a run the type has to be shrunk for. That is what set the Japanese
+    // capture paragraph two sizes down.
+    private static bool WrittenWithoutSpaces(char letter) =>
+        letter is >= '　' and <= 'ヿ'   // the marks, hiragana and katakana
+               or >= '一' and <= '鿿'   // the ideographs
+               or >= '＀' and <= '￯';  // their full and half width forms
 
     // Measured against a generous but finite box. An earlier version passed
     // int.MaxValue as the layout width, which GDI+ turns into a rectangle it

@@ -669,80 +669,86 @@ internal sealed class StudioSetForm : Form
         if (string.IsNullOrEmpty(text))
             return 0;
 
-        var box = BoxBeside(margin, top, top + (int)font.GetHeight(canvas));
-        var lines = StudioText.Wrap(canvas, text, font, box.width);
+        // Every box this block could be set in is measured with the type shrunk
+        // as far as that box needs, and the one that keeps the type largest wins.
+        //
+        // A listing is read at the size of a card, so a line that wraps costs a
+        // reader nothing and a smaller size costs them the sentence. Choosing the
+        // box first and shrinking to fit it afterwards had it the other way round:
+        // ten of the sixteen headlines were set a size down to squeeze into the
+        // room above the settings window while the whole column beside it stood
+        // free.
+        // Across the frame is the first box tried, and the one a block keeps when
+        // another box would only match it: it is the widest, so it is the fewest
+        // lines, and it starts where the reading starts.
+        var chosen = (left: margin, width: ClientSize.Width - margin * 2);
+        var fitted = StudioText.FitToBox(
+            canvas, text, font, chosen.width, RoomBelow(margin, top, chosen), lineHeight);
 
-        float height = lines.Count * font.GetHeight(canvas) * lineHeight;
-        box = BoxBeside(margin, top, top + (int)Math.Ceiling(height));
+        foreach (var box in ColumnsBeside(margin, top))
+        {
+            // Wide enough to read a sentence in. Beside a menu four levels deep
+            // the strip left over is narrower than a single word of Arabic.
+            if (box.width < ClientSize.Width / 3)
+                continue;
 
-        // Settle the size against the box the block ended up with, then lay it
-        // out again at that size.
-        using var fitted = StudioText.FitToBox(
-            canvas, text, font, box.width, RoomBelow(margin, top, box), lineHeight);
-        lines = StudioText.Wrap(canvas, text, fitted, box.width);
+            var candidate = StudioText.FitToBox(
+                canvas, text, font, box.width, RoomBelow(margin, top, box), lineHeight);
 
-        return StudioText.Draw(canvas, lines, fitted, ink, box.left, top,
-            box.width, Mirrored, lineHeight);
+            if (candidate.Size > fitted.Size)
+            {
+                fitted.Dispose();
+                fitted = candidate;
+                chosen = box;
+            }
+            else
+            {
+                candidate.Dispose();
+            }
+        }
+
+        try
+        {
+            var lines = StudioText.Wrap(canvas, text, fitted, chosen.width);
+            return StudioText.Draw(canvas, lines, fitted, ink, chosen.left, top,
+                chosen.width, Mirrored, lineHeight);
+        }
+        finally
+        {
+            fitted.Dispose();
+        }
     }
 
-    // The box a block of text gets, as a left edge and a width: the set less its
-    // margins, pulled in to whichever side of the pose has more room for it.
-    private (int left, int width) BoxBeside(int margin, int top, int bottom)
+    // The column on each side of every window the pose opened below this point.
+    //
+    // One pair per window rather than one column beside all of them together. An
+    // open menu is a staircase - the list of sizes stands tall and the three
+    // levels beside it sit low - so the column to the right of the tall level is
+    // wide, while the column to the right of all four is a sliver. Measured
+    // together, that sliver was the only alternative on offer and the type shrank
+    // instead.
+    //
+    // How far down a column reaches is not decided here: RoomBelow answers that
+    // for the box it is given, so a column that runs into a lower level of the
+    // menu takes its floor from that level.
+    private IEnumerable<(int left, int width)> ColumnsBeside(int margin, int top)
     {
         int left = margin;
         int right = ClientSize.Width - margin;
 
-        // Only what the block would actually run into: the windows the pose
-        // opened that stand at this height. A menu level lower down the frame
-        // than the block leaves it the whole width.
-        int inTheWay = int.MaxValue;
-        int pastTheWay = int.MinValue;
-
         foreach (var area in _reserved)
         {
-            if (area.IsEmpty || area.Bottom <= top || area.Top >= bottom)
+            if (area.IsEmpty || area.Bottom <= top)
                 continue;
 
-            inTheWay = Math.Min(inTheWay, area.Left);
-            pastTheWay = Math.Max(pastTheWay, area.Right);
+            int before = Math.Min(right, area.Left - margin) - left;
+            if (before > 0)
+                yield return (left, before);
+
+            int afterLeft = Math.Max(left, area.Right + margin);
+            if (right > afterLeft)
+                yield return (afterLeft, right - afterLeft);
         }
-
-        if (inTheWay != int.MaxValue)
-        {
-            // A pose that stands in the middle of the frame leaves a column on
-            // each side of it. Both are measured and the wider one is kept.
-            //
-            // Only one was measured before - the one the reading starts at - and
-            // that side is regularly the sliver while the other holds the whole
-            // sentence. Searching from one end only cannot see the larger room
-            // behind the obstacle it stopped at.
-            int leftColumn = Math.Min(right, inTheWay - margin) - left;
-            int rightLeft = Math.Max(left, pastTheWay + margin);
-            int rightColumn = right - rightLeft;
-
-            // A tie goes to the side the reading starts at, which is where a
-            // block belongs whenever the pose leaves it a choice.
-            bool takeRight = Mirrored
-                ? rightColumn >= leftColumn
-                : rightColumn > leftColumn;
-
-            int keptLeft = takeRight ? rightLeft : left;
-            int keptWidth = takeRight ? rightColumn : leftColumn;
-
-            // Step aside only while a sentence still fits in what is left. The
-            // tray menu unfolds across most of the set, and the strip beside it
-            // is narrower than a single word of Arabic; the block is better off
-            // keeping the full width and standing above the menu, which is where
-            // it starts from anyway.
-            //
-            // Widening a collapsed box instead, which is what this did before,
-            // kept the edge the obstacle had pushed the text to. The Arabic body
-            // was pushed right and then made wide enough to run off the picture.
-            if (keptWidth >= ClientSize.Width / 3)
-                return (keptLeft, keptWidth);
-        }
-
-        return (left, right - left);
     }
 
     // How far down a block of text may run: to the top of the taskbar when the
@@ -860,13 +866,15 @@ internal sealed class StudioSetForm : Form
     // scale, as though the screen were half as wide as it is.
     internal const int Magnification = 2;
 
-    // The menu grows less than the desktop around it. At the full doubling it
-    // filled the frame and left no room for the marketing line, and a menu
-    // four levels deep already stands tall on its own.
-    // Less again than the set. At one and a half the menu's own icons were
-    // clipped by the rows they sit in, because a row grows with its font while
-    // the image beside it does not.
-    internal const float MenuMagnification = 1.25f;
+    // The menu is drawn at the size this machine draws it, like the taskbar and
+    // the settings window beside it.
+    //
+    // It was a quarter larger, so that the rows would still read once the store
+    // scales a listing picture down to a card. Whether that is needed is a
+    // question about the store rather than about this app, and it is answered by
+    // looking at a real listing; until then the picture shows the menu a user of
+    // this machine sees. Raising this number is how to make it larger again.
+    internal const float MenuMagnification = 1.0f;
 
     // The real taskbar's height, as this machine draws it.
     //
