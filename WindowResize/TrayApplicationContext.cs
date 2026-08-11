@@ -255,8 +255,12 @@ public class TrayApplicationContext : ApplicationContext
             int currentWidth = SettingsStore.Shared.ResizeClientArea ? window.ClientWidth : window.Width;
             int currentHeight = SettingsStore.Shared.ResizeClientArea ? window.ClientHeight : window.Height;
 
+            // The size this item offers writes itself. Spelled out here a second
+            // time instead, it missed what PresetSize.DisplayName does for a
+            // language that reads right to left, and the Arabic menu offered a
+            // window "x 800 1280".
             var currentSize = new PresetSize(currentWidth, currentHeight, Strings.MenuCurrentSize);
-            var currentItem = new ToolStripMenuItem($"{currentWidth} x {currentHeight}")
+            var currentItem = new ToolStripMenuItem(currentSize.DisplayName)
             {
                 ShortcutKeyDisplayString = Strings.MenuCurrentSize
             };

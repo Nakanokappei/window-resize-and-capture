@@ -333,6 +333,10 @@ internal static class StudioPoses
 
         SelectTab(settings, tabIndex);
 
+        // After the tab is chosen, because choosing one puts the focus rectangle
+        // back on the tab strip.
+        StudioCamera.HideFocusCues(settings.Handle);
+
         // Keep the marketing line clear of the window, the same way the menu
         // pose does.
         set.Reserve(new[] { settings.Bounds });

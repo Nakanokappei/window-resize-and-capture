@@ -43,6 +43,10 @@ internal static class StudioCamera
     private static extern IntPtr WindowFromPoint(POINT point);
 
     [DllImport("user32.dll")]
+    private static extern IntPtr SendMessage(
+        IntPtr hwnd, int message, IntPtr wParam, IntPtr lParam);
+
+    [DllImport("user32.dll")]
     private static extern uint GetWindowThreadProcessId(IntPtr hwnd, out uint processId);
 
     [StructLayout(LayoutKind.Sequential)]
@@ -96,6 +100,26 @@ internal static class StudioCamera
     // shown in does not settle that on its own.
     internal static void Raise(IntPtr handle) =>
         SetWindowPos(handle, TopOfTopmost, 0, 0, 0, 0, NoMove | NoSize | NoActivate);
+
+    // Ask a window and everything in it to stop drawing the keyboard focus
+    // rectangle.
+    //
+    // Windows draws that dotted box once it has seen a key rather than a mouse,
+    // and the studio drives these windows entirely from code. Whether it landed
+    // on the General tab or on a check box changed from one shot to the next, so
+    // two pictures of the same window in one listing differed by a detail nobody
+    // meant to photograph - and it was the last thing keeping a settings picture
+    // from being the same file every time it is taken.
+    //
+    // The message travels up to the top-level window and back down to every
+    // child, which is why one call covers the tabs and what is on them.
+    internal static void HideFocusCues(IntPtr handle) =>
+        SendMessage(handle, WM_CHANGEUISTATE,
+            new IntPtr(UIS_SET | (UISF_HIDEFOCUS << 16)), IntPtr.Zero);
+
+    private const int WM_CHANGEUISTATE = 0x0127;
+    private const int UIS_SET = 1;
+    private const int UISF_HIDEFOCUS = 0x1;
 
     // The first of these windows that the given one is covering, or null when
     // every one of them is where a person would see it.

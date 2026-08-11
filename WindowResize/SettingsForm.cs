@@ -118,14 +118,6 @@ public class SettingsForm : Form
         tabs.TabPages.Add(BuildBehaviorTab());
         Controls.Add(tabs);
 
-        // Everything now has its final size, which is what these need.
-        if (App.ReadsRightToLeft)
-        {
-            WrapWideSettings(this);
-            MirrorLayout(this);
-            MirrorPositionGrid();
-        }
-
         // Scale the finished layout explicitly rather than leaving it to
         // AutoScaleMode. Auto-scaling runs on every Controls.Add and writes
         // the current dimensions back over the design ones, so a form built
@@ -135,6 +127,47 @@ public class SettingsForm : Form
         if (DesignScale > 1f)
             Scale(new SizeF(DesignScale, DesignScale));
     }
+
+    // Turning the layout around waits for the window to have a handle.
+    //
+    // A tab page added to a tab control that has not been created yet reports the
+    // size of a bare control rather than the page rectangle: it said 208 pixels
+    // wide where the page is 396. Both passes below divide that width, so both
+    // came out wrong in a way only an Arabic picture showed. A group box that
+    // fills its page was mirrored to x=-188, half of it outside the window, and
+    // the room left for a check box label was so narrow that the longest Arabic
+    // setting wrapped to five lines and pushed the setting under it off the
+    // bottom of the page. The build no longer claims those sizes are final; the
+    // handle is what makes them final.
+    private bool _turnedAround;
+
+    protected override void OnHandleCreated(EventArgs e)
+    {
+        base.OnHandleCreated(e);
+
+        // Once only. This window hides on close and is shown again, and a handle
+        // is created again with it.
+        if (_turnedAround || !App.ReadsRightToLeft)
+            return;
+
+        _turnedAround = true;
+        WrapWideSettings(this);
+        MirrorLayout(this);
+        MirrorPositionGrid();
+    }
+
+    // The width a child of this container is turned around inside.
+    //
+    // A tab page cannot be asked for it. Until the tab control has laid its pages
+    // out - which it has still not done when the window is handed its handle - a
+    // page reports the size of a bare control, 400 by 200, and mirroring a
+    // full-width group box against that put half of it outside the window. The
+    // tab control knows the page rectangle as soon as it has a handle of its own,
+    // so ask the control instead of the page.
+    private static int RoomInside(Control container) =>
+        container is TabPage page && page.Parent is TabControl tabs
+            ? tabs.DisplayRectangle.Width
+            : container.ClientSize.Width;
 
     // How much larger the display draws things than the 96 DPI every number in
     // this form is written for. Anything measured from the running font has to
@@ -294,7 +327,7 @@ public class SettingsForm : Form
             if (child is not CheckBox check || Array.IndexOf(_positionTiles, check) >= 0)
                 continue;
 
-            int room = parent.ClientSize.Width - check.Left - 8;
+            int room = RoomInside(parent) - check.Left - 8;
             if (check.Width <= room)
                 continue;
 
@@ -349,7 +382,7 @@ public class SettingsForm : Form
 
             // A tab page is positioned by the tab control, not from here.
             if (child is not TabPage)
-                child.Left = parent.ClientSize.Width - child.Left - child.Width;
+                child.Left = RoomInside(parent) - child.Left - child.Width;
 
             MirrorLayout(child);
         }
@@ -372,7 +405,7 @@ public class SettingsForm : Form
             right = Math.Max(right, tile.Right);
         }
 
-        int shift = parent.ClientSize.Width - right - left;
+        int shift = RoomInside(parent) - right - left;
         foreach (var tile in _positionTiles)
             tile.Left += shift;
     }
