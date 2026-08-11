@@ -52,7 +52,7 @@ Klicken Sie auf das Window Resize & Capture-Infobereich-Symbol und wählen Sie *
 
 ### Integrierte Größen
 
-Die App enthält 12 integrierte Voreinstellungen:
+Die App enthält 13 integrierte Voreinstellungen:
 
 | Größe | Bezeichnung |
 |-------|-------------|
@@ -63,8 +63,9 @@ Die App enthält 12 integrierte Voreinstellungen:
 | 1680 x 1050 | WSXGA+ |
 | 1600 x 900 | HD+ |
 | 1440 x 900 | WXGA+ |
-| 1366 x 768 | WXGA |
+| 1366 x 768 | FWXGA |
 | 1280 x 1024 | SXGA |
+| 1280 x 800 | WXGA |
 | 1280 x 720 | HD |
 | 1024 x 768 | XGA |
 | 800 x 600 | SVGA |

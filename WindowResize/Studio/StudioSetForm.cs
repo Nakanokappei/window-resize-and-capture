@@ -854,14 +854,6 @@ internal sealed class StudioSetForm : Form
     // Measured on a real taskbar: a pinned icon is 47 pixels in a band of 96.
     private int IconSize => Math.Max(BandHeight * 49 / 100, 16);
 
-    // The desktop the set pretends to be: 1920 x 1080 with no scaling, whatever
-    // the machine taking the picture actually runs. Everything measured from
-    // the live shell is expressed against this width, so two machines produce
-    // the same picture. Deriving it from the real screen instead made the band
-    // 96 pixels tall on one display and 128 on another, and a language
-    // re-photographed later no longer matched the rest of the listing.
-    private const int ReferenceWidth = 1920;
-
     // A listing picture is never shown at its own size: the store scales it
     // down to fit a card. Drawn true to life, the taskbar and the menu come
     // out too small to read there, so the whole desktop is staged at twice
@@ -876,11 +868,20 @@ internal sealed class StudioSetForm : Form
     // the image beside it does not.
     internal const float MenuMagnification = 1.25f;
 
-    // The real taskbar's height, drawn as it would look on the reference
-    // desktop. The picture is wider than 1920, so the band grows by the same
-    // ratio the desktop does, and the magnification above brings it up again.
-    private int BandHeight => Math.Max(
-        _shell.HeightAt100Percent * ClientSize.Width * Magnification / ReferenceWidth, 16);
+    // The real taskbar's height, as this machine draws it.
+    //
+    // HeightAt100Percent is that measurement in the units this window works in:
+    // the app runs DPI unaware, so a coordinate here is a physical pixel divided
+    // by the scaling of the display, which is exactly what dividing the scaling
+    // out of the measured taskbar leaves.
+    //
+    // It used to be worked out from the width of the picture instead, against a
+    // 1920-wide reference desktop, which made the band four thirds of the
+    // taskbar this machine actually has. Nothing else in the picture is sized
+    // that way: the menu and the settings window are laid out at the machine's
+    // own DPI, and a band derived from the size of the file is a band that
+    // matches nothing standing on it.
+    private int BandHeight => Math.Max(_shell.Height, 16);
 
     private static Icon? LoadTrayIcon()
     {

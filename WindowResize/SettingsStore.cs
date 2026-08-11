@@ -197,6 +197,7 @@ public partial class SettingsStore
         // disagrees with every table a user can look this up in.
         new(1366, 768,  "FWXGA"),
         new(1280, 1024, "SXGA"),
+        new(1280, 800,  "WXGA"),
         new(1280, 720,  "HD"),
         new(1024, 768,  "XGA"),
         new(800,  600,  "SVGA"),

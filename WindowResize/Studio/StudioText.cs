@@ -38,9 +38,17 @@ internal static class StudioText
     // place, so copy in Thai has to be written with them. Finding word
     // boundaries there needs a dictionary, which is far more than this is
     // worth.
+    // The marks themselves, kept where both the rule above and the one that
+    // prefers a clause boundary can read them. Written twice before, once in the
+    // expression and once in the test for a line that ends at a pause, they would
+    // have drifted apart the first time a language was added.
+    private const string ClauseMarks = "、。，．！？；：।،؛؟";
+
+    // Marks that never begin a line, so a break is not offered in front of them.
+    private const string ClosingMarks = "、。，．！？；：」』）】〕》〉”’";
+
     private static readonly Regex AfterClause =
-        new(@"(?<=[、。，．！？；：।،؛؟])(?![、。，．！？；：」』）】〕》〉”’])",
-            RegexOptions.Compiled);
+        new($"(?<=[{ClauseMarks}])(?![{ClosingMarks}])", RegexOptions.Compiled);
 
     // Punctuation that closes or opens a clause in Chinese, Japanese and
     // Korean. A space next to any of these reads as a gap in the sentence.
@@ -50,41 +58,83 @@ internal static class StudioText
     internal static IReadOnlyList<string> Wrap(
         Graphics canvas, string text, Font font, float width)
     {
-        // A space is where the text may break. English already has them
-        // between its words; Japanese and Chinese have none, so one is put
-        // after every clause mark first. Both then wrap by the same rule.
-        var runs = BreakOffer.Split(AfterClause.Replace(text ?? "", " "));
+        var runs = Runs(text);
         var lines = new List<string>();
-        string line = "";
 
-        foreach (var raw in runs)
+        int at = 0;
+        while (at < runs.Count)
         {
-            string run = raw.Trim();
-            if (run.Length == 0)
-                continue;
+            // Take as many runs as the line holds, remembering the last one that
+            // ends where the sentence pauses.
+            int taken = 1;
+            int pause = EndsAClause(runs[at]) ? 1 : 0;
 
-            if (line.Length == 0)
+            while (at + taken < runs.Count)
             {
-                line = run;
-                continue;
+                if (Measure(canvas, Join(runs, at, taken + 1), font) > width)
+                    break;
+
+                taken++;
+                if (EndsAClause(runs[at + taken - 1]))
+                    pause = taken;
             }
 
-            string joined = line + Glue(line, run) + run;
-            if (Measure(canvas, joined, font) <= width)
+            // A line that could end at a comma or a full stop does.
+            //
+            // Every break offer used to count the same, so a line was filled as
+            // far as it would go and broke wherever that landed - in the middle
+            // of a clause more often than not. Ending at the pause reads as the
+            // sentence reads, in a language with spaces between its words as much
+            // as in one without.
+            //
+            // Unless that would leave the line barely begun: a clause that ends
+            // two words in is not worth a line of its own, and the words after it
+            // would only crowd the lines below.
+            if (pause > 0 && pause < taken &&
+                Measure(canvas, Join(runs, at, pause), font) >= width / 2)
             {
-                line = joined;
-                continue;
+                taken = pause;
             }
 
-            lines.Add(line);
-            line = run;
+            lines.Add(Join(runs, at, taken));
+            at += taken;
         }
-
-        if (line.Length > 0)
-            lines.Add(line);
 
         return lines;
     }
+
+    // The pieces the text may be broken between.
+    //
+    // A space is where it may break. English already has them between its words;
+    // Japanese and Chinese have none, so one is put after every clause mark
+    // first. Both then wrap by the same rule.
+    private static List<string> Runs(string text)
+    {
+        var runs = new List<string>();
+
+        foreach (var raw in BreakOffer.Split(AfterClause.Replace(text ?? "", " ")))
+        {
+            string run = raw.Trim();
+            if (run.Length > 0)
+                runs.Add(run);
+        }
+
+        return runs;
+    }
+
+    // Runs put back together the way they are drawn, so what is measured is what
+    // appears.
+    private static string Join(List<string> runs, int from, int count)
+    {
+        string line = runs[from];
+        for (int index = from + 1; index < from + count; index++)
+            line += Glue(line, runs[index]) + runs[index];
+
+        return line;
+    }
+
+    private static bool EndsAClause(string run) =>
+        run.Length > 0 && ClauseMarks.IndexOf(run[^1]) >= 0;
 
     // The same font, or a smaller one, so the whole block fits the box it is
     // given: wide enough for the longest run that cannot break, and no taller
@@ -149,13 +199,8 @@ internal static class StudioText
     {
         float widest = 0;
 
-        foreach (var run in BreakOffer.Split(AfterClause.Replace(text ?? "", " ")))
-        {
-            if (run.Trim().Length == 0)
-                continue;
-
-            widest = Math.Max(widest, Measure(canvas, run.Trim(), font));
-        }
+        foreach (var run in Runs(text))
+            widest = Math.Max(widest, Measure(canvas, run, font));
 
         return widest;
     }

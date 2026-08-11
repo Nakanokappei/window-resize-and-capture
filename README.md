@@ -7,7 +7,7 @@ The app started as a port of [Window Resize for macOS](https://github.com/Nakano
 ## Features
 
 - **Lives in the system tray** — left-click or right-click the icon to open the menu
-- **12 built-in sizes** — common Windows display resolutions
+- **13 built-in sizes** — common Windows display resolutions
 - **Custom sizes** — add your own width x height presets and give them names
 - **Position after resize** — move the window to any of nine spots on the screen, such as a corner or the center. You can also move it to your main display, or bring it to the front.
 - **Capture** — after a resize, save a picture of the window to a file, to the clipboard, or to both
@@ -46,8 +46,9 @@ You do not need to install the .NET runtime. Everything the app needs is inside 
 | 1680 x 1050 | WSXGA+ |
 | 1600 x 900 | HD+ |
 | 1440 x 900 | WXGA+ |
-| 1366 x 768 | WXGA |
+| 1366 x 768 | FWXGA |
 | 1280 x 1024 | SXGA |
+| 1280 x 800 | WXGA |
 | 1280 x 720 | HD |
 | 1024 x 768 | XGA |
 | 800 x 600 | SVGA |

@@ -52,7 +52,7 @@ Nhấp vào biểu tượng Window Resize & Capture trong khay, sau đó chọn 
 
 ### Kích thước tích hợp
 
-Ứng dụng bao gồm 12 kích thước đặt trước tích hợp:
+Ứng dụng bao gồm 13 kích thước đặt trước tích hợp:
 
 | Kích thước | Nhãn |
 |------------|------|
@@ -63,8 +63,9 @@ Nhấp vào biểu tượng Window Resize & Capture trong khay, sau đó chọn 
 | 1680 x 1050 | WSXGA+ |
 | 1600 x 900 | HD+ |
 | 1440 x 900 | WXGA+ |
-| 1366 x 768 | WXGA |
+| 1366 x 768 | FWXGA |
 | 1280 x 1024 | SXGA |
+| 1280 x 800 | WXGA |
 | 1280 x 720 | HD |
 | 1024 x 768 | XGA |
 | 800 x 600 | SVGA |

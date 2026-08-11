@@ -52,7 +52,7 @@ Cliquez sur l'icône Window Resize & Capture dans la zone de notification, puis 
 
 ### Tailles intégrées
 
-L'application comprend 12 tailles prédéfinies intégrées :
+L'application comprend 13 tailles prédéfinies intégrées :
 
 | Taille | Étiquette |
 |--------|-----------|
@@ -63,8 +63,9 @@ L'application comprend 12 tailles prédéfinies intégrées :
 | 1680 x 1050 | WSXGA+ |
 | 1600 x 900 | HD+ |
 | 1440 x 900 | WXGA+ |
-| 1366 x 768 | WXGA |
+| 1366 x 768 | FWXGA |
 | 1280 x 1024 | SXGA |
+| 1280 x 800 | WXGA |
 | 1280 x 720 | HD |
 | 1024 x 768 | XGA |
 | 800 x 600 | SVGA |
