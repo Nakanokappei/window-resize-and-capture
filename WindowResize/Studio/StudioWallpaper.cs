@@ -111,13 +111,20 @@ internal static class StudioWallpaper
             var escapes = new double[width * height];
 
             // Rows are independent, so the work spreads across the machine.
+            //
+            // Sampled at the middle of each pixel rather than at its corner. On the
+            // real axis the orbit stays real, and its escape lands a shade away
+            // from the escapes of the rows either side of it: two of the sixteen
+            // viewpoints sit on that axis, and in both the row that fell exactly on
+            // it came out as a dark line drawn across the whole picture. Half a
+            // pixel down, no row lands on it.
             Parallel.For(0, height, y =>
             {
-                double imaginary = imaginaryMin + y * scale;
+                double imaginary = imaginaryMin + (y + 0.5) * scale;
                 int row = y * width;
 
                 for (int x = 0; x < width; x++)
-                    escapes[row + x] = Escape(realMin + x * scale, imaginary);
+                    escapes[row + x] = Escape(realMin + (x + 0.5) * scale, imaginary);
             });
 
             var spread = new Distribution(escapes);
