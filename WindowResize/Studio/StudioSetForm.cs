@@ -80,6 +80,18 @@ internal sealed class StudioSetForm : Form
         Text = $"{App.Name} studio set";
     }
 
+    // Shown without being activated.
+    //
+    // Show activates a form, and activating this one asks Windows for the
+    // foreground - which a process nobody clicked cannot have, so the request is
+    // queued and granted later. It was arriving in the middle of arranging the
+    // pose, lifting the set inside the topmost band and dropping the menu behind
+    // it: four pictures in a pass of sixteen were refused for exactly that.
+    //
+    // The set has no need of it. What a photograph sees is the z-order, and
+    // StudioCamera.Raise sets that without asking anyone's permission.
+    protected override bool ShowWithoutActivation => true;
+
     // Windows mirrors its whole taskbar for a right-to-left language: Start and
     // the search box move to the right end, the notification area and the clock
     // to the left, and the tray menu therefore unfolds up and to the right. The
@@ -850,6 +862,20 @@ internal sealed class StudioSetForm : Form
     // further in than the band it sits above.
     internal int PictureMargin => BandHeight;
 
+    // How tall one line of the clock is, which is the smallest measure in the
+    // picture. A pose keeps this much between whatever it opens and the top of the
+    // taskbar: the settings window used to end exactly where the band begins, and
+    // the two edges met as a dark line across the picture.
+    internal int ClockLineHeight
+    {
+        get
+        {
+            using var canvas = CreateGraphics();
+            using var font = ClockFont();
+            return (int)Math.Ceiling(font.GetHeight(canvas));
+        }
+    }
+
     private void PaintMarketingLine(Graphics canvas)
     {
         if (string.IsNullOrEmpty(_copy.Headline))
@@ -901,9 +927,11 @@ internal sealed class StudioSetForm : Form
         if (notice.Length == 0)
             return;
 
-        int margin = PictureMargin;
-
-        using var font = new Font("Segoe UI", ClientSize.Height / 100f);
+        // The size the clock is drawn at, which is the smallest type anywhere in
+        // the picture and the right size for a note nobody has to read. A hundredth
+        // of the height before, which came out larger than the date it sits
+        // diagonally opposite.
+        using var font = ClockFont();
         using var ink = new SolidBrush(Color.FromArgb(150, 255, 255, 255));
         using var format = new StringFormat(StringFormat.GenericTypographic)
         {
@@ -915,15 +943,14 @@ internal sealed class StudioSetForm : Form
         if (Mirrored)
             format.FormatFlags |= StringFormatFlags.DirectionRightToLeft;
 
-        // Centered in the top margin. That margin is the band's height, so the
-        // note stands in a strip the same depth as the taskbar at the other end
-        // of the picture.
+        // Its own height in from the corner, on both sides of it. A note this
+        // small looked adrift in the middle of a margin as deep as the taskbar,
+        // and the measurement it wants is its own.
         float height = font.GetHeight(canvas);
+        int inset = (int)Math.Ceiling(height);
+
         canvas.DrawString(notice, font, ink, new RectangleF(
-            margin,
-            (margin - height) / 2f,
-            ClientSize.Width - margin * 2,
-            height + 1), format);
+            inset, inset, ClientSize.Width - inset * 2, height + 1), format);
     }
 
     // Measured on a real taskbar: a pinned icon is 47 pixels in a band of 96.

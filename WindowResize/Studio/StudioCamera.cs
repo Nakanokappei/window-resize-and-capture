@@ -152,7 +152,7 @@ internal static class StudioCamera
     // and save it. Returns the size actually written, which the caller checks.
     internal static async Task<Size> Photograph(
         Form form, int width, int height, string outputPath, int settleMs,
-        IReadOnlyList<Control> pose)
+        IReadOnlyList<Control> pose, Action restage)
     {
         SquareTheCorners(form.Handle);
         await MatchVisibleSize(form, width, height);
@@ -170,12 +170,26 @@ internal static class StudioCamera
         // matter. It lifts the set inside the topmost band and the menu opened
         // before it drops behind. Four pictures in one pass of sixteen came out
         // that way, all of them missing the top level of the menu.
-        foreach (var window in pose)
-            Raise(window.Handle);
+        Control? covered = null;
 
-        await Settle(120);
+        for (int attempt = 0; attempt < 5; attempt++)
+        {
+            // Looked at before anything is lifted, because lifting is not free:
+            // it takes the selection off whatever menu item is carrying the
+            // highlight. In the ordinary case nothing is covered and nothing is
+            // touched.
+            covered = FirstCoveredBy(form.Handle, pose);
+            if (covered == null)
+                break;
 
-        var covered = FirstCoveredBy(form.Handle, pose);
+            foreach (var window in pose)
+                Raise(window.Handle);
+
+            // And put back what the lift disturbed.
+            restage();
+            await Settle(120);
+        }
+
         if (covered != null)
         {
             throw new InvalidOperationException(

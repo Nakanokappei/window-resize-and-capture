@@ -31,6 +31,12 @@ internal static class StudioPoses
         // refuses the picture if one of them is not there.
         internal IReadOnlyList<Control> Opened { get; init; } = Array.Empty<Control>();
 
+        // Put back whatever raising those windows disturbs. Lifting a menu takes
+        // the selection off the item carrying the highlight, so the pose that
+        // wants a size highlighted says here how to put it back, and the camera
+        // calls this after any lift of its own.
+        internal Action Restage { get; init; } = () => { };
+
         public void Dispose()
         {
             Menu?.Close();
@@ -121,7 +127,12 @@ internal static class StudioPoses
                 Failure = "the size being chosen lost its highlight",
             };
 
-        return new Arrangement { Menu = menu, Opened = levels };
+        return new Arrangement
+        {
+            Menu = menu,
+            Opened = levels,
+            Restage = () => wanted?.Select(),
+        };
     }
 
     // Every level of the menu that is open, outermost first.
@@ -326,10 +337,16 @@ internal static class StudioPoses
         // top corner clear for the marketing line - which is the left on a
         // left-to-right set and the right on a mirrored one, the same corner the
         // reader's eye starts from in each.
+        // Clear of the taskbar by the height of a line of the clock, not flush
+        // against it. Ending exactly where the band begins put the window's own
+        // shadow along the band's top line, and the two read as one dark rule
+        // drawn across the middle of the picture.
         int margin = set.PictureMargin;
+        int fromTheBand = margin + set.ClockLineHeight;
+
         settings.Location = new System.Drawing.Point(
             set.Mirrored ? set.Left + margin : set.Left + set.Width - settings.Width - margin,
-            set.Top + set.Height - settings.Height - margin);
+            set.Top + set.Height - settings.Height - fromTheBand);
 
         SelectTab(settings, tabIndex);
 

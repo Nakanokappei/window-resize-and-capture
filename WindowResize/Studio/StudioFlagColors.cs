@@ -4,50 +4,56 @@ using System.Globalization;
 
 namespace WindowResizeCapture.Studio;
 
-// Two colors per language, taken from the flag of the country the language
-// belongs to, so a listing picture carries a quiet hint of who it is for.
+// The colors of the flag of the country a language belongs to, so a listing
+// picture carries a quiet hint of who it is for.
 //
-// White is left out: the wallpaper runs from near black to a muted highlight,
-// and white gives the ramp nowhere to go. Where a flag has only one color
-// besides white, the pair is that color and a deep shade of it.
+// Ordered from the darkest to the lightest, because the wallpaper hands the
+// first one to the calmest and largest part of the frame and works up from
+// there.
 //
-// Nothing here is drawn at full strength. The colors are pushed down into a
-// dark ramp by StudioWallpaper; used raw they would fight the marketing line
-// and stop looking like wallpaper.
+// White is in. A flag that is mostly white does not look like itself without it,
+// and the wallpaper holds every color down to a ceiling on lightness, so white
+// arrives as a pale grey rather than as a glare and costs the text over it
+// nothing.
+//
+// Black is the one color left out. The backdrop used to have a near-black stop
+// of its own, and that is exactly what made the body of the fractal read as a
+// hole in the picture rather than as part of it.
 internal static class StudioFlagColors
 {
-    private static readonly Dictionary<string, (Color Deep, Color Light)> ByLanguage = new()
+    private static readonly Color White = Color.FromArgb(255, 255, 255);
+
+    private static readonly Dictionary<string, Color[]> ByLanguage = new()
     {
-        // United States: old glory red and blue.
-        ["en"] = (Color.FromArgb(178, 34, 52), Color.FromArgb(60, 59, 110)),
+        // United States: old glory blue, old glory red, white.
+        ["en"] = new[] { Color.FromArgb(60, 59, 110), Color.FromArgb(178, 34, 52), White },
 
-        // Japan: the flag carries one color, so it is paired with its shade.
-        ["ja"] = (Color.FromArgb(70, 12, 26), Color.FromArgb(188, 0, 45)),
+        // Japan: one red disc on white.
+        ["ja"] = new[] { Color.FromArgb(188, 0, 45), White },
 
-        ["de"] = (Color.FromArgb(221, 0, 0), Color.FromArgb(255, 206, 0)),
-        ["fr"] = (Color.FromArgb(0, 85, 164), Color.FromArgb(239, 65, 53)),
-        ["es"] = (Color.FromArgb(170, 21, 27), Color.FromArgb(241, 191, 0)),
-        ["pt"] = (Color.FromArgb(0, 102, 51), Color.FromArgb(214, 28, 34)),
-        ["it"] = (Color.FromArgb(0, 140, 69), Color.FromArgb(205, 33, 42)),
-        ["ru"] = (Color.FromArgb(0, 57, 166), Color.FromArgb(213, 43, 30)),
-        ["ko"] = (Color.FromArgb(0, 71, 160), Color.FromArgb(205, 46, 58)),
-        ["zh-Hans"] = (Color.FromArgb(222, 41, 16), Color.FromArgb(255, 222, 0)),
-        ["zh-Hant"] = (Color.FromArgb(0, 0, 149), Color.FromArgb(254, 0, 0)),
+        // Germany: red and gold. The third band is black, which is left out.
+        ["de"] = new[] { Color.FromArgb(221, 0, 0), Color.FromArgb(255, 206, 0) },
 
-        // Arabic is spoken across many countries, so the pan-Arab pair stands
-        // in for any one flag.
-        ["ar"] = (Color.FromArgb(0, 122, 61), Color.FromArgb(206, 17, 38)),
+        ["fr"] = new[] { Color.FromArgb(0, 85, 164), Color.FromArgb(239, 65, 53), White },
+        ["es"] = new[] { Color.FromArgb(170, 21, 27), Color.FromArgb(241, 191, 0) },
+        ["pt"] = new[] { Color.FromArgb(214, 28, 34), Color.FromArgb(0, 102, 51) },
+        ["it"] = new[] { Color.FromArgb(205, 33, 42), Color.FromArgb(0, 140, 69), White },
+        ["ru"] = new[] { Color.FromArgb(0, 57, 166), Color.FromArgb(213, 43, 30), White },
+        ["ko"] = new[] { Color.FromArgb(0, 71, 160), Color.FromArgb(205, 46, 58), White },
+        ["zh-Hans"] = new[] { Color.FromArgb(222, 41, 16), Color.FromArgb(255, 222, 0) },
+        ["zh-Hant"] = new[] { Color.FromArgb(0, 0, 149), Color.FromArgb(254, 0, 0), White },
 
-        ["hi"] = (Color.FromArgb(19, 136, 8), Color.FromArgb(255, 153, 51)),
+        // Arabic is spoken across many countries, so the pan-Arab colors stand in
+        // for any one flag. Their black is left out with every other black.
+        ["ar"] = new[] { Color.FromArgb(206, 17, 38), Color.FromArgb(0, 122, 61), White },
 
-        // Indonesia, like Japan, is one color and white.
-        ["id"] = (Color.FromArgb(90, 0, 0), Color.FromArgb(255, 0, 0)),
-
-        ["th"] = (Color.FromArgb(45, 42, 74), Color.FromArgb(165, 25, 49)),
-        ["vi"] = (Color.FromArgb(218, 37, 29), Color.FromArgb(255, 255, 0)),
+        ["hi"] = new[] { Color.FromArgb(19, 136, 8), Color.FromArgb(255, 153, 51), White },
+        ["id"] = new[] { Color.FromArgb(255, 0, 0), White },
+        ["th"] = new[] { Color.FromArgb(45, 42, 74), Color.FromArgb(165, 25, 49), White },
+        ["vi"] = new[] { Color.FromArgb(218, 37, 29), Color.FromArgb(255, 255, 0) },
     };
 
-    internal static (Color Deep, Color Light) For(CultureInfo language)
+    internal static Color[] For(CultureInfo language)
     {
         if (ByLanguage.TryGetValue(language.Name, out var exact))
             return exact;

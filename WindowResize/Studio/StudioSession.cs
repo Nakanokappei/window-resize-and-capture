@@ -43,8 +43,15 @@ internal static class StudioSession
 
         using var set = new StudioSetForm(request);
         set.Show();
-        set.Activate();
         StudioCamera.Raise(set.Handle);
+
+        // Shown and raised, never activated. Activating it asked Windows for the
+        // foreground, which a process nobody clicked cannot have - so the request
+        // was queued and granted later, in the middle of arranging the pose, and
+        // the set jumped in front of the menu it was supposed to be behind. Four
+        // pictures in a pass of sixteen were refused for it. The set does not need
+        // the foreground: the z-order is what a photograph sees, and Raise sets
+        // that without asking anyone's permission.
 
         // Arrange and photograph on the message loop, then close the set. The
         // work is asynchronous because the compositor needs time between the
@@ -89,7 +96,7 @@ internal static class StudioSession
 
         var written = await StudioCamera.Photograph(
             set, request.Size.Width, request.Size.Height, request.OutputPath,
-            request.SettleMs, pose.Opened);
+            request.SettleMs, pose.Opened, pose.Restage);
 
         // An unattended shoot must shout about a wrong size here, not leave it
         // to be discovered on the store listing.

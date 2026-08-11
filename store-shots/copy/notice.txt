@@ -1,61 +1,70 @@
-# The line that admits the desktop around the app is drawn rather than
-# photographed: the wallpaper, the taskbar, and the windows the menu lists.
-# The app's own menu and settings window in these pictures are the real ones.
+# The line that admits the taskbar in these pictures is drawn rather than
+# photographed - the band itself, the icons on it, the search box and the clock.
+# The app's own menu and settings window are the real ones.
 #
 # One [tag] section per language, one line each. A language with no section
 # falls back to [en].
 #
+# The taskbar, and only the taskbar. The wallpaper was named too for a while,
+# which says nothing a reader does not already assume about a wallpaper; the
+# taskbar is the part of the picture that looks like a photograph of Windows and
+# is not one.
+#
+# The word for it is the one each language's own copy uses, which is the one
+# Windows uses in that language: Taskleiste, barra delle applicazioni,
+# 작업 표시줄, 工作列.
+#
 # This is not one sentence translated sixteen times. Every language has its own
-# convention for "this is an illustration, not the thing itself", and the word
-# that carries it is different in each: the German Symbolbild, the Chinese
-# 示意图, the Korean 연출된 화면, the Japanese イメージ. Translating any of them
-# literally into another language says something else - the English "image"
-# would only be stating that a picture is a picture.
+# convention for "this is a stand-in, not the thing itself", and the word that
+# carries it differs in each: the German Symbolbild, the Chinese 示意图, the
+# Korean 연출된 화면, the Japanese イメージ. Translating any of them literally
+# into another language says something else - the English "image" would only be
+# stating that a picture is a picture.
 
 [en]
-Simulated desktop
+Taskbar simulated
 
 [ja]
-※ デスクトップはイメージです
+※ タスク バーはイメージです
 
 [de]
-Desktop: Symbolbild
+Taskleiste: Symbolbild
 
 [fr]
-Bureau simulé
+Barre des tâches simulée
 
 [es]
-Escritorio simulado
+Barra de tareas simulada
 
 [pt]
-Área de trabalho simulada
+Barra de tarefas simulada
 
 [it]
-Desktop simulato
+Barra delle applicazioni simulata
 
 [ru]
-Рабочий стол показан условно
+Панель задач показана условно
 
 [ko]
-데스크톱은 연출된 화면입니다
+작업 표시줄은 연출된 화면입니다
 
 [zh-Hans]
-桌面为示意图
+任务栏为示意图
 
 [zh-Hant]
-桌面為示意圖
+工作列為示意圖
 
 [ar]
-سطح المكتب توضيحي
+شريط المهام توضيحي
 
 [hi]
-डेस्कटॉप केवल उदाहरण के लिए
+टास्कबार केवल उदाहरण के लिए
 
 [id]
-Desktop hanya ilustrasi
+Bilah tugas hanya ilustrasi
 
 [th]
-เดสก์ท็อปเป็นภาพประกอบ
+แถบงานเป็นภาพประกอบ
 
 [vi]
-Màn hình nền chỉ mang tính minh họa
+Thanh tác vụ chỉ mang tính minh họa
