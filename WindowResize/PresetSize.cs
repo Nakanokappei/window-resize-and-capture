@@ -38,6 +38,10 @@ public class PresetSize
     private const string EmbedLeftToRight = "\u202A";
     private const string PopEmbedding = "\u202C";
 
+    // Computed for the menu, never stored. Without this the settings file gained
+    // a DisplayName beside every custom size, and in a right-to-left language
+    // that copy carried the two invisible characters below into the file.
+    [JsonIgnore]
     public string DisplayName => App.ReadsRightToLeft
         ? EmbedLeftToRight + $"{Width} x {Height}" + PopEmbedding
         : $"{Width} x {Height}";
