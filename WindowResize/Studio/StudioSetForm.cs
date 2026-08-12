@@ -882,10 +882,14 @@ internal sealed class StudioSetForm : Form
     // a listing frame, from a setting Windows Update can change while nobody is
     // looking.
     //
-    // 1.54 is what the points came to on the machine the pictures were approved
-    // on: a band of 96 pixels and a heading of 148. The body is half the
-    // heading, as it was.
-    private float HeadlineHeight => BandHeight * 1.54f;
+    // Whole bands: two for the heading, one for the body. Every measure on the
+    // set is now a whole number of taskbar heights, so the picture sits on one
+    // grid and a reader can see what the grid is. The points these replace came
+    // to 1.54 bands on the machine the pictures were approved on, so the type is
+    // larger than it was there - a quarter more.
+    private int HeadlineHeight => BandHeight * 2;
+
+    private int BodyHeight => BandHeight;
 
     // How tall one line of the clock is, which is the smallest measure in the
     // picture. A pose keeps this much between whatever it opens and the top of the
@@ -911,7 +915,7 @@ internal sealed class StudioSetForm : Form
         using var headlineFont = new Font(
             "Segoe UI", HeadlineHeight, FontStyle.Bold, GraphicsUnit.Pixel);
         using var bodyFont = new Font(
-            "Segoe UI", HeadlineHeight / 2f, GraphicsUnit.Pixel);
+            "Segoe UI", BodyHeight, GraphicsUnit.Pixel);
         using var headlineInk = new SolidBrush(Color.White);
         using var bodyInk = new SolidBrush(Color.FromArgb(214, 224, 238));
 
