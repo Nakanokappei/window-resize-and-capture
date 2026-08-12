@@ -40,6 +40,9 @@ internal static class StudioCommandLine
     [DllImport("kernel32.dll")]
     private static extern bool FreeConsole();
 
+    [DllImport("user32.dll")]
+    private static extern uint GetDpiForSystem();
+
     private const int ParentProcess = -1;
 
     // True when the app was asked to print its shot list. The list goes to the
@@ -74,6 +77,18 @@ internal static class StudioCommandLine
             var display = Screen.PrimaryScreen?.Bounds ?? Rectangle.Empty;
             text.AppendLine("screen:");
             text.AppendLine($"  {display.Width}x{display.Height}");
+
+            // The taskbar on this machine, which is the unit every measure in a
+            // picture is a multiple of, and the DPI it was measured at. Both are
+            // read here and now; neither is a number this file knows in advance.
+            //
+            // Reported because together they are what says whether a shoot will
+            // match the pictures already on the listing. Windows Update changed
+            // the scaling on the machine these were taken on, and the pictures
+            // came out with half the type in them - a change nothing else here
+            // would have shown until somebody looked at a picture.
+            text.AppendLine("taskbar:");
+            text.AppendLine($"  {StudioShell.Read().Height}px at {GetDpiForSystem()} dpi");
 
             using var output = Console.OpenStandardOutput();
             var bytes = new UTF8Encoding(false).GetBytes(text.ToString());

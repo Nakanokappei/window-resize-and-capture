@@ -90,8 +90,10 @@ views="$(echo "$listing" | awk '/^views:/{take=1;next} /^[a-z]+:/{take=0} take{p
 languages="$(echo "$listing" | awk '/^languages:/{getline; print}')"
 size="$(echo "$listing" | awk '/^size:/{getline; print $1}')"
 screen="$(echo "$listing" | awk '/^screen:/{getline; print $1}')"
+taskbar="$(echo "$listing" | awk '/^taskbar:/{getline; $1=$1; print}')"
 
-if [ -z "$views" ] || [ -z "$languages" ] || [ -z "$size" ] || [ -z "$screen" ]; then
+if [ -z "$views" ] || [ -z "$languages" ] || [ -z "$size" ] || [ -z "$screen" ] ||
+   [ -z "$taskbar" ]; then
   echo "Could not read the shot list from --list-views" >&2
   exit 1
 fi
@@ -130,6 +132,13 @@ fi
 
 total=$(( $(echo "$views" | wc -w) * $(echo "$languages" | wc -w) ))
 echo "  $total pictures at $size"
+
+# Every measure in a picture is a multiple of the taskbar on this machine, so
+# this line is what says whether the pictures will match the ones already on the
+# listing. Those were taken with a taskbar of 96 pixels at 192 dpi. Printed
+# rather than enforced: another machine with another taskbar is free to take
+# them, as long as whoever runs this can see that is what is happening.
+echo "  taskbar $taskbar"
 echo
 
 # ── Taking the pictures ────────────────────────────────────────────────────
