@@ -2,7 +2,7 @@
 
 **Window Resize & Capture**
 
-Last updated: August 1, 2026
+Last updated: August 12, 2026
 
 *日本語版はこのページの下部にあります。*
 
@@ -23,9 +23,9 @@ Window Resize & Capture is a system tray app. It resizes app windows to preset s
 
 The app still sends nothing on its own. But Windows can send a report to Microsoft when an app crashes or stops responding. This is a Windows feature called Windows Error Reporting. It is part of Windows, not part of this app.
 
-You decide whether Windows sends these reports. To change the setting, open **Settings > Privacy & security > Diagnostics & feedback**. Microsoft's privacy statement explains how Microsoft handles the data.
+Windows sends these reports only from a PC where sending diagnostic data is turned on. You control that setting. To change it, open **Settings > Privacy & security > Diagnostics & feedback**. The app cannot change the setting, and it cannot see what Windows sends. Windows sends the report to Microsoft, not to the developer. Microsoft's privacy statement explains how Microsoft handles the data.
 
-Microsoft then shows the developer a summary in Partner Center: how many times the app crashed or stopped responding, which version it happened in, and technical details about the failure. The summary describes the failure, not you. The developer uses it only to fix problems.
+Microsoft then shows the developer a summary in Partner Center: how many times the app crashed or stopped responding, which version it happened in, and the technical details Windows recorded about the failure. The summary describes the failure. It does not tell the developer who you are. The developer uses it only to fix problems.
 
 ## What the app saves on your PC
 
@@ -59,7 +59,7 @@ If you have questions about this policy, open an issue in the [GitHub repository
 
 **Window Resize & Capture**
 
-最終更新日: 2026 年 8 月 1 日
+最終更新日: 2026 年 8 月 12 日
 
 ## 概要
 
@@ -76,9 +76,9 @@ Window Resize & Capture は、アプリケーションのウィンドウを既�
 
 ### Microsoft Store 版をご利用の場合
 
-アプリ自身が何かを送信しない点は変わりません。ただし、アプリのクラッシュや応答停止については、Windows が Windows エラー報告 (Windows Error Reporting) を通じて Microsoft に報告することがあります。これは本アプリの機能ではなく Windows の機能です。報告が行われるかどうかは、お使いの Windows の診断データ設定（[設定] > [プライバシーとセキュリティ] > [診断とフィードバック]）と Microsoft のプライバシーステートメントによって決まり、本アプリが制御するものではありません。
+アプリ自身が何かを送信しない点は変わりません。ただし、アプリのクラッシュや応答停止については、Windows が Windows エラー報告 (Windows Error Reporting) を通じて Microsoft に報告することがあります。これは本アプリの機能ではなく Windows の機能です。報告が行われるのは、診断データの送信を有効にしている機械だけです。この設定は [設定] > [プライバシーとセキュリティ] > [診断とフィードバック] で変更できます。本アプリはこの設定を変更できず、送信される内容を読むこともできません。報告の送信先は Microsoft であり、開発者に直接送られることはありません。Microsoft がこのデータをどのように扱うかは、Microsoft のプライバシーステートメントが定めます。
 
-開発者は、パートナーセンターを通じて本アプリの信頼性に関する集計情報を受け取ります。具体的には、クラッシュや応答停止が何件発生したか、どのバージョンで発生したか、および Windows がそれに付随して記録する技術的な障害情報です。これらは発生した障害についての情報であって、利用者個人を特定するものではなく、不具合の修正のみに使用します。
+開発者は、パートナーセンターを通じて本アプリの信頼性に関する集計情報を受け取ります。具体的には、クラッシュや応答停止が何件発生したか、どのバージョンで発生したか、および Windows がそれに付随して記録する技術的な障害情報です。これらは発生した障害についての情報です。開発者がこれによって利用者を特定することはできません。不具合の修正のみに使用します。
 
 ## ローカルに保存されるデータ
 
