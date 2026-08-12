@@ -104,12 +104,15 @@ public class SettingsForm : Form
         MaximizeBox = false;
         StartPosition = FormStartPosition.CenterScreen;
         ShowInTaskbar = true;
-        ClientSize = new Size(420, 384);
+        // Tall enough for the General tab, which is the longest of the three:
+        // both size lists at their full height, the editor under them and two
+        // check boxes under that.
+        ClientSize = new Size(420, 554);
 
         var tabs = new TabControl
         {
             Location = new Point(8, 8),
-            Size = new Size(404, 368),
+            Size = new Size(404, 538),
 
             // The form's own RightToLeftLayout mirrors what sits directly on it
             // and stops at a tab control, which carries its own. Without this
@@ -185,16 +188,27 @@ public class SettingsForm : Form
         var tab = new TabPage(Strings.SettingsGeneral);
 
         // ── Built-in sizes group ──
+        //
+        // Tall enough for every built-in size at once. Four rows of thirteen
+        // showed while the list was something to read; it is something to clear
+        // check boxes in now, and nine sizes hidden under a scroll bar is nine
+        // sizes a person has to go looking for. Everything below is placed from
+        // this number, so the group can be resized here alone.
+        // Generous rather than exact: a list box trims its own height to a whole
+        // number of rows, so slack disappears and a shortfall of a pixel costs a
+        // whole row. 228 showed twelve of the thirteen.
+        int builtInHeight = 248;
+
         var builtInGroup = new GroupBox
         {
             Text = Strings.SettingsBuiltIn,
-            Size = new Size(380, 100)
+            Size = new Size(380, builtInHeight + 32)
         };
         Place(tab, builtInGroup, 8, 8);
 
         _builtInList = new CheckedListBox
         {
-            Size = new Size(364, 70),
+            Size = new Size(364, builtInHeight),
             BorderStyle = BorderStyle.None,
             CheckOnClick = true,
             AccessibleName = Strings.SettingsBuiltIn
@@ -203,12 +217,13 @@ public class SettingsForm : Form
         Place(builtInGroup, _builtInList, 8, 20);
 
         // ── Custom sizes group ──
+        int customTop = 8 + builtInHeight + 32 + 8;
         var customGroup = new GroupBox
         {
             Text = Strings.SettingsCustom,
             Size = new Size(380, 150)
         };
-        Place(tab, customGroup, 8, 116);
+        Place(tab, customGroup, 8, customTop);
 
         _customList = new CheckedListBox
         {
@@ -290,7 +305,7 @@ public class SettingsForm : Form
 
         // ── Size by client area ──
         _resizeClientAreaCheck = AddSettingCheck(
-            tab, Strings.SettingsResizeClientArea, new Point(12, 274),
+            tab, Strings.SettingsResizeClientArea, new Point(12, customTop + 158),
             _store.ResizeClientArea,
             on =>
             {
@@ -303,7 +318,7 @@ public class SettingsForm : Form
         // also the only one that does not save and notify: writing it registers
         // the app with Windows itself.
         _launchAtLoginCheck = AddSettingCheck(
-            tab, Strings.SettingsLaunchAtLogin, new Point(12, 300),
+            tab, Strings.SettingsLaunchAtLogin, new Point(12, customTop + 184),
             _store.LaunchAtLogin,
             on => _store.LaunchAtLogin = on);
 
