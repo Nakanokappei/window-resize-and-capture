@@ -22,6 +22,23 @@ namespace WindowResizeCapture.Studio;
 // repository or shipped inside the product.
 internal sealed class StudioSetForm : Form
 {
+    // Every measure this file decides for itself is a whole number of one of two
+    // units: the height of the taskbar, and the height of one line of the clock
+    // standing in it. The band is measured on the machine taking the picture and
+    // the clock's line follows the band, so a picture keeps its proportions
+    // wherever it is taken, and a reader can see what the grid is.
+    //
+    // Two kinds of number sit outside the rule, deliberately:
+    //
+    //   - what Windows measures. The icons, the search box and the clock are a
+    //     reproduction of a real taskbar, and a real taskbar puts a pinned icon
+    //     at 0.49 of its height, a notification glyph at 0.33, the clock at
+    //     0.245. Rounded to whole units they stop looking like Windows, which is
+    //     the one thing this band has to do.
+    //   - what a typeface measures. The leading a font reports is the font's
+    //     own; the two ratios the marketing line passes to DrawBlock tighten it
+    //     rather than replace it.
+
     // Measured on a real taskbar: the clock's text stops 0.42 of the band's
     // height from the screen's edge, and stands 0.35 clear of the icons beside
     // it. Both were fixed pixel counts before, which held at one band height
@@ -148,7 +165,7 @@ internal sealed class StudioSetForm : Form
             var slot = NotificationSlot(TrayIconPlace);
             return PointToScreen(new Point(
                 slot.Left + slot.Width / 2,
-                ClientSize.Height - BandHeight - BandHeight / 4));
+                ClientSize.Height - BandHeight - ClockLineHeight));
         }
     }
 
@@ -934,7 +951,7 @@ internal sealed class StudioSetForm : Form
         // left over from the headline's leading. Closing the headline's lines up
         // took that leftover away and left the paragraph sitting on top of the
         // headline; the space between them belongs here, where it can be seen.
-        int bodyTop = (int)(margin + used + ClientSize.Height / 20f);
+        int bodyTop = (int)(margin + used) + ClockLineHeight * 2;
         DrawBlock(canvas, _copy.Body, bodyFont, bodyInk, margin, bodyTop, 0.95f);
     }
 
@@ -978,7 +995,7 @@ internal sealed class StudioSetForm : Form
         // small looked adrift in the middle of a margin as deep as the taskbar,
         // and the measurement it wants is its own.
         float height = font.GetHeight(canvas);
-        int inset = (int)Math.Ceiling(height);
+        int inset = ClockLineHeight;
 
         canvas.DrawString(notice, font, ink, new RectangleF(
             inset, inset, ClientSize.Width - inset * 2, height + 1), format);
