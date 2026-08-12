@@ -136,6 +136,18 @@
   <data name="SettingsMoveToMainScreen" xml:space="preserve">
     <value>Move to main screen</value>
   </data>
+  <data name="SettingsEdgeMargin" xml:space="preserve">
+    <value>Margin from the screen edge</value>
+  </data>
+  <data name="SettingsEdgeMarginNone" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="SettingsEdgeMarginTaskbar" xml:space="preserve">
+    <value>The height of the taskbar</value>
+  </data>
+  <data name="SettingsEdgeMarginTitleBar" xml:space="preserve">
+    <value>The height of a title bar</value>
+  </data>
   <data name="MenuCurrentSize" xml:space="preserve">
     <value>Current</value>
   </data>

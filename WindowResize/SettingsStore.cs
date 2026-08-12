@@ -19,6 +19,20 @@ public enum WindowPosition
     BottomLeft, Bottom, BottomRight
 }
 
+// How far a window stands off the screen edge it is sent to.
+//
+// Only the edges. A window sent to the middle of the screen touches no edge, so
+// nothing is held away from anything there, whichever of these is chosen. The
+// same goes for the one coordinate a side position leaves alone: a window at the
+// top of the screen is centred left to right, and only its top edge is held off.
+[JsonConverter(typeof(JsonStringEnumConverter<ScreenEdgeMargin>))]
+public enum ScreenEdgeMargin
+{
+    None,
+    Taskbar,
+    TitleBar
+}
+
 // Thread-safe singleton that persists all user preferences to a JSON file
 // in %APPDATA%/WindowsResizeCapture/settings.json. Also manages the
 // "launch at login" registration via either the Windows registry (standalone
@@ -49,6 +63,10 @@ public partial class SettingsStore
     public bool BringToFront { get; set; } = true;
     public WindowPosition? Position { get; set; }
     public bool MoveToMainScreen { get; set; }
+
+    // How far the position above holds a window off the edge it sends it to.
+    // None by default, which is where every window has landed until now.
+    public ScreenEdgeMargin EdgeMargin { get; set; }
 
     // When true, preset dimensions size the window's client area (content)
     // rather than its outer frame, so the visible content matches the number.
@@ -298,6 +316,7 @@ public partial class SettingsStore
             BringToFront = data?.BringToFront ?? true;
             Position = data?.Position;
             MoveToMainScreen = data?.MoveToMainScreen ?? false;
+            EdgeMargin = data?.EdgeMargin ?? ScreenEdgeMargin.None;
             ResizeClientArea = data?.ResizeClientArea ?? false;
 
             // Capture settings (bypass property setters to avoid auto-logic).
@@ -358,6 +377,7 @@ public partial class SettingsStore
                 BringToFront = BringToFront,
                 Position = Position,
                 MoveToMainScreen = MoveToMainScreen,
+                EdgeMargin = EdgeMargin,
                 ResizeClientArea = ResizeClientArea,
                 CaptureEnabled = CaptureEnabled,
                 CaptureSaveToFile = CaptureSaveToFile,
@@ -401,6 +421,7 @@ public partial class SettingsStore
         public bool BringToFront { get; set; } = true;
         public WindowPosition? Position { get; set; }
         public bool MoveToMainScreen { get; set; }
+        public ScreenEdgeMargin EdgeMargin { get; set; }
         public bool ResizeClientArea { get; set; }
         public bool? CaptureEnabled { get; set; }
         public bool? CaptureSaveToFile { get; set; }

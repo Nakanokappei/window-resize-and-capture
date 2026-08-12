@@ -75,4 +75,16 @@
   <data name="SettingsResizeClientArea" xml:space="preserve"><value>Ubah ukuran area klien, bukan seluruh jendela</value></data>
   <data name="SettingsCaptureClientArea" xml:space="preserve"><value>Tangkap hanya area klien</value></data>
   <data name="AlertResizeElevatedBody" xml:space="preserve"><value>Jendela ini milik aplikasi yang berjalan sebagai administrator, sehingga Windows tidak mengizinkan Window Resize &amp; Capture mengubah ukurannya. Jalankan aplikasi ini sebagai administrator untuk mengubah ukuran jendela seperti ini.</value></data>
+  <data name="SettingsEdgeMargin" xml:space="preserve">
+    <value>Margin dari tepi layar</value>
+  </data>
+  <data name="SettingsEdgeMarginNone" xml:space="preserve">
+    <value>Tidak ada</value>
+  </data>
+  <data name="SettingsEdgeMarginTaskbar" xml:space="preserve">
+    <value>Tinggi taskbar</value>
+  </data>
+  <data name="SettingsEdgeMarginTitleBar" xml:space="preserve">
+    <value>Tinggi bilah judul</value>
+  </data>
 </root>

@@ -75,4 +75,16 @@
   <data name="SettingsResizeClientArea" xml:space="preserve"><value>Ajustar el area de cliente, no toda la ventana</value></data>
   <data name="SettingsCaptureClientArea" xml:space="preserve"><value>Capturar solo el area de cliente</value></data>
   <data name="AlertResizeElevatedBody" xml:space="preserve"><value>Esta ventana pertenece a una aplicacion que se ejecuta como administrador, por lo que Windows no permite que Window Resize &amp; Capture cambie su tamano. Ejecuta esta aplicacion como administrador para redimensionar ventanas como esta.</value></data>
+  <data name="SettingsEdgeMargin" xml:space="preserve">
+    <value>Margen desde el borde de la pantalla</value>
+  </data>
+  <data name="SettingsEdgeMarginNone" xml:space="preserve">
+    <value>Ninguno</value>
+  </data>
+  <data name="SettingsEdgeMarginTaskbar" xml:space="preserve">
+    <value>Alto de la barra de tareas</value>
+  </data>
+  <data name="SettingsEdgeMarginTitleBar" xml:space="preserve">
+    <value>Alto de una barra de título</value>
+  </data>
 </root>

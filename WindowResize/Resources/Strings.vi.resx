@@ -75,4 +75,16 @@
   <data name="SettingsResizeClientArea" xml:space="preserve"><value>Thay đổi kích thước vùng nội dung, không phải toàn bộ cửa sổ</value></data>
   <data name="SettingsCaptureClientArea" xml:space="preserve"><value>Chỉ chụp vùng nội dung</value></data>
   <data name="AlertResizeElevatedBody" xml:space="preserve"><value>Cửa sổ này thuộc về một ứng dụng đang chạy với quyền quản trị viên, nên Windows không cho phép Window Resize &amp; Capture thay đổi kích thước. Hãy chạy ứng dụng này với quyền quản trị viên để thay đổi kích thước những cửa sổ như vậy.</value></data>
+  <data name="SettingsEdgeMargin" xml:space="preserve">
+    <value>Lề từ cạnh màn hình</value>
+  </data>
+  <data name="SettingsEdgeMarginNone" xml:space="preserve">
+    <value>Không</value>
+  </data>
+  <data name="SettingsEdgeMarginTaskbar" xml:space="preserve">
+    <value>Chiều cao của thanh tác vụ</value>
+  </data>
+  <data name="SettingsEdgeMarginTitleBar" xml:space="preserve">
+    <value>Chiều cao của thanh tiêu đề</value>
+  </data>
 </root>

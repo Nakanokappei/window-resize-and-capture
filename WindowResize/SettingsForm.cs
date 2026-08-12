@@ -15,6 +15,7 @@ public class SettingsForm : Form
     // General tab controls
     private CheckedListBox _builtInList = null!;
     private CheckedListBox _customList = null!;
+    private RadioButton[] _edgeMarginChoices = Array.Empty<RadioButton>();
 
     // Set while the lists are being filled, because SetItemChecked raises
     // ItemCheck as if a person had clicked the box.
@@ -629,6 +630,51 @@ public class SettingsForm : Form
             Place(tab, tile,
                 12 + col * (tileSize + tileGap),
                 gridTop + row * (tileSize + tileGap));
+        }
+
+        // How far the position above holds the window off the edge it sends it
+        // to. Under the grid, because it says something about what the grid does
+        // and means nothing without it.
+        int marginTop = gridTop + 3 * (tileSize + tileGap) + 12;
+        Place(tab, new Label
+        {
+            Text = Strings.SettingsEdgeMargin,
+            AutoSize = true
+        }, 12, marginTop);
+
+        _edgeMarginChoices = new RadioButton[3];
+        (string label, ScreenEdgeMargin margin)[] choices =
+        {
+            (Strings.SettingsEdgeMarginNone, ScreenEdgeMargin.None),
+            (Strings.SettingsEdgeMarginTaskbar, ScreenEdgeMargin.Taskbar),
+            (Strings.SettingsEdgeMarginTitleBar, ScreenEdgeMargin.TitleBar),
+        };
+
+        for (int i = 0; i < choices.Length; i++)
+        {
+            var choice = new RadioButton
+            {
+                Text = choices[i].label,
+                AutoSize = true,
+                Tag = choices[i].margin,
+                Checked = _store.EdgeMargin == choices[i].margin
+            };
+
+            // CheckedChanged arrives twice for one click - once for the button
+            // being cleared and once for the button being set - so only the one
+            // being set writes to the store.
+            choice.CheckedChanged += (sender, _) =>
+            {
+                if (sender is RadioButton picked && picked.Checked &&
+                    picked.Tag is ScreenEdgeMargin margin)
+                {
+                    _store.EdgeMargin = margin;
+                    _store.SaveAndNotify();
+                }
+            };
+
+            _edgeMarginChoices[i] = choice;
+            Place(tab, choice, 12, marginTop + 24 + i * 24);
         }
 
         RefreshPositionTiles();

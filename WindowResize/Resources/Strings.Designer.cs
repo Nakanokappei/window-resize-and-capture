@@ -300,6 +300,30 @@ namespace WindowResizeCapture {
             }
         }
 
+        internal static string SettingsEdgeMargin {
+            get {
+                return ResourceManager.GetString("SettingsEdgeMargin", resourceCulture) ?? "Margin from the screen edge";
+            }
+        }
+
+        internal static string SettingsEdgeMarginNone {
+            get {
+                return ResourceManager.GetString("SettingsEdgeMarginNone", resourceCulture) ?? "None";
+            }
+        }
+
+        internal static string SettingsEdgeMarginTaskbar {
+            get {
+                return ResourceManager.GetString("SettingsEdgeMarginTaskbar", resourceCulture) ?? "The height of the taskbar";
+            }
+        }
+
+        internal static string SettingsEdgeMarginTitleBar {
+            get {
+                return ResourceManager.GetString("SettingsEdgeMarginTitleBar", resourceCulture) ?? "The height of a title bar";
+            }
+        }
+
         internal static string SettingsMoveToMainScreen {
             get {
                 return ResourceManager.GetString("SettingsMoveToMainScreen", resourceCulture) ?? "Move to main screen";

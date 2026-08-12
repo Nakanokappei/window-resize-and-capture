@@ -75,4 +75,16 @@
   <data name="SettingsResizeClientArea" xml:space="preserve"><value>ウィンドウ全体ではなくクライアント領域をリサイズ</value></data>
   <data name="SettingsCaptureClientArea" xml:space="preserve"><value>クライアント領域のみキャプチャ</value></data>
   <data name="AlertResizeElevatedBody" xml:space="preserve"><value>このウィンドウは管理者として実行中のアプリのものです。Windows の制限により、Window Resize &amp; Capture からはサイズを変更できません。このアプリを管理者として実行すると、こうしたウィンドウもリサイズできます。</value></data>
+  <data name="SettingsEdgeMargin" xml:space="preserve">
+    <value>画面端からのマージン</value>
+  </data>
+  <data name="SettingsEdgeMarginNone" xml:space="preserve">
+    <value>なし</value>
+  </data>
+  <data name="SettingsEdgeMarginTaskbar" xml:space="preserve">
+    <value>タスク バーの高さ</value>
+  </data>
+  <data name="SettingsEdgeMarginTitleBar" xml:space="preserve">
+    <value>タイトル バーの高さ</value>
+  </data>
 </root>

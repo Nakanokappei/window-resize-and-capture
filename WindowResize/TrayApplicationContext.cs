@@ -327,7 +327,8 @@ public class TrayApplicationContext : ApplicationContext
             bringToFront: SettingsStore.Shared.BringToFront,
             position: SettingsStore.Shared.Position,
             moveToMainScreen: SettingsStore.Shared.MoveToMainScreen,
-            clientArea: SettingsStore.Shared.ResizeClientArea);
+            clientArea: SettingsStore.Shared.ResizeClientArea,
+            edgeMargin: SettingsStore.Shared.EdgeMargin);
 
         // On success capture the window; on failure explain the cause so
         // the user doesn't mistake a Windows restriction for an app bug.

@@ -75,4 +75,16 @@
   <data name="SettingsResizeClientArea" xml:space="preserve"><value>Clientbereich statt des ganzen Fensters anpassen</value></data>
   <data name="SettingsCaptureClientArea" xml:space="preserve"><value>Nur den Clientbereich aufnehmen</value></data>
   <data name="AlertResizeElevatedBody" xml:space="preserve"><value>Dieses Fenster gehort zu einer als Administrator ausgefuhrten App, daher lasst Windows nicht zu, dass Window Resize &amp; Capture es anpasst. Fuhren Sie diese App als Administrator aus, um solche Fenster zu skalieren.</value></data>
+  <data name="SettingsEdgeMargin" xml:space="preserve">
+    <value>Abstand zum Bildschirmrand</value>
+  </data>
+  <data name="SettingsEdgeMarginNone" xml:space="preserve">
+    <value>Keiner</value>
+  </data>
+  <data name="SettingsEdgeMarginTaskbar" xml:space="preserve">
+    <value>Höhe der Taskleiste</value>
+  </data>
+  <data name="SettingsEdgeMarginTitleBar" xml:space="preserve">
+    <value>Höhe einer Titelleiste</value>
+  </data>
 </root>

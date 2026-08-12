@@ -75,4 +75,16 @@
   <data name="SettingsResizeClientArea" xml:space="preserve"><value>Ridimensiona l'area client, non l'intera finestra</value></data>
   <data name="SettingsCaptureClientArea" xml:space="preserve"><value>Cattura solo l'area client</value></data>
   <data name="AlertResizeElevatedBody" xml:space="preserve"><value>Questa finestra appartiene a un'app in esecuzione come amministratore, quindi Windows non consente a Window Resize &amp; Capture di ridimensionarla. Esegui questa app come amministratore per ridimensionare finestre di questo tipo.</value></data>
+  <data name="SettingsEdgeMargin" xml:space="preserve">
+    <value>Margine dal bordo dello schermo</value>
+  </data>
+  <data name="SettingsEdgeMarginNone" xml:space="preserve">
+    <value>Nessuno</value>
+  </data>
+  <data name="SettingsEdgeMarginTaskbar" xml:space="preserve">
+    <value>Altezza della barra delle applicazioni</value>
+  </data>
+  <data name="SettingsEdgeMarginTitleBar" xml:space="preserve">
+    <value>Altezza di una barra del titolo</value>
+  </data>
 </root>

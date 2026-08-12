@@ -75,4 +75,16 @@
   <data name="SettingsResizeClientArea" xml:space="preserve"><value>調整工作區大小，而非整個視窗</value></data>
   <data name="SettingsCaptureClientArea" xml:space="preserve"><value>僅擷取工作區</value></data>
   <data name="AlertResizeElevatedBody" xml:space="preserve"><value>此視窗屬於以系統管理員身分執行的應用程式，因此 Windows 不允許 Window Resize &amp; Capture 調整其大小。請以系統管理員身分執行本應用程式以調整這類視窗。</value></data>
+  <data name="SettingsEdgeMargin" xml:space="preserve">
+    <value>與螢幕邊緣的邊界</value>
+  </data>
+  <data name="SettingsEdgeMarginNone" xml:space="preserve">
+    <value>無</value>
+  </data>
+  <data name="SettingsEdgeMarginTaskbar" xml:space="preserve">
+    <value>工作列的高度</value>
+  </data>
+  <data name="SettingsEdgeMarginTitleBar" xml:space="preserve">
+    <value>標題列的高度</value>
+  </data>
 </root>

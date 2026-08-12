@@ -75,4 +75,16 @@
   <data name="SettingsResizeClientArea" xml:space="preserve"><value>पूरी विंडो नहीं, क्लाइंट क्षेत्र का आकार बदलें</value></data>
   <data name="SettingsCaptureClientArea" xml:space="preserve"><value>केवल क्लाइंट क्षेत्र कैप्चर करें</value></data>
   <data name="AlertResizeElevatedBody" xml:space="preserve"><value>यह विंडो व्यवस्थापक के रूप में चल रहे किसी ऐप की है, इसलिए Windows, Window Resize &amp; Capture को इसका आकार बदलने नहीं देता। ऐसी विंडो का आकार बदलने के लिए इस ऐप को व्यवस्थापक के रूप में चलाएँ।</value></data>
+  <data name="SettingsEdgeMargin" xml:space="preserve">
+    <value>स्क्रीन के किनारे से मार्जिन</value>
+  </data>
+  <data name="SettingsEdgeMarginNone" xml:space="preserve">
+    <value>कोई नहीं</value>
+  </data>
+  <data name="SettingsEdgeMarginTaskbar" xml:space="preserve">
+    <value>टास्कबार की ऊंचाई</value>
+  </data>
+  <data name="SettingsEdgeMarginTitleBar" xml:space="preserve">
+    <value>शीर्षक बार की ऊंचाई</value>
+  </data>
 </root>

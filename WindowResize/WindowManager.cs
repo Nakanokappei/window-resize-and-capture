@@ -117,6 +117,12 @@ public static class WindowManager
     [DllImport("user32.dll")]
     private static extern bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFO lpmi);
 
+    [DllImport("user32.dll")]
+    private static extern int GetSystemMetricsForDpi(int index, uint dpi);
+
+    [DllImport("user32.dll")]
+    private static extern uint GetDpiForWindow(IntPtr hwnd);
+
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern IntPtr OpenProcess(uint dwDesiredAccess, bool bInheritHandle, uint dwProcessId);
 
@@ -155,6 +161,10 @@ public static class WindowManager
     // higher-integrity (elevated) target, which is how we detect elevation.
     private const uint PROCESS_QUERY_INFORMATION = 0x0400;
     private const uint MONITOR_DEFAULTTONEAREST = 2;
+
+    // The height of a title bar, which is one of the margins a window can be
+    // held off a screen edge by.
+    private const int SM_CYCAPTION = 4;
     private const uint MONITOR_DEFAULTTOPRIMARY = 1;
     private const int SW_RESTORE = 9;
 
@@ -261,7 +271,7 @@ public static class WindowManager
     // Returns an outcome so the caller can explain why a resize was refused.
     public static ResizeOutcome ResizeWindow(WindowInfo window, PresetSize size,
         bool bringToFront = false, WindowPosition? position = null, bool moveToMainScreen = false,
-        bool clientArea = false)
+        bool clientArea = false, ScreenEdgeMargin edgeMargin = ScreenEdgeMargin.None)
     {
         int targetWidth = size.Width;
         int targetHeight = size.Height;
@@ -297,7 +307,9 @@ public static class WindowManager
         {
             var workArea = ResolveTargetWorkArea(window.Handle, moveToMainScreen);
             var anchor = position ?? WindowPosition.Center;
-            var origin = CalculateSnapOrigin(anchor, targetWidth, targetHeight, workArea);
+            int standOff = MarginInPixels(edgeMargin, window.Handle, workArea);
+            var origin = CalculateSnapOrigin(
+                anchor, targetWidth, targetHeight, workArea, standOff);
 
             SetWindowPos(
                 window.Handle, IntPtr.Zero,
@@ -404,8 +416,14 @@ public static class WindowManager
 
     // Compute the top-left pixel coordinate for a window of the given size
     // snapped to one of nine anchor positions within the work area.
+    //
+    // standOff is how far an edge holds the window away from itself. It is added
+    // to the coordinates that sit against an edge and left out of the ones that
+    // are centred, so the middle of the screen is unaffected however large it is:
+    // there is no edge there to stand off from.
     private static Point CalculateSnapOrigin(
-        WindowPosition anchor, int windowWidth, int windowHeight, RECT workArea)
+        WindowPosition anchor, int windowWidth, int windowHeight, RECT workArea,
+        int standOff = 0)
     {
         int areaWidth = workArea.Right - workArea.Left;
         int areaHeight = workArea.Bottom - workArea.Top;
@@ -414,23 +432,62 @@ public static class WindowManager
         int x = anchor switch
         {
             WindowPosition.TopLeft or WindowPosition.Left or WindowPosition.BottomLeft
-                => workArea.Left,
+                => workArea.Left + standOff,
             WindowPosition.Top or WindowPosition.Center or WindowPosition.Bottom
                 => workArea.Left + (areaWidth - windowWidth) / 2,
-            _ => workArea.Right - windowWidth,
+            _ => workArea.Right - windowWidth - standOff,
         };
 
         // Vertical coordinate based on the anchor row
         int y = anchor switch
         {
             WindowPosition.TopLeft or WindowPosition.Top or WindowPosition.TopRight
-                => workArea.Top,
+                => workArea.Top + standOff,
             WindowPosition.Left or WindowPosition.Center or WindowPosition.Right
                 => workArea.Top + (areaHeight - windowHeight) / 2,
-            _ => workArea.Bottom - windowHeight,
+            _ => workArea.Bottom - windowHeight - standOff,
         };
 
         return new Point(x, y);
+    }
+
+    // How many pixels the chosen margin comes to for this window's display.
+    //
+    // The taskbar is measured as the difference between the display and the work
+    // area on it, taken on whichever side the taskbar is: that is the taskbar's
+    // own thickness, and it is 0 on a machine set to hide it, which leaves the
+    // window against the edge as it was before this setting existed.
+    //
+    // A title bar is asked for at the window's own DPI. SM_CYCAPTION without a
+    // DPI answers for 96 dots per inch whatever the display is doing, which on a
+    // 200 per cent display is half the title bar the person is looking at.
+    private static int MarginInPixels(
+        ScreenEdgeMargin margin, IntPtr window, RECT workArea)
+    {
+        switch (margin)
+        {
+            case ScreenEdgeMargin.Taskbar:
+                var display = DisplayBoundsFor(window);
+                return Math.Max(Math.Max(
+                        workArea.Left - display.Left, display.Right - workArea.Right),
+                    Math.Max(
+                        workArea.Top - display.Top, display.Bottom - workArea.Bottom));
+
+            case ScreenEdgeMargin.TitleBar:
+                return GetSystemMetricsForDpi(SM_CYCAPTION, GetDpiForWindow(window));
+
+            default:
+                return 0;
+        }
+    }
+
+    // The whole of the display this window is on, taskbar included.
+    private static RECT DisplayBoundsFor(IntPtr window)
+    {
+        IntPtr monitor = MonitorFromWindow(window, MONITOR_DEFAULTTONEAREST);
+        var info = new MONITORINFO { cbSize = Marshal.SizeOf<MONITORINFO>() };
+        GetMonitorInfo(monitor, ref info);
+        return info.rcMonitor;
     }
 
     // Force a window to the foreground even from a background/tray process.

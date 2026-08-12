@@ -75,4 +75,16 @@
   <data name="SettingsResizeClientArea" xml:space="preserve"><value>调整客户区大小，而非整个窗口</value></data>
   <data name="SettingsCaptureClientArea" xml:space="preserve"><value>仅捕获客户区</value></data>
   <data name="AlertResizeElevatedBody" xml:space="preserve"><value>此窗口属于以管理员身份运行的应用，因此 Windows 不允许 Window Resize &amp; Capture 调整其大小。请以管理员身份运行本应用以调整此类窗口。</value></data>
+  <data name="SettingsEdgeMargin" xml:space="preserve">
+    <value>与屏幕边缘的边距</value>
+  </data>
+  <data name="SettingsEdgeMarginNone" xml:space="preserve">
+    <value>无</value>
+  </data>
+  <data name="SettingsEdgeMarginTaskbar" xml:space="preserve">
+    <value>任务栏的高度</value>
+  </data>
+  <data name="SettingsEdgeMarginTitleBar" xml:space="preserve">
+    <value>标题栏的高度</value>
+  </data>
 </root>
