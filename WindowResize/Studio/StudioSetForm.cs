@@ -870,6 +870,23 @@ internal sealed class StudioSetForm : Form
     // further in than the band it sits above.
     internal int PictureMargin => BandHeight;
 
+    // The marketing line, measured against the taskbar rather than against the
+    // picture, and in pixels rather than in points.
+    //
+    // Everything else in the set is already a multiple of the band: the margin
+    // above, the clock, the icons beside it. The two fonts here were the last
+    // measures taken from the picture's own height, and they were given in
+    // points, which the display's scaling turns into a different number of
+    // pixels on every machine. The same words came out 147 pixels tall at 200%
+    // and 74 at 100%, in a picture of exactly the same size - half the type in
+    // a listing frame, from a setting Windows Update can change while nobody is
+    // looking.
+    //
+    // 1.54 is what the points came to on the machine the pictures were approved
+    // on: a band of 96 pixels and a heading of 148. The body is half the
+    // heading, as it was.
+    private float HeadlineHeight => BandHeight * 1.54f;
+
     // How tall one line of the clock is, which is the smallest measure in the
     // picture. A pose keeps this much between whatever it opens and the top of the
     // taskbar: the settings window used to end exactly where the band begins, and
@@ -891,8 +908,10 @@ internal sealed class StudioSetForm : Form
 
         int margin = PictureMargin;
 
-        using var headlineFont = new Font("Segoe UI", ClientSize.Height / 26f, FontStyle.Bold);
-        using var bodyFont = new Font("Segoe UI", ClientSize.Height / 52f);
+        using var headlineFont = new Font(
+            "Segoe UI", HeadlineHeight, FontStyle.Bold, GraphicsUnit.Pixel);
+        using var bodyFont = new Font(
+            "Segoe UI", HeadlineHeight / 2f, GraphicsUnit.Pixel);
         using var headlineInk = new SolidBrush(Color.White);
         using var bodyInk = new SolidBrush(Color.FromArgb(214, 224, 238));
 
