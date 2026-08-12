@@ -740,7 +740,7 @@ public class SettingsForm : Form
     {
         string display = size.DisplayName;
         if (!string.IsNullOrEmpty(size.Label))
-            display += $"    {size.Label}";
+            display += $"    {size.DisplayLabel}";
         return display;
     }
 

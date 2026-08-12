@@ -46,6 +46,18 @@ public class PresetSize
         ? EmbedLeftToRight + $"{Width} x {Height}" + PopEmbedding
         : $"{Width} x {Height}";
 
+    // The label as it is shown, fenced off the same way and for the same reason.
+    //
+    // A name that ends in a mark rather than a letter - WSXGA+, HD+, WXGA+ - had
+    // the + carried to the front of the line in a language that reads right to
+    // left, because a mark on its own belongs to whichever direction surrounds
+    // it. The Arabic settings list offered a size called +WSXGA and the Arabic
+    // menu a size called +HD.
+    [JsonIgnore]
+    public string? DisplayLabel => Label != null && App.ReadsRightToLeft
+        ? EmbedLeftToRight + Label + PopEmbedding
+        : Label;
+
     public PresetSize() { }
 
     public PresetSize(int width, int height, string? label = null)

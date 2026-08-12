@@ -308,7 +308,7 @@ public class TrayApplicationContext : ApplicationContext
             var sizeItem = new ToolStripMenuItem(size.DisplayName);
 
             if (!string.IsNullOrEmpty(size.Label))
-                sizeItem.ShortcutKeyDisplayString = size.Label;
+                sizeItem.ShortcutKeyDisplayString = size.DisplayLabel;
 
             sizeItem.Click += (_, _) => PerformResize(window, size);
 
