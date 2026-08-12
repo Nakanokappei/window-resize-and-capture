@@ -186,3 +186,16 @@ begin
 
   Result := '';
 end;
+
+// Uninstalling has the same problem and hides it better. Removing the app while
+// it runs answered "uninstall complete" - the entry in installed programs gone,
+// the launch-at-login value gone - and left 77 megabytes of executable behind in
+// a folder it could not remove either, without even queueing the file for the
+// next restart. The log said "Failed to delete the file; it may be in use (5)".
+function InitializeUninstall(): Boolean;
+begin
+  EndTheAppIfItIsRunning('{#MyAppExeName}');
+  EndTheAppIfItIsRunning('WindowsResizeCapture.exe');
+  Sleep(500);
+  Result := True;
+end;
