@@ -153,6 +153,12 @@ public class TrayApplicationContext : ApplicationContext
     {
         var windows = staged ?? WindowManager.DiscoverWindows();
 
+        // Staged windows mean a listing picture is being taken, and a listing
+        // picture has to read the same whoever takes it. So the sizes offered
+        // there are all of them, rather than the ones this display can hold and
+        // the ones whose box the operator happens to have cleared.
+        bool everySize = staged != null;
+
         if (windows.Count == 0)
         {
             parent.DropDownItems.Add(new ToolStripMenuItem(Strings.MenuNoWindows) { Enabled = false });
@@ -171,7 +177,7 @@ public class TrayApplicationContext : ApplicationContext
         {
             // Flat list — every window gets its own top-level item
             foreach (var window in windows)
-                AddFlatWindowItem(parent, window, menuFont, maxMenuWidth);
+                AddFlatWindowItem(parent, window, menuFont, maxMenuWidth, everySize);
             return;
         }
 
@@ -184,7 +190,7 @@ public class TrayApplicationContext : ApplicationContext
             {
                 // Too few windows to justify a group — show flat
                 foreach (var window in appWindows)
-                    AddFlatWindowItem(parent, window, menuFont, maxMenuWidth);
+                    AddFlatWindowItem(parent, window, menuFont, maxMenuWidth, everySize);
                 continue;
             }
 
@@ -198,7 +204,7 @@ public class TrayApplicationContext : ApplicationContext
             // Each window becomes a child of the group. No icon here: the
             // group above already carries the app's.
             foreach (var window in appWindows)
-                groupItem.DropDownItems.Add(WindowItem(window, menuFont, maxMenuWidth));
+                groupItem.DropDownItems.Add(WindowItem(window, menuFont, maxMenuWidth, everySize));
 
             parent.DropDownItems.Add(groupItem);
         }
@@ -210,9 +216,10 @@ public class TrayApplicationContext : ApplicationContext
     // reserving the tag's column width, which padded the menu out to a
     // fixed, oversized width. The app icon already identifies the app.
     private static void AddFlatWindowItem(
-        ToolStripMenuItem parent, WindowInfo window, Font menuFont, float maxMenuWidth)
+        ToolStripMenuItem parent, WindowInfo window, Font menuFont, float maxMenuWidth,
+        bool everySize)
     {
-        var item = WindowItem(window, menuFont, maxMenuWidth);
+        var item = WindowItem(window, menuFont, maxMenuWidth, everySize);
         ShowAppIcon(item, window.AppIcon);
         parent.DropDownItems.Add(item);
     }
@@ -222,13 +229,13 @@ public class TrayApplicationContext : ApplicationContext
     // reached through a group and one reached directly have to offer the same
     // thing; two copies of this drifted apart once already.
     private static ToolStripMenuItem WindowItem(
-        WindowInfo window, Font menuFont, float maxMenuWidth)
+        WindowInfo window, Font menuFont, float maxMenuWidth, bool everySize)
     {
         string displayTitle = string.IsNullOrEmpty(window.Title) ? Strings.MenuUntitled : window.Title;
         string truncatedTitle = TruncateToFit(displayTitle, menuFont, maxMenuWidth);
 
         var item = new ToolStripMenuItem(EscapeMenuMnemonics(truncatedTitle));
-        BuildSizeSubmenu(item, window);
+        BuildSizeSubmenu(item, window, everySize);
         return item;
     }
 
@@ -252,7 +259,8 @@ public class TrayApplicationContext : ApplicationContext
     // exceed the window's current screen are shown but disabled.
     // When positioning features are active, a "Current Size" item is
     // prepended to allow repositioning without changing dimensions.
-    private static void BuildSizeSubmenu(ToolStripMenuItem parent, WindowInfo window)
+    private static void BuildSizeSubmenu(
+        ToolStripMenuItem parent, WindowInfo window, bool everySize)
     {
         // Determine the resolution of the display containing this window
         var screenBounds = ScreenBoundsForWindow(window);
@@ -281,18 +289,24 @@ public class TrayApplicationContext : ApplicationContext
             parent.DropDownItems.Add(new ToolStripSeparator());
         }
 
-        // Add every preset size, disabling those larger than the screen
+        // A size is offered when it fits the display this window is on and its
+        // box is checked in the settings window. Sizes that do not fit used to
+        // be listed and greyed out, which spent the height of the menu on sizes
+        // nobody on that display can pick.
         foreach (var size in SettingsStore.Shared.AllSizes)
         {
-            bool exceedsScreen = size.Width > screenBounds.Width || size.Height > screenBounds.Height;
+            if (!everySize && (size.Width > screenBounds.Width || size.Height > screenBounds.Height))
+                continue;
 
-            var sizeItem = new ToolStripMenuItem(size.DisplayName) { Enabled = !exceedsScreen };
+            if (!everySize && !SettingsStore.Shared.ShowsInMenu(size))
+                continue;
+
+            var sizeItem = new ToolStripMenuItem(size.DisplayName);
 
             if (!string.IsNullOrEmpty(size.Label))
                 sizeItem.ShortcutKeyDisplayString = size.Label;
 
-            if (!exceedsScreen)
-                sizeItem.Click += (_, _) => PerformResize(window, size);
+            sizeItem.Click += (_, _) => PerformResize(window, size);
 
             parent.DropDownItems.Add(sizeItem);
         }

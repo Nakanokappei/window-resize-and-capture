@@ -203,6 +203,29 @@ public partial class SettingsStore
         new(800,  600,  "SVGA"),
     };
 
+    // The sizes whose box is cleared in the settings window. Only what was
+    // cleared is written down, so a size added by a later version arrives shown.
+    //
+    // Kept as "width x height" rather than by Id, because a built-in size is
+    // built at startup and takes a new Id with it every time: an Id written to
+    // the file would match nothing on the next run. Two presets of the same
+    // dimensions read as one line in the menu, and clearing the box hides both.
+    private readonly HashSet<string> _sizesKeptOutOfTheMenu = new();
+
+    private static string SizeKey(PresetSize size) => $"{size.Width}x{size.Height}";
+
+    public bool ShowsInMenu(PresetSize size) => !_sizesKeptOutOfTheMenu.Contains(SizeKey(size));
+
+    public void SetShowsInMenu(PresetSize size, bool shows)
+    {
+        if (shows)
+            _sizesKeptOutOfTheMenu.Remove(SizeKey(size));
+        else
+            _sizesKeptOutOfTheMenu.Add(SizeKey(size));
+
+        SaveAndNotify();
+    }
+
     // Merged view of built-in presets followed by user-defined custom sizes.
     public List<PresetSize> AllSizes
     {
@@ -266,6 +289,11 @@ public partial class SettingsStore
             if (data?.CustomSizes != null)
                 CustomSizes = data.CustomSizes;
 
+            _sizesKeptOutOfTheMenu.Clear();
+            if (data?.HiddenSizes != null)
+                foreach (string key in data.HiddenSizes)
+                    _sizesKeptOutOfTheMenu.Add(key);
+
             // Behavior settings
             BringToFront = data?.BringToFront ?? true;
             Position = data?.Position;
@@ -326,6 +354,7 @@ public partial class SettingsStore
             var data = new SettingsData
             {
                 CustomSizes = CustomSizes,
+                HiddenSizes = new List<string>(_sizesKeptOutOfTheMenu),
                 BringToFront = BringToFront,
                 Position = Position,
                 MoveToMainScreen = MoveToMainScreen,
@@ -363,6 +392,12 @@ public partial class SettingsStore
     private class SettingsData
     {
         public List<PresetSize>? CustomSizes { get; set; }
+
+        // The sizes whose box is cleared in the settings window, as
+        // "width x height". Written as the exceptions rather than as the whole
+        // list, so a size the app gains later is shown without being listed.
+        public List<string>? HiddenSizes { get; set; }
+
         public bool BringToFront { get; set; } = true;
         public WindowPosition? Position { get; set; }
         public bool MoveToMainScreen { get; set; }

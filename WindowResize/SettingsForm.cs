@@ -13,8 +13,12 @@ public class SettingsForm : Form
     private readonly SettingsStore _store = SettingsStore.Shared;
 
     // General tab controls
-    private ListBox _builtInList = null!;
-    private ListBox _customList = null!;
+    private CheckedListBox _builtInList = null!;
+    private CheckedListBox _customList = null!;
+
+    // Set while the lists are being filled, because SetItemChecked raises
+    // ItemCheck as if a person had clicked the box.
+    private bool _fillingTheLists;
     private TextBox _widthBox = null!;
     private TextBox _heightBox = null!;
     private TextBox _nameBox = null!;
@@ -187,13 +191,14 @@ public class SettingsForm : Form
         };
         Place(tab, builtInGroup, 8, 8);
 
-        _builtInList = new ListBox
+        _builtInList = new CheckedListBox
         {
             Size = new Size(364, 70),
-            SelectionMode = SelectionMode.None,
             BorderStyle = BorderStyle.None,
+            CheckOnClick = true,
             AccessibleName = Strings.SettingsBuiltIn
         };
+        _builtInList.ItemCheck += OnBuiltInSizeChecked;
         Place(builtInGroup, _builtInList, 8, 20);
 
         // ── Custom sizes group ──
@@ -204,12 +209,14 @@ public class SettingsForm : Form
         };
         Place(tab, customGroup, 8, 116);
 
-        _customList = new ListBox
+        _customList = new CheckedListBox
         {
             Size = new Size(280, 55),
             BorderStyle = BorderStyle.FixedSingle,
+            CheckOnClick = true,
             AccessibleName = Strings.SettingsCustom
         };
+        _customList.ItemCheck += OnCustomSizeChecked;
         Place(customGroup, _customList, 8, 20);
 
         // Remove button beside the custom list
@@ -630,13 +637,17 @@ public class SettingsForm : Form
 
     // ── Data population ──────────────────────────────────────────────────
 
-    // Fill the built-in and custom size list boxes from the store.
+    // Fill the built-in and custom size list boxes from the store. A checked
+    // box means the size is offered in the menu.
     private void PopulateLists()
     {
-        // Built-in sizes (read-only display)
+        _fillingTheLists = true;
+
         _builtInList.Items.Clear();
         foreach (var size in SettingsStore.BuiltInSizes)
-            _builtInList.Items.Add(FormatSize(size));
+            _builtInList.Items.Add(FormatSize(size), _store.ShowsInMenu(size));
+
+        _fillingTheLists = false;
 
         RefreshCustomList();
     }
@@ -644,6 +655,7 @@ public class SettingsForm : Form
     // Rebuild the custom sizes list and show a placeholder when empty.
     private void RefreshCustomList()
     {
+        _fillingTheLists = true;
         _customList.Items.Clear();
 
         if (_store.CustomSizes.Count == 0)
@@ -654,10 +666,11 @@ public class SettingsForm : Form
         else
         {
             foreach (var size in _store.CustomSizes)
-                _customList.Items.Add(FormatSize(size));
+                _customList.Items.Add(FormatSize(size), _store.ShowsInMenu(size));
             _customList.Enabled = true;
         }
 
+        _fillingTheLists = false;
         _removeButton.Enabled = false;
     }
 
@@ -691,6 +704,26 @@ public class SettingsForm : Form
         _heightBox.Clear();
         _nameBox.Clear();
         RefreshCustomList();
+    }
+
+    // Clearing a box keeps that size out of the menu. ItemCheck arrives before
+    // the box has changed, so the new state is the one being asked for.
+    private void OnBuiltInSizeChecked(object? sender, ItemCheckEventArgs e)
+    {
+        if (_fillingTheLists || e.Index < 0 || e.Index >= SettingsStore.BuiltInSizes.Count)
+            return;
+
+        _store.SetShowsInMenu(SettingsStore.BuiltInSizes[e.Index], e.NewValue == CheckState.Checked);
+    }
+
+    // The same for a size the person added. The placeholder line that stands in
+    // for an empty list is not a size, and the list is disabled while it shows.
+    private void OnCustomSizeChecked(object? sender, ItemCheckEventArgs e)
+    {
+        if (_fillingTheLists || e.Index < 0 || e.Index >= _store.CustomSizes.Count)
+            return;
+
+        _store.SetShowsInMenu(_store.CustomSizes[e.Index], e.NewValue == CheckState.Checked);
     }
 
     // Remove the currently selected custom preset.
