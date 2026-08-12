@@ -89,10 +89,30 @@ listing="$("$exe" --list-views)"
 views="$(echo "$listing" | awk '/^views:/{take=1;next} /^[a-z]+:/{take=0} take{print $1}')"
 languages="$(echo "$listing" | awk '/^languages:/{getline; print}')"
 size="$(echo "$listing" | awk '/^size:/{getline; print $1}')"
+screen="$(echo "$listing" | awk '/^screen:/{getline; print $1}')"
 
-if [ -z "$views" ] || [ -z "$languages" ] || [ -z "$size" ]; then
+if [ -z "$views" ] || [ -z "$languages" ] || [ -z "$size" ] || [ -z "$screen" ]; then
   echo "Could not read the shot list from --list-views" >&2
   exit 1
+fi
+
+# A picture is a copy of the screen, so a screen smaller than one picture can
+# take none of them. Checked here, before the loop below deletes the picture it
+# is about to replace: a shoot that cannot succeed must not spend the pictures
+# that are already there finding that out.
+#
+# The screen can shrink without anybody changing a setting. This runs in a
+# virtual machine whose display mode is handed to it by the host, and a suspend
+# and resume is enough to hand it a smaller one.
+if [ "$screen" != "$size" ]; then
+  screenWidth=${screen%x*};  screenHeight=${screen#*x}
+  wantWidth=${size%x*};      wantHeight=${size#*x}
+  if [ "$screenWidth" -lt "$wantWidth" ] || [ "$screenHeight" -lt "$wantHeight" ]; then
+    echo "The screen is $screen and a picture is $size." >&2
+    echo "Windows will not make a window larger than the display it is on, so" >&2
+    echo "nothing here can be photographed until the screen is at least $size." >&2
+    exit 1
+  fi
 fi
 
 # A language asked for on the command line has to be one the app speaks. It

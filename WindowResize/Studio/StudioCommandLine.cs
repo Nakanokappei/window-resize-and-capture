@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Windows.Forms;
 
 namespace WindowResizeCapture.Studio;
 
@@ -64,6 +65,15 @@ internal static class StudioCommandLine
 
             text.AppendLine("size:");
             text.AppendLine($"  {StudioViews.DefaultSize.Width}x{StudioViews.DefaultSize.Height}");
+
+            // The screen the pictures would be copied from, in physical pixels.
+            // A shoot has no business starting on a screen that cannot hold one
+            // picture, and it is the caller that knows what it is about to
+            // overwrite, so the caller is told rather than left to find out one
+            // deleted file at a time.
+            var display = Screen.PrimaryScreen?.Bounds ?? Rectangle.Empty;
+            text.AppendLine("screen:");
+            text.AppendLine($"  {display.Width}x{display.Height}");
 
             using var output = Console.OpenStandardOutput();
             var bytes = new UTF8Encoding(false).GetBytes(text.ToString());

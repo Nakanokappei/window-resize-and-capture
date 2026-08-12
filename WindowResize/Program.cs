@@ -24,6 +24,10 @@ static class Program
         // are taken from a Debug build, which is what store-shots builds.
         if (Studio.StudioCommandLine.IsListRequest(args))
         {
+            // Aware before the screen is measured for the list, or the size it
+            // reports is the one Windows makes up for a process that does not
+            // know about scaling - which is not the size a picture is copied at.
+            Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
             Studio.StudioCommandLine.PrintViews();
             return;
         }

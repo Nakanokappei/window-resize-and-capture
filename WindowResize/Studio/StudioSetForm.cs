@@ -56,16 +56,7 @@ internal sealed class StudioSetForm : Form
         StartPosition = FormStartPosition.Manual;
         Size = request.Size;
 
-        // Sit in the screen's corner where the real tray is: the bottom right,
-        // or the bottom left in a language Windows mirrors its taskbar for.
-        // Menus open away from the edge they are near, so from that corner the
-        // tray menu unfolds up and inward, into the picture. Staged in the
-        // opposite corner it unfolded outward and the camera, which only copies
-        // the set's own rectangle, cut it off.
-        var screen = Screen.PrimaryScreen?.Bounds ?? new Rectangle(0, 0, 1920, 1080);
-        Location = new Point(
-            Mirrored ? screen.Left : screen.Right - request.Size.Width,
-            screen.Bottom - request.Size.Height);
+        PinToTheTrayCorner();
         ShowInTaskbar = false;
         TopMost = true;
         DoubleBuffered = true;
@@ -73,6 +64,28 @@ internal sealed class StudioSetForm : Form
 
         // The set is scenery, never something the operator interacts with.
         Text = $"{App.Name} studio set";
+    }
+
+    // Put the set in the screen's corner where the real tray is: the bottom
+    // right, or the bottom left in a language Windows mirrors its taskbar for.
+    //
+    // This is what makes the menus in a picture behave as they do on somebody's
+    // desktop. A menu opens away from the edge it is near, so only from that
+    // corner does the tray menu unfold up and inward, into the picture. Staged
+    // in the opposite corner it unfolded outward and the camera, which only
+    // copies the set's own rectangle, cut it off.
+    //
+    // Measured from the set's current size, and called again whenever the
+    // camera changes that size. Placed once from the size that was asked for,
+    // the corner moved every time the window grew: the camera grows a window
+    // from its top left, so the tray corner walked away from the screen's own
+    // corner and the menus opened from the middle of the set.
+    internal void PinToTheTrayCorner()
+    {
+        var screen = Screen.PrimaryScreen?.Bounds ?? new Rectangle(0, 0, 1920, 1080);
+        Location = new Point(
+            Mirrored ? screen.Left : screen.Right - Width,
+            screen.Bottom - Height);
     }
 
     // Shown without being activated.

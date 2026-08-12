@@ -29,6 +29,25 @@ internal static class StudioSession
             return;
         }
 
+        // A picture is a copy of the screen, so the screen has to be able to
+        // hold it. Windows refuses to make a window larger than the display it
+        // is on, and the set is a window: asked for more, it is cut down, the
+        // corner it is staged in cannot reach the screen's corner, and the
+        // picture comes out the wrong size with its menus opening the wrong way.
+        //
+        // Refused here, before the set is built and before anything is drawn on
+        // the operator's screen, so that a machine which cannot take the
+        // pictures says so instead of producing bad ones.
+        var display = Screen.PrimaryScreen?.Bounds ?? Rectangle.Empty;
+        if (display.Width < request.Size.Width || display.Height < request.Size.Height)
+        {
+            Log($"error\t{request.View}\t{request.Language.Name}\t" +
+                $"the screen is {display.Width}x{display.Height} and a " +
+                $"{request.Size.Width}x{request.Size.Height} picture needs at " +
+                $"least that many physical pixels");
+            return;
+        }
+
         // The language has to be settled before any control is built, because
         // WinForms reads the culture as it creates each one.
         CultureInfo.CurrentUICulture = request.Language;

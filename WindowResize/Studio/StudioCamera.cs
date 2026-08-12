@@ -310,6 +310,12 @@ internal static class StudioCamera
                 form.Width + (int)Math.Round(widthShort / scale),
                 form.Height + (int)Math.Round(heightShort / scale));
 
+            // A window grows from its top left, which walks the corner the set
+            // is staged in away from the screen's own corner. The set is there
+            // so that its menus open the way they open from a real tray, so it
+            // goes back there after every change of size.
+            (form as StudioSetForm)?.PinToTheTrayCorner();
+
             await Settle(80);
         }
     }
