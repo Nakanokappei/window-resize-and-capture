@@ -22,11 +22,6 @@ namespace WindowResizeCapture.Studio;
 // repository or shipped inside the product.
 internal sealed class StudioSetForm : Form
 {
-    // Where the app's own tray icon sits, right to left along the band, and
-    // where the clock goes. Both are measured from the right edge, because
-    // the clock's width changes with the language.
-    private const int TrayIconRightInset = 310;
-
     // Measured on a real taskbar: the clock's text stops 0.42 of the band's
     // height from the screen's edge, and stands 0.35 clear of the icons beside
     // it. Both were fixed pixel counts before, which held at one band height
