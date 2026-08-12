@@ -2,6 +2,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace WindowResizeCapture.Studio;
@@ -22,11 +23,24 @@ namespace WindowResizeCapture.Studio;
 // repository or shipped inside the product.
 internal sealed class StudioSetForm : Form
 {
-    // Every measure this file decides for itself is a whole number of one of two
-    // units: the height of the taskbar, and the height of one line of the clock
-    // standing in it. The band is measured on the machine taking the picture and
-    // the clock's line follows the band, so a picture keeps its proportions
+    [DllImport("user32.dll")]
+    private static extern int GetSystemMetricsForDpi(int index, uint dpi);
+
+    [DllImport("user32.dll")]
+    private static extern uint GetDpiForWindow(IntPtr window);
+
+    private const int SM_CYCAPTION = 4;
+
+    // Every measure this file decides for itself is a whole number of one of
+    // three units, each of them read from the machine taking the picture: the
+    // height of the taskbar, the height of one line of the clock standing in it,
+    // and the height of a title bar. A picture therefore keeps its proportions
     // wherever it is taken, and a reader can see what the grid is.
+    //
+    // The marketing line is measured in title bars - three of them for the
+    // heading, two for the paragraph. In bands the heading was two, which left
+    // the paragraph so little room in a crowded frame that it was shrunk to fit;
+    // a smaller heading leaves the paragraph the size it was given.
     //
     // Two kinds of number sit outside the rule, deliberately:
     //
@@ -899,14 +913,17 @@ internal sealed class StudioSetForm : Form
     // a listing frame, from a setting Windows Update can change while nobody is
     // looking.
     //
-    // Whole bands: two for the heading, one for the body. Every measure on the
-    // set is now a whole number of taskbar heights, so the picture sits on one
-    // grid and a reader can see what the grid is. The points these replace came
-    // to 1.54 bands on the machine the pictures were approved on, so the type is
-    // larger than it was there - a quarter more.
-    private int HeadlineHeight => BandHeight * 2;
+    // The height of a title bar on this machine, asked for at the DPI the set is
+    // drawn at. SM_CYCAPTION without a DPI answers for 96 dots per inch whatever
+    // the display is doing, which on a 200 per cent display is 23 pixels where
+    // the title bar the operator is looking at is 45.
+    private int TitleBarHeight =>
+        GetSystemMetricsForDpi(SM_CYCAPTION, GetDpiForWindow(Handle));
 
-    private int BodyHeight => BandHeight;
+    // Three title bars for the heading, two for the paragraph.
+    private int HeadlineHeight => TitleBarHeight * 3;
+
+    private int BodyHeight => TitleBarHeight * 2;
 
     // How tall one line of the clock is, which is the smallest measure in the
     // picture. A pose keeps this much between whatever it opens and the top of the
