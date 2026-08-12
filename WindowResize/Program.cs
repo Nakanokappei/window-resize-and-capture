@@ -14,9 +14,14 @@ static class Program
     [STAThread]
     static void Main(string[] args)
     {
+#if DEBUG
         // The studio that takes the store pictures runs the app once per
         // picture, usually while the developer's own copy is already in the
         // tray, so it never takes part in the single-instance handshake.
+        //
+        // Debug only. What ships has no studio in it at all - the project file
+        // leaves its files out of a build that is not Debug - so the pictures
+        // are taken from a Debug build, which is what store-shots builds.
         if (Studio.StudioCommandLine.IsListRequest(args))
         {
             Studio.StudioCommandLine.PrintViews();
@@ -35,6 +40,7 @@ static class Program
             Studio.StudioSession.Run(studioRequest);
             return;
         }
+#endif
 
         // A language named on the command line applies to this launch only.
         // Nothing is stored: the app otherwise follows the language Windows is

@@ -34,6 +34,12 @@ The drawing code is the one part that cannot live here, because it has to
 compile with the app. It is kept together under `WindowResize/Studio/` rather
 than spread through the UI.
 
+**It is built into Debug only.** The project file leaves `Studio/**` out of
+every other configuration, and the two calls into it are behind `#if DEBUG`, so
+what ships carries no studio: a Release binary has no `--screenshot` to give
+and would start the tray app instead. Take the pictures from a Debug build,
+which is what the script builds.
+
 ## Running a shoot
 
 **Run these from a shell, not from PowerShell's `Start-Process`.** The app is a
@@ -43,7 +49,7 @@ spaces, which cuts a path off at its first folder with a space in it. Both
 failures look like app bugs and are not.
 
 The whole listing, every language and every pose, is one command. It builds
-Release first and refuses to shoot a binary older than the source, because
+Debug first and refuses to shoot a binary older than the source, because
 three copies of the executable live under `bin` at once and the stalest of them
 is the one a wildcard finds.
 
@@ -56,7 +62,7 @@ the rest of the run producing more of them, and prints what the app wrote to
 its log. A single picture, for trying out wording, is a run of the app by hand:
 
 ```bash
-exe=WindowResize/bin/Release/net8.0-windows10.0.17763.0/WindowResizeCapture.exe
+exe=WindowResize/bin/Debug/net8.0-windows10.0.17763.0/WindowResizeCapture.exe
 
 # What the app can hold, and in which languages. Never keep a second copy of this list.
 "$exe" --list-views

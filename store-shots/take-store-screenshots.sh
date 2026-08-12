@@ -38,14 +38,17 @@ studioLog="$(cygpath -u "$TEMP")/WindowResizeCapture-studio.log"
 
 # Build first, so the pictures show the current source rather than whatever was
 # left in bin from an older session.
-echo "Building Release..."
-dotnet build "$project" -c Release --nologo -v:quiet
+# Debug, because the studio is only built there. What ships has no studio in
+# it: the project file leaves those files out of every other configuration, so
+# a Release binary has no --studio to give and would start the tray app here.
+echo "Building Debug..."
+dotnet build "$project" -c Debug --nologo -v:quiet
 
 # Ask MSBuild where it just wrote, instead of searching bin. Three copies of
 # the executable live under bin at once - the framework build, the win-x64
 # runtime build and the published one - and a search picks whichever comes
 # first alphabetically, which is regularly the stalest of them.
-target="$(dotnet msbuild "$project" -getProperty:TargetPath -p:Configuration=Release -v:quiet)"
+target="$(dotnet msbuild "$project" -getProperty:TargetPath -p:Configuration=Debug -v:quiet)"
 exe="$(cygpath -u "${target%$'\r'}")"
 exe="${exe%.dll}.exe"
 

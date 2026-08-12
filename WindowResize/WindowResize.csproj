@@ -27,6 +27,16 @@
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>
 
+  <!-- The studio that photographs this app for its store listing is a tool for
+       whoever maintains it, and nothing a person who installs the app can reach.
+       So it is not built into what ships: no code for it, no strings for it, and
+       nothing in the binary to read. Debug keeps it, which is where the pictures
+       are taken from. Program.cs and TrayApplicationContext.cs guard their two
+       calls into it with #if DEBUG for the same reason. -->
+  <ItemGroup Condition="'$(Configuration)' != 'Debug'">
+    <Compile Remove="Studio\**" />
+  </ItemGroup>
+
   <!-- UseWindowsForms requires Windows Desktop SDK which isn't on macOS.
        Instead, reference the framework directly via FrameworkReference. -->
   <ItemGroup>

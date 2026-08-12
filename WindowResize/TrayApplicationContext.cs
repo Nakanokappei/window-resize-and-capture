@@ -125,6 +125,7 @@ public class TrayApplicationContext : ApplicationContext
         menu.Items.Add(quitItem);
     }
 
+#if DEBUG
     // The menu the studio photographs. It is the menu above, with the actions
     // left inert: a picture is taken of it, never clicked.
     //
@@ -132,6 +133,8 @@ public class TrayApplicationContext : ApplicationContext
     // whatever the operator has open, which makes a listing picture different
     // every time it is taken; the studio hands in a written cast instead. The
     // menu itself is built the same way either way.
+    //
+    // Debug only, with the studio it belongs to.
     internal static ContextMenuStrip BuildStudioMenu(
         IReadOnlyList<WindowInfo>? windows = null)
     {
@@ -143,6 +146,7 @@ public class TrayApplicationContext : ApplicationContext
             onQuit: () => { });
         return menu;
     }
+#endif
 
 
     // Enumerate visible windows and add each as a submenu item with its
