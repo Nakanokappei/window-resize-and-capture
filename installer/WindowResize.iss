@@ -150,3 +150,39 @@ begin
     end;
   end;
 end;
+
+// Setup cannot write over an executable that is running, and the app is
+// running at upgrade time whenever the person turned launch-at-login on.
+//
+// CloseApplications=force asks Restart Manager to close it, which is refused
+// on Windows on ARM: XtaCache, the service that caches translated x64 code,
+// holds the same file, and a Setup running with the user's own privileges
+// cannot restart a service. The log reads "Can use RestartManager to avoid
+// reboot? No (1: Permission Denied)", after which installing stops on the file
+// in use - silently leaving the old executable behind, or refusing outright.
+//
+// So the app is closed the one way that is always permitted: by ending the
+// process, which belongs to the person running Setup. Nothing is lost with it,
+// because the app writes its settings as they change rather than on the way
+// out.
+procedure EndTheAppIfItIsRunning(ExeName: String);
+var
+  ResultCode: Integer;
+begin
+  Exec(ExpandConstant('{sys}\taskkill.exe'), '/F /IM ' + ExeName,
+       '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+end;
+
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+begin
+  // Both spellings. The executable was WindowsResizeCapture.exe up to 1.8.1
+  // and WindowResizeCapture.exe from 1.8.2, so an upgrade from 1.8.1 has the
+  // old one running and holding the file that InstallDelete has to remove.
+  EndTheAppIfItIsRunning('{#MyAppExeName}');
+  EndTheAppIfItIsRunning('WindowsResizeCapture.exe');
+
+  // Windows lets go of the file a moment after the process ends.
+  Sleep(500);
+
+  Result := '';
+end;
