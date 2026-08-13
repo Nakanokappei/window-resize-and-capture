@@ -737,7 +737,7 @@ public class SettingsForm : Form
     // Render a preset as "W x H" followed by its label when one is set.
     private static string FormatSize(PresetSize size)
     {
-        string display = size.DisplayName;
+        string display = size.DisplayDimensions;
         if (!string.IsNullOrEmpty(size.Label))
             display += $"    {size.DisplayLabel}";
         return display;

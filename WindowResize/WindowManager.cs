@@ -307,9 +307,9 @@ public static class WindowManager
         {
             var workArea = DisplayInfoFor(window.Handle, moveToMainScreen).rcWork;
             var anchor = position ?? WindowPosition.Center;
-            int standOff = MarginInPixels(edgeMargin, window.Handle, workArea);
+            int marginInPixels = MarginInPixels(edgeMargin, window.Handle, workArea);
             var origin = CalculateSnapOrigin(
-                anchor, targetWidth, targetHeight, workArea, standOff);
+                anchor, targetWidth, targetHeight, workArea, marginInPixels);
 
             SetWindowPos(
                 window.Handle, IntPtr.Zero,
@@ -422,13 +422,14 @@ public static class WindowManager
     // Compute the top-left pixel coordinate for a window of the given size
     // snapped to one of nine anchor positions within the work area.
     //
-    // standOff is how far an edge holds the window away from itself. It is added
-    // to the coordinates that sit against an edge and left out of the ones that
-    // are centred, so the middle of the screen is unaffected however large it is:
-    // there is no edge there to stand off from.
+    // marginInPixels is the margin from the screen edge, in pixels, as
+    // MarginInPixels below works it out. It is added to the coordinates that sit
+    // against an edge and left out of the ones that are centred, so the middle
+    // of the screen is unaffected however large it is: there is no edge there to
+    // be held away from.
     private static Point CalculateSnapOrigin(
         WindowPosition anchor, int windowWidth, int windowHeight, RECT workArea,
-        int standOff = 0)
+        int marginInPixels = 0)
     {
         int areaWidth = workArea.Right - workArea.Left;
         int areaHeight = workArea.Bottom - workArea.Top;
@@ -437,20 +438,20 @@ public static class WindowManager
         int x = anchor switch
         {
             WindowPosition.TopLeft or WindowPosition.Left or WindowPosition.BottomLeft
-                => workArea.Left + standOff,
+                => workArea.Left + marginInPixels,
             WindowPosition.Top or WindowPosition.Center or WindowPosition.Bottom
                 => workArea.Left + (areaWidth - windowWidth) / 2,
-            _ => workArea.Right - windowWidth - standOff,
+            _ => workArea.Right - windowWidth - marginInPixels,
         };
 
         // Vertical coordinate based on the anchor row
         int y = anchor switch
         {
             WindowPosition.TopLeft or WindowPosition.Top or WindowPosition.TopRight
-                => workArea.Top + standOff,
+                => workArea.Top + marginInPixels,
             WindowPosition.Left or WindowPosition.Center or WindowPosition.Right
                 => workArea.Top + (areaHeight - windowHeight) / 2,
-            _ => workArea.Bottom - windowHeight - standOff,
+            _ => workArea.Bottom - windowHeight - marginInPixels,
         };
 
         return new Point(x, y);
@@ -467,9 +468,9 @@ public static class WindowManager
     // DPI answers for 96 dots per inch whatever the display is doing, which on a
     // 200 per cent display is half the title bar the person is looking at.
     private static int MarginInPixels(
-        ScreenEdgeMargin margin, IntPtr window, RECT workArea)
+        ScreenEdgeMargin edgeMargin, IntPtr window, RECT workArea)
     {
-        switch (margin)
+        switch (edgeMargin)
         {
             case ScreenEdgeMargin.Taskbar:
                 var display = DisplayInfoFor(window).rcMonitor;

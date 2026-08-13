@@ -25,12 +25,16 @@ public enum WindowPosition
 // nothing is held away from anything there, whichever of these is chosen. The
 // same goes for the one coordinate a side position leaves alone: a window at the
 // top of the screen is centred left to right, and only its top edge is held off.
+// Written down and read back by name, so these may be listed in the order the
+// settings window offers them: no margin first, then the two measures in
+// ascending height. None stays first for the other reason too - it is the
+// default, and a value absent from the file has to read as no margin.
 [JsonConverter(typeof(JsonStringEnumConverter<ScreenEdgeMargin>))]
 public enum ScreenEdgeMargin
 {
     None,
-    Taskbar,
-    TitleBar
+    TitleBar,
+    Taskbar
 }
 
 // Thread-safe singleton that persists all user preferences to a JSON file

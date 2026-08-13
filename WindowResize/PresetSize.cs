@@ -49,13 +49,16 @@ public class PresetSize
         ? EmbedLeftToRight + text + PopEmbedding
         : text;
 
-    // "1280 x 720", and in that order in every language.
+    // "1280 x 720", and in that order in every language. Dimensions rather than
+    // a name, because that is what it is: the name of a size is its Label, and
+    // the separator between the two numbers is Strings.SettingsDimensionSeparator.
     //
-    // Computed for the menu, never stored. Without this the settings file gained
-    // a DisplayName beside every custom size, and in a right-to-left language
-    // that copy carried the two invisible characters above into the file.
+    // Computed for the menu, never stored. While this was called DisplayName the
+    // settings file gained a key of that name beside every custom size, and in a
+    // right-to-left language that copy carried the two invisible characters above
+    // into the file.
     [JsonIgnore]
-    public string DisplayName => ReadLeftToRight($"{Width} x {Height}");
+    public string DisplayDimensions => ReadLeftToRight($"{Width} x {Height}");
 
     // The label as it is shown, fenced off the same way and for the same reason.
     [JsonIgnore]
