@@ -106,7 +106,7 @@ public class SplashForm : Form
         // Copyright notice
         using var copyrightFont = new Font("Segoe UI", 8);
         using var copyrightBrush = new SolidBrush(Color.FromArgb(120, 120, 120));
-        g.DrawString("\u00a9 2026 Window Resize", copyrightFont, copyrightBrush,
+        g.DrawString(App.Copyright, copyrightFont, copyrightBrush,
             new RectangleF(0, 150, Width, 20), centered);
 
         // Thin border around the form edge

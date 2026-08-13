@@ -31,6 +31,14 @@ internal static class App
     // that half is not for a person to read.
     internal static string Version { get; } = VersionWithoutCommit();
 
+    // The copyright line, as the project file declares it. Windows already shows
+    // this string in the file properties, so the splash reads the same one
+    // rather than keeping a second copy: the copy it did keep said "Window
+    // Resize", the app's name before 1.8.2, three releases after the rename.
+    internal static string Copyright { get; } =
+        Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyCopyrightAttribute>()?.Copyright
+        ?? "Copyright \u00a9 2026 Kappei Nakano";
+
     private static string VersionWithoutCommit()
     {
         string declared = Assembly.GetExecutingAssembly()
