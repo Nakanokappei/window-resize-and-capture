@@ -36,13 +36,14 @@ internal static class App
     // rather than keeping a second copy: the copy it did keep said "Window
     // Resize", the app's name before 1.8.2, three releases after the rename.
     //
-    // The same words as the LICENSE file, in the same order, down to writing the
-    // sign as (c). The name reads Nakano Kappei here and Kappei Nakano wherever
-    // Windows or the Store asks who published the app - a different question,
-    // and registered with Microsoft under that spelling.
+    // The same words as the LICENSE file, character for character, down to
+    // writing the sign as (c). The name is spelled the way the Store has it
+    // registered, so the copyright holder and the publisher read alike wherever
+    // the app is looked at: Company, the installer's publisher and the package's
+    // PublisherDisplayName all say Kappei Nakano too.
     internal static string Copyright { get; } =
         Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyCopyrightAttribute>()?.Copyright
-        ?? "Copyright (c) 2026 Nakano Kappei";
+        ?? "Copyright (c) 2026 Kappei Nakano";
 
     private static string VersionWithoutCommit()
     {
