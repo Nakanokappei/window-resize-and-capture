@@ -259,25 +259,28 @@ public class TrayApplicationContext : ApplicationContext
         catch { }
     }
 
-    // Attach preset-size children to a window menu item. Sizes that
-    // exceed the window's current screen are shown but disabled.
+    // Attach preset-size children to a window menu item: the sizes that fit the
+    // screen the window is on and whose box is checked in the settings window.
     // When positioning features are active, a "Current Size" item is
     // prepended to allow repositioning without changing dimensions.
     private static void BuildSizeSubmenu(
         ToolStripMenuItem parent, WindowInfo window, bool everySize)
     {
-        // Determine the resolution of the display containing this window
-        var screenBounds = ScreenBoundsForWindow(window);
+        var settings = SettingsStore.Shared;
+
+        // The size of the screen this window is on, which is what a preset has
+        // to fit inside to be offered.
+        var screenSize = ScreenSizeForWindow(window);
 
         // If any positioning feature is active, offer a "reposition only" item.
         // Report the current size in the same coordinate system as the presets:
         // client dimensions when client-area sizing is on, outer dimensions
         // otherwise. Passing the matching value keeps this a pure reposition —
         // in client mode ResizeWindow re-adds the border to preserve the frame.
-        if (SettingsStore.Shared.IsPositioningActive)
+        if (settings.IsPositioningActive)
         {
-            int currentWidth = SettingsStore.Shared.ResizeClientArea ? window.ClientWidth : window.Width;
-            int currentHeight = SettingsStore.Shared.ResizeClientArea ? window.ClientHeight : window.Height;
+            int currentWidth = settings.ResizeClientArea ? window.ClientWidth : window.Width;
+            int currentHeight = settings.ResizeClientArea ? window.ClientHeight : window.Height;
 
             // The size this item offers writes itself. Spelled out here a second
             // time instead, it missed what PresetSize.DisplayName does for a
@@ -297,13 +300,14 @@ public class TrayApplicationContext : ApplicationContext
         // box is checked in the settings window. Sizes that do not fit used to
         // be listed and greyed out, which spent the height of the menu on sizes
         // nobody on that display can pick.
-        foreach (var size in SettingsStore.Shared.AllSizes)
+        foreach (var size in settings.AllSizes)
         {
-            if (!everySize && (size.Width > screenBounds.Width || size.Height > screenBounds.Height))
+            if (!everySize &&
+                (size.Width > screenSize.Width || size.Height > screenSize.Height ||
+                 !settings.ShowsInMenu(size)))
+            {
                 continue;
-
-            if (!everySize && !SettingsStore.Shared.ShowsInMenu(size))
-                continue;
+            }
 
             var sizeItem = new ToolStripMenuItem(size.DisplayName);
 
@@ -322,13 +326,14 @@ public class TrayApplicationContext : ApplicationContext
     // capture the window if successful, or show an error dialog.
     private static void PerformResize(WindowInfo window, PresetSize size)
     {
+        var settings = SettingsStore.Shared;
         var outcome = WindowManager.ResizeWindow(
             window, size,
-            bringToFront: SettingsStore.Shared.BringToFront,
-            position: SettingsStore.Shared.Position,
-            moveToMainScreen: SettingsStore.Shared.MoveToMainScreen,
-            clientArea: SettingsStore.Shared.ResizeClientArea,
-            edgeMargin: SettingsStore.Shared.EdgeMargin);
+            bringToFront: settings.BringToFront,
+            position: settings.Position,
+            moveToMainScreen: settings.MoveToMainScreen,
+            clientArea: settings.ResizeClientArea,
+            edgeMargin: settings.EdgeMargin);
 
         // On success capture the window; on failure explain the cause so
         // the user doesn't mistake a Windows restriction for an app bug.
@@ -396,9 +401,9 @@ public class TrayApplicationContext : ApplicationContext
         return text[..10] + "\u2026";
     }
 
-    // Return the pixel dimensions of the display that contains the
-    // center point of the given window.
-    private static Size ScreenBoundsForWindow(WindowInfo window)
+    // The size in pixels of the screen that contains the center point of the
+    // given window.
+    private static Size ScreenSizeForWindow(WindowInfo window)
     {
         var center = new Point(
             window.Left + window.Width / 2,

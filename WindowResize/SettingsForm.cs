@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -15,7 +16,6 @@ public class SettingsForm : Form
     // General tab controls
     private CheckedListBox _builtInList = null!;
     private CheckedListBox _customList = null!;
-    private RadioButton[] _edgeMarginChoices = Array.Empty<RadioButton>();
 
     // Set while the lists are being filled, because SetItemChecked raises
     // ItemCheck as if a person had clicked the box.
@@ -23,17 +23,15 @@ public class SettingsForm : Form
     private TextBox _widthBox = null!;
     private TextBox _heightBox = null!;
     private TextBox _nameBox = null!;
-    private Button _addButton = null!;
     private Button _removeButton = null!;
-    private CheckBox _resizeClientAreaCheck = null!;
-    private CheckBox _launchAtLoginCheck = null!;
 
-    // Capture tab controls
+    // Capture tab controls. Only the ones something later has to reach are
+    // kept: a control that is placed and never looked at again is a local in
+    // the method that builds it, and its parent holds on to it.
     private CheckBox _captureEnabledCheck = null!;
     private Panel _captureOptionsPanel = null!;
     private CheckBox _captureSaveToFileCheck = null!;
     private CheckBox _captureCopyToClipboardCheck = null!;
-    private CheckBox _captureClientAreaCheck = null!;
     private Button _chooseFolderButton = null!;
     private Label _folderPathLabel = null!;
 
@@ -43,8 +41,6 @@ public class SettingsForm : Form
     // Behavior tab controls. The position tiles are checkbox-styled
     // buttons so UI Automation exposes their checked state to screen
     // readers (a plain Button has no toggle state).
-    private CheckBox _bringToFrontCheck = null!;
-    private CheckBox _moveToMainScreenCheck = null!;
     private CheckBox[] _positionTiles = null!;
 
     // Geometric glyphs for the 3x3 position grid (TL, T, TR, L, C, R, BL, B,
@@ -87,6 +83,7 @@ public class SettingsForm : Form
         // This has no effect on the shipping app, which runs DPI unaware and
         // is therefore always told its display is 96 DPI. It is what lets the
         // studio photograph this window from a DPI-aware process.
+        //
         // In a language that reads right to left, Windows mirrors a window's
         // whole layout: the tabs run from the right, a check box keeps its box
         // on the side the reading starts, a label its text. Both properties are
@@ -213,7 +210,7 @@ public class SettingsForm : Form
             CheckOnClick = true,
             AccessibleName = Strings.SettingsBuiltIn
         };
-        _builtInList.ItemCheck += OnBuiltInSizeChecked;
+        _builtInList.ItemCheck += (_, e) => OnSizeChecked(SettingsStore.BuiltInSizes, e);
         Place(builtInGroup, _builtInList, 8, 20);
 
         // ── Custom sizes group ──
@@ -232,7 +229,7 @@ public class SettingsForm : Form
             CheckOnClick = true,
             AccessibleName = Strings.SettingsCustom
         };
-        _customList.ItemCheck += OnCustomSizeChecked;
+        _customList.ItemCheck += (_, e) => OnSizeChecked(_store.CustomSizes, e);
         Place(customGroup, _customList, 8, 20);
 
         // Remove button beside the custom list
@@ -295,16 +292,16 @@ public class SettingsForm : Form
         };
         Place(customGroup, _nameBox, 64, 116);
 
-        _addButton = new Button
+        var addButton = new Button
         {
             Text = Strings.SettingsAdd,
             Size = new Size(80, 26)
         };
-        _addButton.Click += OnAddPreset;
-        Place(customGroup, _addButton, 292, 114);
+        addButton.Click += OnAddPreset;
+        Place(customGroup, addButton, 292, 114);
 
         // ── Size by client area ──
-        _resizeClientAreaCheck = AddSettingCheck(
+        AddSettingCheck(
             tab, Strings.SettingsResizeClientArea, new Point(12, customTop + 158),
             _store.ResizeClientArea,
             on =>
@@ -317,7 +314,7 @@ public class SettingsForm : Form
         // The only setting that is not kept in the settings file, so it is
         // also the only one that does not save and notify: writing it registers
         // the app with Windows itself.
-        _launchAtLoginCheck = AddSettingCheck(
+        AddSettingCheck(
             tab, Strings.SettingsLaunchAtLogin, new Point(12, customTop + 184),
             _store.LaunchAtLogin,
             on => _store.LaunchAtLogin = on);
@@ -557,7 +554,7 @@ public class SettingsForm : Form
         panelY += 26;
 
         // Capture client area only
-        _captureClientAreaCheck = AddSettingCheck(
+        AddSettingCheck(
             _captureOptionsPanel, Strings.SettingsCaptureClientArea, new Point(28, panelY),
             _store.CaptureClientArea,
             on =>
@@ -576,7 +573,7 @@ public class SettingsForm : Form
         var tab = new TabPage(Strings.SettingsBehavior);
 
         // Bring to front
-        _bringToFrontCheck = AddSettingCheck(
+        AddSettingCheck(
             tab, Strings.SettingsBringToFront, new Point(12, 12),
             _store.BringToFront,
             on =>
@@ -586,7 +583,7 @@ public class SettingsForm : Form
             });
 
         // Move to main screen
-        _moveToMainScreenCheck = AddSettingCheck(
+        AddSettingCheck(
             tab, Strings.SettingsMoveToMainScreen, new Point(12, 40),
             _store.MoveToMainScreen,
             on =>
@@ -661,7 +658,6 @@ public class SettingsForm : Form
         // reading down the list is reading a widening gap. A title bar is always
         // the shorter of the two: 23 pixels against the taskbar's 48 at 96 dpi,
         // and both grow with the scaling.
-        _edgeMarginChoices = new RadioButton[3];
         (string label, ScreenEdgeMargin margin)[] choices =
         {
             (Strings.SettingsEdgeMarginNone, ScreenEdgeMargin.None),
@@ -692,7 +688,6 @@ public class SettingsForm : Form
                 }
             };
 
-            _edgeMarginChoices[i] = choice;
             Place(tab, choice, 12, marginTop + 24 + i * 24);
         }
 
@@ -773,22 +768,18 @@ public class SettingsForm : Form
 
     // Clearing a box keeps that size out of the menu. ItemCheck arrives before
     // the box has changed, so the new state is the one being asked for.
-    private void OnBuiltInSizeChecked(object? sender, ItemCheckEventArgs e)
+    //
+    // Both lists come here with the sizes they were filled from, because the
+    // rule is the same for a built-in size and one the person added. Checking
+    // the index against that list also disposes of the placeholder line
+    // standing in for an empty custom list: it is not a size, and there are no
+    // sizes for it to be the first of.
+    private void OnSizeChecked(IReadOnlyList<PresetSize> sizes, ItemCheckEventArgs e)
     {
-        if (_fillingTheLists || e.Index < 0 || e.Index >= SettingsStore.BuiltInSizes.Count)
+        if (_fillingTheLists || e.Index < 0 || e.Index >= sizes.Count)
             return;
 
-        _store.SetShowsInMenu(SettingsStore.BuiltInSizes[e.Index], e.NewValue == CheckState.Checked);
-    }
-
-    // The same for a size the person added. The placeholder line that stands in
-    // for an empty list is not a size, and the list is disabled while it shows.
-    private void OnCustomSizeChecked(object? sender, ItemCheckEventArgs e)
-    {
-        if (_fillingTheLists || e.Index < 0 || e.Index >= _store.CustomSizes.Count)
-            return;
-
-        _store.SetShowsInMenu(_store.CustomSizes[e.Index], e.NewValue == CheckState.Checked);
+        _store.SetShowsInMenu(sizes[e.Index], e.NewValue == CheckState.Checked);
     }
 
     // Remove the currently selected custom preset.

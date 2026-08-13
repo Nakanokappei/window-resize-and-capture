@@ -20,13 +20,20 @@ public class PresetSize
     [JsonPropertyName("label")]
     public string? Label { get; set; }
 
-    // "1280 x 720", and in that order in every language.
+    // Fence a run of text off as left to right, so that a language which reads
+    // the other way leaves the order of what is inside alone.
     //
-    // A language that reads right to left lays the parts of this out from the
-    // right, which turned the dimensions round: 1280 x 720 was drawn as
-    // "x 720 1280" in the Arabic menu. Windows does the same to any such string,
-    // and the way out is the one its own dialogs use - fence the run off as
-    // left-to-right with characters that take no space and draw nothing.
+    // A language that reads right to left lays the parts of a string out from
+    // the right, which turned the dimensions round: 1280 x 720 was drawn as
+    // "x 720 1280" in the Arabic menu. And a name that ends in a mark rather
+    // than a letter - WSXGA+, HD+, WXGA+ - had the + carried to the front of
+    // the line, because a mark on its own belongs to whichever direction
+    // surrounds it: the Arabic settings list offered a size called +WSXGA and
+    // the Arabic menu a size called +HD.
+    //
+    // Windows does this to any such string, and the way out is the one its own
+    // dialogs use - fence the run off with characters that take no space and
+    // draw nothing.
     //
     // The embedding pair, not the newer isolate pair. Segoe UI has no glyph for
     // the isolates, so GDI+ drew them as two boxes lettered LRI and PDI, one on
@@ -38,25 +45,21 @@ public class PresetSize
     private const string EmbedLeftToRight = "\u202A";
     private const string PopEmbedding = "\u202C";
 
+    private static string ReadLeftToRight(string text) => App.ReadsRightToLeft
+        ? EmbedLeftToRight + text + PopEmbedding
+        : text;
+
+    // "1280 x 720", and in that order in every language.
+    //
     // Computed for the menu, never stored. Without this the settings file gained
     // a DisplayName beside every custom size, and in a right-to-left language
-    // that copy carried the two invisible characters below into the file.
+    // that copy carried the two invisible characters above into the file.
     [JsonIgnore]
-    public string DisplayName => App.ReadsRightToLeft
-        ? EmbedLeftToRight + $"{Width} x {Height}" + PopEmbedding
-        : $"{Width} x {Height}";
+    public string DisplayName => ReadLeftToRight($"{Width} x {Height}");
 
     // The label as it is shown, fenced off the same way and for the same reason.
-    //
-    // A name that ends in a mark rather than a letter - WSXGA+, HD+, WXGA+ - had
-    // the + carried to the front of the line in a language that reads right to
-    // left, because a mark on its own belongs to whichever direction surrounds
-    // it. The Arabic settings list offered a size called +WSXGA and the Arabic
-    // menu a size called +HD.
     [JsonIgnore]
-    public string? DisplayLabel => Label != null && App.ReadsRightToLeft
-        ? EmbedLeftToRight + Label + PopEmbedding
-        : Label;
+    public string? DisplayLabel => Label == null ? null : ReadLeftToRight(Label);
 
     public PresetSize() { }
 

@@ -305,7 +305,7 @@ public static class WindowManager
         // Step 2 — snap to a screen position if any positioning is requested
         if (position != null || moveToMainScreen)
         {
-            var workArea = ResolveTargetWorkArea(window.Handle, moveToMainScreen);
+            var workArea = DisplayInfoFor(window.Handle, moveToMainScreen).rcWork;
             var anchor = position ?? WindowPosition.Center;
             int standOff = MarginInPixels(edgeMargin, window.Handle, workArea);
             var origin = CalculateSnapOrigin(
@@ -400,18 +400,23 @@ public static class WindowManager
         return null;
     }
 
-    // Return the taskbar-excluded work area of the target display.
-    // When usePrimaryScreen is true, always pick the primary monitor;
-    // otherwise pick whichever monitor currently contains the window.
-    private static RECT ResolveTargetWorkArea(IntPtr hWnd, bool usePrimaryScreen)
+    // What Windows knows about the display a window is on: rcMonitor is the
+    // whole of it, and rcWork what is left of it once the taskbar has taken its
+    // strip. When the main screen is asked for, that display is described
+    // instead, wherever the window happens to be.
+    //
+    // Both rectangles come from the same three calls, so they are made here
+    // once. Asked for in the two places that want them, this was two copies of
+    // the same lookup that differed only in which rectangle they returned.
+    private static MONITORINFO DisplayInfoFor(IntPtr hWnd, bool useMainScreen = false)
     {
-        IntPtr hMonitor = usePrimaryScreen
+        IntPtr hMonitor = useMainScreen
             ? MonitorFromWindow(IntPtr.Zero, MONITOR_DEFAULTTOPRIMARY)
             : MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
 
         var info = new MONITORINFO { cbSize = Marshal.SizeOf<MONITORINFO>() };
         GetMonitorInfo(hMonitor, ref info);
-        return info.rcWork;
+        return info;
     }
 
     // Compute the top-left pixel coordinate for a window of the given size
@@ -467,7 +472,7 @@ public static class WindowManager
         switch (margin)
         {
             case ScreenEdgeMargin.Taskbar:
-                var display = DisplayBoundsFor(window);
+                var display = DisplayInfoFor(window).rcMonitor;
                 return Math.Max(Math.Max(
                         workArea.Left - display.Left, display.Right - workArea.Right),
                     Math.Max(
@@ -479,15 +484,6 @@ public static class WindowManager
             default:
                 return 0;
         }
-    }
-
-    // The whole of the display this window is on, taskbar included.
-    private static RECT DisplayBoundsFor(IntPtr window)
-    {
-        IntPtr monitor = MonitorFromWindow(window, MONITOR_DEFAULTTONEAREST);
-        var info = new MONITORINFO { cbSize = Marshal.SizeOf<MONITORINFO>() };
-        GetMonitorInfo(monitor, ref info);
-        return info.rcMonitor;
     }
 
     // Force a window to the foreground even from a background/tray process.
