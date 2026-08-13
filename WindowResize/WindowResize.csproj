@@ -15,7 +15,7 @@
     <AssemblyTitle>Window Resize &amp; Capture</AssemblyTitle>
     <Product>Window Resize &amp; Capture</Product>
     <Company>Kappei Nakano</Company>
-    <Copyright>Copyright © 2026 Kappei Nakano</Copyright>
+    <Copyright>Copyright (c) 2026 Nakano Kappei</Copyright>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <ApplicationIcon>Resources\app.ico</ApplicationIcon>
     <!-- Suppress platform compatibility warnings for WinRT APIs guarded by IsPackaged() -->
