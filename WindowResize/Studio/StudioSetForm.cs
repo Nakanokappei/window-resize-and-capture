@@ -32,15 +32,21 @@ internal sealed class StudioSetForm : Form
     private const int SM_CYCAPTION = 4;
 
     // Every measure this file decides for itself is a whole number of one of
-    // three units, each of them read from the machine taking the picture: the
-    // height of the taskbar, the height of one line of the clock standing in it,
-    // and the height of a title bar. A picture therefore keeps its proportions
-    // wherever it is taken, and a reader can see what the grid is.
+    // three units: the height of the taskbar, the height of one line of the clock
+    // standing in it, and the height of a title bar. A reader can therefore see
+    // what the grid is, and a picture keeps its proportions wherever it is taken.
     //
-    // The marketing line is measured in title bars - three of them for the
-    // heading, two for the paragraph. In bands the heading was two, which left
-    // the paragraph so little room in a crowded frame that it was shrunk to fit;
-    // a smaller heading leaves the paragraph the size it was given.
+    // The first two are read at the display's own scaling, because they belong to
+    // the desktop the picture reproduces: a taskbar in a picture should be the
+    // taskbar of the machine that took it. The title bar is read at 96 dots per
+    // inch instead, because what it measures - the marketing line - is the one
+    // thing in the picture that is not part of that desktop and is the thing a
+    // reader has to read. Read at the display's scaling it halved on a machine at
+    // 100 per cent, which is correct by the rule and too small on a listing.
+    //
+    // Six title bars for the heading, four for the paragraph. In taskbars the
+    // heading was two, which left the paragraph so little room in a crowded frame
+    // that it was shrunk to fit; this heading leaves it the size it was given.
     //
     // Two kinds of number sit outside the rule, deliberately:
     //
@@ -913,17 +919,25 @@ internal sealed class StudioSetForm : Form
     // a listing frame, from a setting Windows Update can change while nobody is
     // looking.
     //
-    // The height of a title bar on this machine, asked for at the DPI the set is
-    // drawn at. SM_CYCAPTION without a DPI answers for 96 dots per inch whatever
-    // the display is doing, which on a 200 per cent display is 23 pixels where
-    // the title bar the operator is looking at is 45.
-    private int TitleBarHeight =>
-        GetSystemMetricsForDpi(SM_CYCAPTION, GetDpiForWindow(Handle));
+    // A title bar at 96 dots per inch: 23 pixels, the same number on every
+    // machine, because that is the DPI this metric answers for when none is
+    // named. The one measure in the set that is deliberately not read at the
+    // display's own scaling.
+    //
+    // The marketing line is the only thing in a picture that is not a
+    // reproduction of somebody's desktop, and it is the thing a reader of the
+    // listing actually has to read. Sized in the display's title bars it halved
+    // on a machine at 100 per cent - correct by the rule, and too small to read
+    // in a listing frame. Sized in these it comes out the same on any machine.
+    //
+    // Six of them for the heading and four for the paragraph, which is what the
+    // display's title bars came to at 200 per cent - 138 and 92 against 135 and
+    // 90 - so the pictures approved at that scaling are unchanged.
+    private int TitleBarHeightAt96Dpi => GetSystemMetricsForDpi(SM_CYCAPTION, 96);
 
-    // Three title bars for the heading, two for the paragraph.
-    private int HeadlineHeight => TitleBarHeight * 3;
+    private int HeadlineHeight => TitleBarHeightAt96Dpi * 6;
 
-    private int BodyHeight => TitleBarHeight * 2;
+    private int BodyHeight => TitleBarHeightAt96Dpi * 4;
 
     // How tall one line of the clock is, which is the smallest measure in the
     // picture. A pose keeps this much between whatever it opens and the top of the
