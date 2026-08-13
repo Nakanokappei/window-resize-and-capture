@@ -657,12 +657,16 @@ public class SettingsForm : Form
             AutoSize = true
         }, 12, marginTop);
 
+        // No margin first, then the two measures in ascending height, so that
+        // reading down the list is reading a widening gap. A title bar is always
+        // the shorter of the two: 23 pixels against the taskbar's 48 at 96 dpi,
+        // and both grow with the scaling.
         _edgeMarginChoices = new RadioButton[3];
         (string label, ScreenEdgeMargin margin)[] choices =
         {
             (Strings.SettingsEdgeMarginNone, ScreenEdgeMargin.None),
-            (Strings.SettingsEdgeMarginTaskbar, ScreenEdgeMargin.Taskbar),
             (Strings.SettingsEdgeMarginTitleBar, ScreenEdgeMargin.TitleBar),
+            (Strings.SettingsEdgeMarginTaskbar, ScreenEdgeMargin.Taskbar),
         };
 
         for (int i = 0; i < choices.Length; i++)
