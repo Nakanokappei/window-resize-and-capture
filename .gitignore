@@ -22,6 +22,9 @@ HANDOFF.md
 *.af
 store-hero.png
 Microsoft Store.jpg
+# Health report exports pulled from Partner Center while chasing a
+# number. They are a snapshot of one day, not a fact about the code.
+health-*.csv
 2026-*.png
 
 ## Build artifacts

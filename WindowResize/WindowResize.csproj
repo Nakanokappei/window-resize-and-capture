@@ -10,7 +10,9 @@
     <!-- Without these the binary reports version 1.0.0.0 and the assembly name
          as its description, which is what Windows shows in the file properties,
          Task Manager and the installed-programs list. Keep the version in step
-         with SplashForm.cs, Package/AppxManifest.xml and installer/WindowResize.iss. -->
+         with Package/AppxManifest.xml and installer/WindowResize.iss. The
+         splash screen is not on that list any more: App.Version reads this
+         one, after the splash spent three releases naming a stale version. -->
     <Version>1.8.3</Version>
     <AssemblyTitle>Window Resize &amp; Capture</AssemblyTitle>
     <Product>Window Resize &amp; Capture</Product>
