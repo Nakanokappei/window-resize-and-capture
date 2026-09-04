@@ -13,6 +13,7 @@ public class TrayApplicationContext : ApplicationContext
 {
     private readonly NotifyIcon _notifyIcon;
     private readonly ContextMenuStrip _contextMenu;
+    private readonly SessionEndWindow _sessionEnd;
     private SettingsForm? _settingsForm;
 
     // Initialize the tray icon, build the menu, show the splash screen,
@@ -47,6 +48,10 @@ public class TrayApplicationContext : ApplicationContext
             _contextMenu.Items.Clear();
             BuildMenu();
         };
+
+        // Leave when the session ends, before Windows kills the process and
+        // counts the death as a hang. See SessionEndWindow.
+        _sessionEnd = new SessionEndWindow(QuitForSessionEnd);
 
         // Brief splash screen on startup
         new SplashForm().ShowSplash(1500);
@@ -364,6 +369,18 @@ public class TrayApplicationContext : ApplicationContext
         MessageBoxDefaultButton.Button1,
         App.MessageReading);
 
+    // Exit at once because Windows is waiting. Application.Exit would be the
+    // polite way, but it only ends the WinForms loop: a native message box
+    // (a refused resize, say) runs a loop of its own that ends with a click,
+    // and no click is coming. Nothing is lost by the short cut, since
+    // settings are saved as they change, and WM_ENDSESSION expressly allows
+    // the process to terminate itself while handling it.
+    private void QuitForSessionEnd()
+    {
+        _notifyIcon.Visible = false;
+        Environment.Exit(0);
+    }
+
     // Show the settings form, creating it on first use. Reuses the
     // existing instance (which hides instead of closing) when possible.
     private void ShowSettingsForm()
@@ -439,6 +456,7 @@ public class TrayApplicationContext : ApplicationContext
     {
         if (disposing)
         {
+            _sessionEnd.Dispose();
             _notifyIcon.Visible = false;
             _notifyIcon.Dispose();
             _contextMenu.Dispose();

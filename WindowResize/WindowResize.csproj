@@ -11,7 +11,7 @@
          as its description, which is what Windows shows in the file properties,
          Task Manager and the installed-programs list. Keep the version in step
          with SplashForm.cs, Package/AppxManifest.xml and installer/WindowResize.iss. -->
-    <Version>1.8.2</Version>
+    <Version>1.8.3</Version>
     <AssemblyTitle>Window Resize &amp; Capture</AssemblyTitle>
     <Product>Window Resize &amp; Capture</Product>
     <Company>Kappei Nakano</Company>

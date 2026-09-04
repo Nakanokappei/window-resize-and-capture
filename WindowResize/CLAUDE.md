@@ -45,6 +45,7 @@ The project works around this with `EnableWindowsTargeting=true` plus a direct
 | `SettingsStore.cs` | JSON persistence, launch-at-login, built-in preset list |
 | `SettingsForm.cs` | Settings window (tabs: General, Capture, Behavior) |
 | `SplashForm.cs` | Startup splash |
+| `SessionEndWindow.cs` | Exits when Windows ends the session, so the process is not killed and reported as a hang |
 | `PresetSize.cs` | Size model |
 | `Package/` | MSIX manifest and Store assets |
 | `Resources/` | `Strings.resx` (English) plus 15 translations, icon, splash |
@@ -77,14 +78,45 @@ the UI.
 
 `PrintWindow` sends `WM_PRINT` synchronously to the target window and has **no
 timeout parameter**. Capturing a busy or unresponsive window used to stall the
-message pump until the system hang timeout, which Partner Center reported as
-`MOAPPLICATION_HANG ... HANG_QUIESCE`. Since 1.8.1 the capture runs on a
+message pump, freezing the tray menu with it. Since 1.8.1 the capture runs on a
 thread-pool thread; only the clipboard write is marshalled back, because
 `Clipboard.SetImage` requires an STA thread.
+
+1.8.1 was made in the belief that this stall was the hang Partner Center
+reports. It was not (see the next section), but the change stands on its own:
+the menu stays usable while a large window paints itself.
 
 The same applies to icon extraction: `WM_GETICON` goes out through
 `SendMessageTimeout` with `SMTO_ABORTIFHUNG` and a short cap, because the cap
 applies per message across three icon sizes for every window in the list.
+
+### The hang Partner Center reports is the session end
+
+The Health report's hang bucket is
+`MOAPPLICATION_HANG_cfffffff_KappeiNakano.WindowResizeforWindows_..!HANG_QUIESCE`.
+The `MOAPPLICATION_HANG` prefix and the `HANG_QUIESCE` type mark it as a
+packaged-app lifecycle report, not an unresponsive window, and it carries no
+module or function name, so it points at no line of code.
+
+What it records: Windows asked the app to leave (sign-out, shutdown, an OS or
+package update) with `WM_QUERYENDSESSION`, `WM_ENDSESSION` and finally
+`WM_CLOSE`, the process was still alive some thirty seconds later, and Windows
+killed it and filed the kill as a hang. An unpackaged app is killed the same
+way, silently, which is why the plain EXE never showed it. Windows Terminal
+found the same bucket behind 80 % of its crash reports.
+
+This app has no main form, so nothing in WinForms ended the message loop on
+those messages; `SessionEndWindow` now exits the process on `WM_ENDSESSION`
+and `WM_CLOSE`. With launch at login on, the old behaviour could produce a
+report at every shutdown; 1.8.1 ran at a hang rate of 5.96 %, and 1.8.1 is
+the version that was supposed to have fixed the hang.
+
+To see it on a machine: run the Store build, sign out and back in, and open
+Reliability Monitor. The entry reads `MoAppHang`, `P2: praid:WindowsResizeCapture`,
+`Hang type: Quiesce`, at the time of the sign-out. To confirm the fix, the same
+steps must produce no entry. Partner Center's "Hang rate" is the percentage of
+daily unique devices with at least one hang, so a version that quits cleanly
+should fall towards zero rather than merely drop.
 
 ### Capture under DPI virtualization
 
